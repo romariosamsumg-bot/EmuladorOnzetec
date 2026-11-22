@@ -40,5 +40,14 @@ class HotkeyDetectorTest {
         d.onKey(KEYCODE_BUTTON_SELECT, true)
         assertEquals(Hotkey.FAST_FORWARD, d.onKey(KEYCODE_BUTTON_R1, true))
         assertNull(d.onKey(KEYCODE_BUTTON_A, true))
+        // Soltar o R1 avisa (modo "segurar para acelerar").
+        assertEquals(Hotkey.FAST_FORWARD_RELEASE, d.onKey(KEYCODE_BUTTON_R1, false))
+    }
+
+    @Test
+    fun `modificador l3`() {
+        val d = HotkeyDetector(modifier = android.view.KeyEvent.KEYCODE_BUTTON_THUMBL)
+        d.onKey(android.view.KeyEvent.KEYCODE_BUTTON_THUMBL, true)
+        assertEquals(Hotkey.MENU, d.onKey(KEYCODE_BUTTON_START, true))
     }
 }

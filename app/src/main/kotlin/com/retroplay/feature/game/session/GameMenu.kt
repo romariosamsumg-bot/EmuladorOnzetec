@@ -46,6 +46,7 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.retroplay.R
 import com.retroplay.domain.saves.SaveSlot
+import com.retroplay.domain.settings.CoreOption
 import com.retroplay.domain.system.GameSystem
 import com.retroplay.domain.system.IdentificationStrategy
 import com.retroplay.domain.system.RetroPadButton
@@ -53,7 +54,7 @@ import com.retroplay.ui.components.requestFocusWhenReady
 import androidx.compose.runtime.LaunchedEffect
 
 enum class MenuPage { MAIN, SAVE, LOAD, CONTROLS, CORE_OPTIONS }
-enum class ShaderChoice(val label: Int) { DEFAULT(R.string.shader_none), CRT(R.string.shader_crt), LCD(R.string.shader_lcd), SHARP(R.string.shader_sharp) }
+enum class ShaderChoice(val label: Int) { DEFAULT(R.string.shader_none), CRT(R.string.shader_crt), LCD(R.string.shader_lcd), SHARP(R.string.shader_sharp), SMOOTH(R.string.shader_smooth) }
 enum class AspectChoice(val label: Int) { ORIGINAL(R.string.aspect_original), PIXEL_PERFECT(R.string.aspect_pixel) }
 
 @Immutable
@@ -69,7 +70,8 @@ data class GameMenuState(
     /** null = o núcleo não permite mudar a proporção. */
     val aspect: AspectChoice? = null,
     val showFps: Boolean = false,
-    val coreOptions: List<Pair<String, String>> = emptyList(),
+    val slotCount: Int = 9,
+    val coreOptions: List<CoreOption> = emptyList(),
 )
 
 /** Ações do menu (implementadas pela GameActivity). */
@@ -88,6 +90,7 @@ interface GameMenuActions {
     fun toggleFps()
     fun screenshot()
     fun exit()
+    fun setCoreOption(key: String, value: String) {}
 }
 
 /** Menu rápido sobre o jogo pausado. Voltar fecha a página atual ou o menu. */
@@ -110,7 +113,7 @@ fun GameMenu(state: GameMenuState, actions: GameMenuActions) {
                 MenuPage.SAVE -> SlotsPage(state, saving = true, actions)
                 MenuPage.LOAD -> SlotsPage(state, saving = false, actions)
                 MenuPage.CONTROLS -> ControlsPage(state.system)
-                MenuPage.CORE_OPTIONS -> CoreOptionsPage(state.coreOptions)
+                MenuPage.CORE_OPTIONS -> CoreOptionsPage(state.coreOptions, actions)
             }
         }
     }
@@ -198,7 +201,8 @@ private fun SlotsPage(state: GameMenuState, saving: Boolean, a: GameMenuActions)
         modifier = Modifier.testTag(if (saving) "slots_save" else "slots_load"),
     ) {
         // O automático só pode ser carregado (é gravado sozinho ao sair).
-        val slots = if (saving) SaveSlot.MANUAL.toList() else SaveSlot.ALL
+        val manual = (1..state.slotCount).toList()
+        val slots = if (saving) manual else listOf(SaveSlot.AUTO) + manual
         items(slots, key = { it }) { slot ->
             val info = bySlot[slot]
             val enabled = saving || info != null
@@ -288,16 +292,25 @@ private fun gamepadName(button: RetroPadButton): String = when (button) {
     else -> button.name
 }
 
+/** Opções do núcleo: OK passa para o próximo valor; vale na hora e fica salvo para este jogo. */
 @Composable
-private fun CoreOptionsPage(options: List<Pair<String, String>>) {
+private fun CoreOptionsPage(options: List<CoreOption>, a: GameMenuActions) {
+    val first = remember { FocusRequester() }
+    LaunchedEffect(options.isEmpty()) { if (options.isNotEmpty()) first.requestFocusWhenReady() }
     Text(stringResource(R.string.core_options_note), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    LazyColumn(Modifier.testTag("core_options"), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    LazyColumn(Modifier.testTag("core_options"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         if (options.isEmpty()) item { Text(stringResource(R.string.core_options_empty), style = MaterialTheme.typography.bodyLarge) }
-        items(options, key = { it.first }) { (k, v) ->
-            Row(Modifier.fillMaxWidth()) {
-                Text(k, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f), maxLines = 1)
-                Text(v, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
-            }
+        items(options, key = { it.key }) { o ->
+            MenuRow(
+                label = o.description,
+                value = o.current,
+                enabled = o.values.size > 1,
+                onClick = {
+                    val i = o.values.indexOf(o.current)
+                    a.setCoreOption(o.key, o.values[(i + 1) % o.values.size])
+                },
+                modifier = (if (o == options.first()) Modifier.focusRequester(first) else Modifier).testTag("coreopt_${o.key}"),
+            )
         }
     }
 }

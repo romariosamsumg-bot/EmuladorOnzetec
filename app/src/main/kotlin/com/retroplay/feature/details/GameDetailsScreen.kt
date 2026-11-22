@@ -39,6 +39,14 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
+import com.retroplay.feature.settings.PinDialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Button
@@ -66,9 +74,10 @@ import com.retroplay.ui.components.rememberInitialFocus
 import com.retroplay.core.ui.R as UiR
 
 @Composable
-fun GameDetailsEntry(onBack: () -> Unit, viewModel: GameDetailsViewModel = hiltViewModel()) {
+fun GameDetailsEntry(onBack: () -> Unit, onOpenSettings: (Long) -> Unit = {}, viewModel: GameDetailsViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val deletePin by viewModel.deletePin.collectAsStateWithLifecycle()
     val download by viewModel.launcher.coreDownload.collectAsStateWithLifecycle()
     LaunchGamesEffect(viewModel.launcher)
     LaunchedEffect(viewModel) {
@@ -95,6 +104,9 @@ fun GameDetailsEntry(onBack: () -> Unit, viewModel: GameDetailsViewModel = hiltV
             onToggleFavorite = { viewModel.toggleFavorite(s.game) },
             onSetCover = { viewModel.setCover(s.game, it) },
             onDelete = { viewModel.delete(s.game) },
+            deletePin = deletePin,
+            onOpenSettings = { onOpenSettings(s.game.id) },
+            onRename = { viewModel.rename(s.game, it) },
         )
     }
 }
@@ -111,10 +123,15 @@ fun GameDetailsScreen(
     onToggleFavorite: () -> Unit,
     onSetCover: (CoverType?) -> Unit,
     onDelete: () -> Unit,
+    deletePin: String? = null,
+    onOpenSettings: () -> Unit = {},
+    onRename: (String?) -> Unit = {},
 ) {
     val playFocus = rememberInitialFocus()
     var showOptions by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
+    var askPin by remember { mutableStateOf(false) }
+    var renaming by remember { mutableStateOf(false) }
     val background = MaterialTheme.colorScheme.background
 
     Box(Modifier.fillMaxSize().testTag("screen_details")) {
@@ -207,7 +224,7 @@ fun GameDetailsScreen(
                     OutlinedButton(onClick = { showOptions = true }, modifier = Modifier.testTag("details_options")) {
                         Text(stringResource(R.string.game_options))
                     }
-                    OutlinedButton(onClick = { confirmDelete = true }, modifier = Modifier.testTag("details_delete")) {
+                    OutlinedButton(onClick = { if (deletePin != null) askPin = true else confirmDelete = true }, modifier = Modifier.testTag("details_delete")) {
                         Text(stringResource(R.string.delete))
                     }
                 }
@@ -230,7 +247,23 @@ fun GameDetailsScreen(
     }
 
     if (showOptions) {
-        OptionsDialog(game, system, onSetCover = { onSetCover(it); showOptions = false }, onDismiss = { showOptions = false })
+        OptionsDialog(
+            game, system,
+            onSetCover = { onSetCover(it); showOptions = false },
+            onOpenSettings = { showOptions = false; onOpenSettings() },
+            onRename = { showOptions = false; renaming = true },
+            onDismiss = { showOptions = false },
+        )
+    }
+    if (renaming) {
+        RenameDialog(game.title, onSave = { onRename(it); renaming = false }, onDismiss = { renaming = false })
+    }
+    if (askPin && deletePin != null) {
+        PinDialog(
+            stringResource(R.string.pin_enter),
+            onSubmit = { (it == deletePin).also { ok -> if (ok) { askPin = false; confirmDelete = true } } },
+            onDismiss = { askPin = false },
+        )
     }
     if (confirmDelete) {
         ConfirmDeleteDialog(game, onConfirm = { confirmDelete = false; onDelete() }, onDismiss = { confirmDelete = false })
@@ -262,7 +295,14 @@ private fun DialogColumn(tag: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun OptionsDialog(game: Game, system: GameSystem, onSetCover: (CoverType?) -> Unit, onDismiss: () -> Unit) {
+private fun OptionsDialog(
+    game: Game,
+    system: GameSystem,
+    onSetCover: (CoverType?) -> Unit,
+    onOpenSettings: () -> Unit,
+    onRename: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     Dialog(onDismissRequest = onDismiss) {
         val first = rememberInitialFocus()
         DialogColumn("options_dialog") {
@@ -271,13 +311,17 @@ private fun OptionsDialog(game: Game, system: GameSystem, onSetCover: (CoverType
                 stringResource(R.string.options_core, system.defaultCore.displayName),
                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(onClick = onOpenSettings, modifier = Modifier.focusRequester(first).testTag("options_settings")) { Text(stringResource(R.string.game_settings)) }
+                Button(onClick = onRename, modifier = Modifier.testTag("options_rename")) { Text(stringResource(R.string.rename)) }
+            }
             Text(stringResource(R.string.options_cover), style = MaterialTheme.typography.titleMedium)
             val choices = listOf<CoverType?>(null) + game.availableCovers
-            choices.forEachIndexed { i, type ->
+            choices.forEach { type ->
                 val selected = game.coverOverride == type
                 Button(
                     onClick = { onSetCover(type) },
-                    modifier = (if (i == 0) Modifier.focusRequester(first) else Modifier).fillMaxWidth().testTag("cover_${type?.name ?: "AUTO"}"),
+                    modifier = Modifier.fillMaxWidth().testTag("cover_${type?.name ?: "AUTO"}"),
                     colors = ButtonDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 ) {
                     Text((if (selected) "✓ " else "") + stringResource(coverLabel(type)))
@@ -285,6 +329,33 @@ private fun OptionsDialog(game: Game, system: GameSystem, onSetCover: (CoverType
             }
             if (game.availableCovers.isEmpty()) {
                 Text(stringResource(R.string.options_no_cover), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
+}
+
+/** Renomear: campo de texto (abre o teclado da TV) + salvar / voltar ao nome original. */
+@Composable
+private fun RenameDialog(current: String, onSave: (String?) -> Unit, onDismiss: () -> Unit) {
+    var text by remember { mutableStateOf(TextFieldValue(current, TextRange(current.length))) }
+    Dialog(onDismissRequest = onDismiss) {
+        val field = rememberInitialFocus()
+        DialogColumn("rename_dialog") {
+            Text(stringResource(R.string.rename_title), style = MaterialTheme.typography.headlineSmall)
+            BasicTextField(
+                value = text,
+                onValueChange = { text = it },
+                singleLine = true,
+                textStyle = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { onSave(text.text) }),
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(14.dp).focusRequester(field).testTag("rename_field"),
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                Button(onClick = { onSave(text.text) }, modifier = Modifier.testTag("rename_save")) { Text(stringResource(R.string.save)) }
+                OutlinedButton(onClick = { onSave(null) }, modifier = Modifier.testTag("rename_reset")) { Text(stringResource(R.string.rename_reset)) }
             }
         }
     }

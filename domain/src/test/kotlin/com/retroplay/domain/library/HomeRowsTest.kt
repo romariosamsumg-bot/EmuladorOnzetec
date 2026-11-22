@@ -73,4 +73,22 @@ class HomeRowsTest {
         assertEquals("Mario", games.applyFilter(GameFilter.MOST_PLAYED).first().title)
         assertEquals(listOf("Mario"), games.applyFilter(GameFilter.FAVORITES).map { it.title })
     }
+
+    @Test
+    fun `fileiras ocultas somem e a ordem segue os grupos`() {
+        val arranged = rows().arranged(listOf("systems", "recent", "continue", "favorites", "most_played", "genres"), setOf("favorites", "genres"))
+        assertEquals(
+            listOf("system_snes", "system_megadrive", "system_mastersystem", "recent", "continue", "most_played"),
+            arranged.map { it.type.key },
+        )
+        // Grupo desconhecido na ordem vai para o fim, sem quebrar.
+        assertEquals("continue", rows().arranged(listOf("continue"), emptySet()).first().type.key)
+    }
+
+    @Test
+    fun `ocultar nao identificados`() {
+        val list = games + g(7, "Desconhecido").copy(status = IdentStatus.UNIDENTIFIED)
+        assertEquals(7, list.visible(false).size)
+        assertTrue(list.visible(true).none { it.status == IdentStatus.UNIDENTIFIED })
+    }
 }

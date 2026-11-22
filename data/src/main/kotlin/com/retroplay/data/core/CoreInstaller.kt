@@ -47,6 +47,8 @@ class CoreInstaller(
             val (sha, size) = extract(zipFile, entryName, soTmp)
             val target = storage.libraryFile(coreId, abi)
             target.parentFile?.mkdirs()
+            // Mantém a versão em uso como "anterior" (Configurações → Núcleos → voltar versão).
+            storage.backupCurrent(coreId, abi)
             if (!soTmp.renameTo(target)) {
                 target.delete()
                 if (!soTmp.renameTo(target)) throw CoreInstallException(CoreError.UNKNOWN, "Falha ao mover o núcleo")
@@ -59,6 +61,13 @@ class CoreInstaller(
             soTmp.delete()
         }
     }
+
+    /** Versão publicada no buildbot (ETag/Last-Modified), sem baixar o arquivo. */
+    fun remoteVersion(coreId: String, abi: String): String? = runCatching {
+        client.newCall(Request.Builder().url(urlFor(coreId, abi)).head().build()).execute().use { resp ->
+            if (!resp.isSuccessful) null else resp.header("ETag")?.trim('"') ?: resp.header("Last-Modified")
+        }
+    }.getOrNull()
 
     private suspend fun download(url: String, dest: File, onProgress: (Long, Long) -> Unit): String {
         val request = Request.Builder().url(url).build()

@@ -57,6 +57,14 @@ class FakeLibraryRepository : LibraryRepository {
     override suspend fun setCover(id: Long, cover: CoverType?) = update(id) { it.copy(coverOverride = cover) }
     override suspend fun recordPlayStarted(id: Long, atMillis: Long) = update(id) { it.copy(playCount = it.playCount + 1, lastPlayedAt = atMillis) }
     override suspend fun addPlayTime(id: Long, millis: Long) = update(id) { it.copy(playTimeMs = it.playTimeMs + millis) }
+    val bios = MutableStateFlow<List<com.retroplay.domain.library.BiosStatus>>(emptyList())
+    var rebuilt = 0
+    override suspend fun rename(id: Long, title: String?) = update(id) { it.copy(title = title ?: it.title) }
+    override fun observeDuplicates(): Flow<List<Game>> = games.map { l -> l.groupBy { it.datName }.filter { it.key != null && it.value.size > 1 }.values.flatten() }
+    override fun observeBios(): Flow<List<com.retroplay.domain.library.BiosStatus>> = bios
+    override suspend fun rebuild() { rebuilt++ }
+    override suspend fun totalBytes(): Long = games.value.sumOf { it.sizeBytes }
+
     override suspend fun deleteGame(id: Long): DeleteResult {
         deleted += id
         if (deleteResult == DeleteResult.DELETED) games.value = games.value.filter { it.id != id }

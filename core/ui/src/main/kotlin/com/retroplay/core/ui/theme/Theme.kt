@@ -14,6 +14,10 @@ data class RetroUiPrefs(
     val accent: AccentColor = AccentColor.VIOLETA,
     val oledBlack: Boolean = false,
     val animations: AnimationLevel = AnimationLevel.COMPLETAS,
+    /** Movimento lento (Ken Burns) no destaque da Início. */
+    val heroAnimated: Boolean = true,
+    /** Escala dos cartões de jogo (Pequeno 0.85, Médio 1, Grande 1.2). */
+    val cardScale: Float = 1f,
 )
 
 val LocalRetroUiPrefs = staticCompositionLocalOf { RetroUiPrefs() }

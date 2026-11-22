@@ -106,6 +106,9 @@ sealed interface ScanState {
 
 enum class DeleteResult { DELETED, NO_PERMISSION, NOT_FOUND }
 
+/** BIOS encontrada numa pasta monitorada (ex.: neogeo.zip). */
+data class BiosStatus(val system: SystemId, val setName: String, val uri: String, val complete: Boolean)
+
 /** Situação das pastas padrão (Jogos e a pasta privada do app). */
 data class DefaultFolders(
     /** Caminho da pasta Jogos (ex.: /storage/emulated/0/Jogos). */
@@ -138,6 +141,17 @@ interface LibraryRepository {
 
     /** Apaga o arquivo do jogo (e o tira da biblioteca). */
     suspend fun deleteGame(id: Long): DeleteResult
+
+    /** Nome personalizado (null volta ao nome do banco de dados). */
+    suspend fun rename(id: Long, title: String?)
+
+    fun observeDuplicates(): Flow<List<Game>>
+    fun observeBios(): Flow<List<BiosStatus>>
+
+    /** Apaga a lista (não os arquivos) e verifica tudo de novo. */
+    suspend fun rebuild()
+
+    suspend fun totalBytes(): Long
     suspend fun addFolder(uri: String, source: GameSource, displayName: String, isDefault: Boolean = false): GameFolder
     suspend fun removeFolder(id: Long)
 

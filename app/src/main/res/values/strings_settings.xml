@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Categorias -->
+    <string name="cat_video">Vídeo</string>
+    <string name="cat_audio">Áudio</string>
+    <string name="cat_controls">Controles</string>
+    <string name="cat_emulation">Emulação</string>
+    <string name="cat_bios">BIOS</string>
+    <string name="cat_library">Biblioteca</string>
+    <string name="cat_cores">Núcleos</string>
+    <string name="cat_interface">Interface</string>
+    <string name="cat_network">Rede</string>
+    <string name="cat_storage">Armazenamento</string>
+    <string name="cat_parental">Controle parental</string>
+    <string name="cat_about">Sobre</string>
+
+    <!-- Níveis -->
+    <string name="scope_global">Global</string>
+    <string name="scope_game">Este jogo: %1$s</string>
+    <string name="scope_hint">O console sobrescreve o global; o jogo sobrescreve o console.</string>
+    <string name="only_global_note">As outras opções desta categoria valem para todos os consoles. Escolha Global para mudá-las.</string>
+    <string name="game_settings_note">Só aparecem aqui as opções que podem ser diferentes em cada jogo.</string>
+    <string name="override_here">Personalizado aqui</string>
+    <string name="inherited_global">Herdado do global</string>
+    <string name="inherited_system">Herdado do console</string>
+    <string name="use_inherited">Usar o valor herdado (%1$s)</string>
+    <string name="value_on">Ligado</string>
+    <string name="value_off">Desligado</string>
+    <string name="value_default">Padrão</string>
+    <string name="done">Pronto</string>
+    <string name="confirm">Confirmar</string>
+
+    <!-- Vídeo -->
+    <string name="set_shader">Filtro de imagem</string>
+    <string name="set_shader_desc">Efeito visual aplicado à imagem do jogo.</string>
+    <string name="set_aspect">Proporção</string>
+    <string name="set_aspect_desc">Original (4:3) ou pixel perfeito, sem correção de proporção.</string>
+    <string name="set_fps">Mostrar FPS</string>
+    <string name="set_fps_desc">Exibe os quadros por segundo no canto da tela.</string>
+    <string name="set_low_power">Modo econômico</string>
+    <string name="set_low_power_desc">Não redesenha quadros repetidos. Gasta menos processador.</string>
+    <string name="video_note">Esticar a imagem, intensidade das scanlines, rotação e VSync não são oferecidos pelo motor de emulação (LibretroDroid).</string>
+
+    <!-- Áudio -->
+    <string name="set_audio">Som do jogo</string>
+    <string name="set_audio_desc">Liga ou desliga o áudio do jogo.</string>
+    <string name="set_latency">Latência do áudio</string>
+    <string name="set_latency_desc">Baixa responde mais rápido. Normal evita estalos em TVs lentas.</string>
+    <string name="latency_low">Baixa</string>
+    <string name="latency_normal">Normal</string>
+    <string name="set_mute_menu">Silenciar no menu</string>
+    <string name="set_mute_menu_desc">Corta o som enquanto o menu do jogo está aberto.</string>
+    <string name="audio_note">Volume, taxa de amostragem e sincronização dinâmica ficam a cargo do sistema e do motor de emulação.</string>
+
+    <!-- Controles -->
+    <string name="controls_connected">Controles conectados</string>
+    <string name="controls_none">Nenhum controle conectado. O controle remoto da TV também funciona.</string>
+    <string name="gamepad_desc">Perfil %1$s · %2$s</string>
+    <string name="port_auto">Porta automática</string>
+    <string name="port_n">Jogador %1$d</string>
+    <string name="set_port_title">Porta de %1$s</string>
+    <string name="set_remap">Remapear botões</string>
+    <string name="set_remap_desc">Assistente \"pressione o botão…\" para trocar os botões.</string>
+    <string name="remap_custom">Personalizado (%1$d)</string>
+    <string name="set_turbo">Turbo</string>
+    <string name="set_turbo_desc">Botões que disparam sozinhos enquanto ficam pressionados.</string>
+    <string name="turbo_none">Nenhum</string>
+    <string name="set_remote">Controle remoto como gamepad</string>
+    <string name="set_remote_desc">Usa o direcional e o OK do controle remoto para jogar.</string>
+    <string name="set_analog">Analógico como direcional</string>
+    <string name="set_analog_desc">O analógico esquerdo também move o direcional.</string>
+    <string name="set_deadzone">Zona morta do analógico</string>
+    <string name="set_deadzone_desc">Quanto o analógico precisa ser inclinado para contar.</string>
+    <string name="set_nintendo">Layout Nintendo</string>
+    <string name="set_nintendo_desc">Troca A↔B e X↔Y, na posição do controle do SNES.</string>
+    <string name="set_hotkeys">Atalhos</string>
+    <string name="set_hotkeys_desc">Combinações com o botão modificador durante o jogo.</string>
+    <string name="set_modifier">Botão modificador</string>
+    <string name="set_modifier_desc">Segure-o junto com outro botão para usar um atalho.</string>
+    <string name="mod_select">Select</string>
+    <string name="mod_l3">L3 (apertar o analógico)</string>
+    <string name="hotkeys_list">Modificador + Start: menu · + R1: acelerar · + L1: voltar no tempo · + R2: salvar rápido · + L2: carregar rápido</string>
+    <string name="multiplayer_note">Até 4 jogadores: cada controle novo vira o próximo jogador, ou escolha a porta acima.</string>
+
+    <!-- Assistente de remapeamento -->
+    <string name="remap_title">Remapear botões · %1$s</string>
+    <string name="remap_all_systems">todos os consoles</string>
+    <string name="remap_press">Pressione o botão para</string>
+    <string name="remap_step">%1$d de %2$d</string>
+    <string name="remap_hint">OK do controle remoto pula este botão · Voltar cancela</string>
+    <string name="remap_done">Mapeamento salvo.</string>
+    <string name="remap_start">Iniciar assistente</string>
+    <string name="remap_reset">Restaurar o padrão</string>
+
+    <!-- Emulação -->
+    <string name="set_ff_speed">Velocidade da aceleração</string>
+    <string name="set_ff_speed_desc">Quanto o jogo acelera com o atalho de avanço rápido.</string>
+    <string name="set_ff_mode">Modo da aceleração</string>
+    <string name="set_ff_mode_desc">Alternar: aperta uma vez para ligar. Segurar: só enquanto segura.</string>
+    <string name="ff_toggle">Alternar</string>
+    <string name="ff_hold">Segurar</string>
+    <string name="set_rewind">Voltar no tempo</string>
+    <string name="set_rewind_desc">Grava os últimos segundos para poder voltar. Usa mais memória.</string>
+    <string name="set_rewind_mb">Memória do voltar no tempo</string>
+    <string name="set_rewind_mb_desc">Mais memória guarda mais segundos. Esta TV tem %1$s de RAM.</string>
+    <string name="rewind_ram_warning">Atenção: acima de 32 MB pode deixar lenta uma TV com 2 GB.</string>
+    <string name="set_auto_save">Salvar ao sair</string>
+    <string name="set_auto_save_desc">Cria um save automático quando você sai do jogo.</string>
+    <string name="set_auto_load">Continuar automaticamente</string>
+    <string name="set_auto_load_desc">Ao abrir o jogo, carrega o save automático.</string>
+    <string name="set_slots">Espaços de save</string>
+    <string name="set_slots_desc">Quantos espaços de save aparecem no menu do jogo.</string>
+    <string name="set_core">Núcleo do %1$s</string>
+    <string name="set_core_desc">Emulador usado para este console.</string>
+    <string name="core_default_suffix">%1$s (padrão)</string>
+    <string name="set_core_options">Opções do núcleo %1$s</string>
+    <string name="set_core_options_desc">Ajustes internos do emulador, com restauração dos padrões.</string>
+    <string name="coreopts_empty">Abra um jogo com este núcleo uma vez para carregar a lista de opções.</string>
+    <string name="core_options_reset">Restaurar padrões</string>
+    <string name="core_options_reset_done">Opções do núcleo restauradas.</string>
+    <string name="emulation_note">Pular quadros e run-ahead não são suportados pelo motor de emulação (LibretroDroid).</string>
+
+    <!-- BIOS -->
+    <string name="bios_header">BIOS do Neo Geo (neogeo.zip)</string>
+    <string name="bios_ok">Encontrada e completa</string>
+    <string name="bios_incomplete">Encontrada, mas incompleta ou de outra versão</string>
+    <string name="bios_missing">Não encontrada</string>
+    <string name="bios_missing_desc">Coloque a neogeo.zip na pasta Jogos/BIOS ou importe abaixo.</string>
+    <string name="bios_import">Importar neogeo.zip</string>
+    <string name="bios_import_desc">Escolha o arquivo num pendrive ou numa pasta.</string>
+    <string name="bios_imported">BIOS copiada. Verificando…</string>
+    <string name="bios_modes_note">MVS, AES e UniBIOS são escolhidos nas opções do núcleo FBNeo (categoria Emulação).</string>
+
+    <!-- Biblioteca -->
+    <string name="set_folders">Pastas monitoradas</string>
+    <string name="set_folders_desc">Onde o app procura jogos. Adicione ou remova em Transferir.</string>
+    <string name="set_scan_now">Procurar jogos agora</string>
+    <string name="set_scan_now_desc">Verifica as pastas e adiciona os jogos novos.</string>
+    <string name="scan_started">Procurando jogos…</string>
+    <string name="set_scan_start">Procurar ao abrir o app</string>
+    <string name="set_scan_start_desc">Verifica as pastas sempre que o app é aberto.</string>
+    <string name="set_hide_unident">Ocultar não identificados</string>
+    <string name="set_hide_unident_desc">Esconde os jogos que não foram reconhecidos no banco de dados.</string>
+    <string name="set_duplicates">Duplicados</string>
+    <string name="set_duplicates_desc">Jogos que aparecem em mais de um arquivo.</string>
+    <string name="duplicates_none">Nenhum</string>
+    <string name="duplicates_hint">OK apaga o arquivo escolhido (o original continua).</string>
+    <string name="set_rebuild">Limpar e reconstruir a biblioteca</string>
+    <string name="set_rebuild_desc">Apaga a lista de jogos (os arquivos ficam) e procura de novo.</string>
+    <string name="rebuild_confirm">Isso apaga a lista de jogos, os favoritos e o tempo de jogo. Arquivos e saves não são apagados. Continuar?</string>
+    <string name="library_note">Para renomear um jogo ou trocar a capa: abra o jogo → Opções.</string>
+
+    <!-- Núcleos -->
+    <string name="set_channel">Canal de atualização</string>
+    <string name="set_channel_desc">Estável: só atualiza quando você pede. Nightly: verifica todo dia.</string>
+    <string name="channel_stable">Estável</string>
+    <string name="channel_nightly">Nightly</string>
+    <string name="set_check_updates">Verificar atualizações</string>
+    <string name="set_check_updates_desc">Compara os núcleos instalados com o servidor.</string>
+    <string name="core_updates_found">Há atualizações. Abra o núcleo para atualizar.</string>
+    <string name="core_updates_none">Os núcleos instalados estão atualizados.</string>
+    <string name="set_download_all">Baixar os núcleos padrão</string>
+    <string name="set_download_all_desc">Baixa agora para jogar sem esperar depois.</string>
+    <string name="core_not_installed">Não instalado</string>
+    <string name="coremgr_installed">Versão %1$s · %2$s</string>
+    <string name="core_update_available">Atualização disponível</string>
+    <string name="coremgr_downloading">Baixando %1$d%%</string>
+    <string name="coremgr_queued">Na fila</string>
+    <string name="core_failed">Falhou. Tente de novo.</string>
+    <string name="core_used_by">Usado por: %1$s</string>
+    <string name="core_action_install">Baixar</string>
+    <string name="core_action_update">Atualizar</string>
+    <string name="core_action_rollback">Voltar à versão anterior</string>
+    <string name="core_action_remove">Remover</string>
+    <string name="core_rollback_done">Versão anterior restaurada.</string>
+    <string name="core_rollback_none">Não há versão anterior guardada.</string>
+
+    <!-- Interface -->
+    <string name="set_language">Idioma</string>
+    <string name="set_language_desc">Idioma dos menus. O app reinicia a tela ao mudar.</string>
+    <string name="lang_system">Idioma do sistema</string>
+    <string name="set_theme">Tema</string>
+    <string name="set_theme_desc">Escuro ou preto total, ideal para TVs OLED.</string>
+    <string name="theme_dark">Escuro</string>
+    <string name="theme_oled">Preto OLED</string>
+    <string name="set_accent">Cor de destaque</string>
+    <string name="set_accent_desc">Cor do foco e dos botões.</string>
+    <string name="accent_VIOLETA">Violeta</string>
+    <string name="accent_CIANO">Ciano</string>
+    <string name="accent_AMBAR">Âmbar</string>
+    <string name="accent_VERDE">Verde</string>
+    <string name="accent_CORAL">Coral</string>
+    <string name="set_animations">Animações</string>
+    <string name="set_animations_desc">Reduza ou desligue em TVs mais lentas.</string>
+    <string name="anim_COMPLETAS">Completas</string>
+    <string name="anim_REDUZIDAS">Reduzidas</string>
+    <string name="anim_DESLIGADAS">Desligadas</string>
+    <string name="set_hero">Destaque animado</string>
+    <string name="set_hero_desc">Movimento suave na imagem grande da Início.</string>
+    <string name="set_nav_sound">Som de navegação</string>
+    <string name="set_nav_sound_desc">Clique ao mover o foco com o direcional.</string>
+    <string name="set_card_size">Tamanho das capas</string>
+    <string name="set_card_size_desc">Tamanho dos cartões de jogo nas listas.</string>
+    <string name="size_small">Pequeno</string>
+    <string name="size_medium">Médio</string>
+    <string name="size_large">Grande</string>
+    <string name="set_home_rows">Fileiras da Início</string>
+    <string name="set_home_rows_desc">Mostre, oculte e mude a ordem das fileiras.</string>
+    <string name="home_rows_value">%1$d de %2$d visíveis</string>
+    <string name="rows_hint">OK mostra ou oculta. Use ▲ e ▼ para mudar a posição.</string>
+    <string name="row_systems">Por console</string>
+    <string name="row_genres">Por gênero</string>
+    <string name="row_hidden">Oculta</string>
+    <string name="row_visible">Visível</string>
+
+    <!-- Rede -->
+    <string name="set_port">Porta da transferência</string>
+    <string name="set_port_desc">Porta da página de envio pelo celular.</string>
+    <string name="set_fixed_pin">PIN da transferência</string>
+    <string name="set_fixed_pin_desc">Sem PIN fixo, um novo é sorteado a cada vez.</string>
+    <string name="pin_random">Sorteado a cada vez</string>
+    <string name="pin_use_random">Sortear a cada vez</string>
+    <string name="set_covers">Baixar capas</string>
+    <string name="set_covers_desc">Busca capas e imagens dos jogos na internet.</string>
+    <string name="set_covers_wifi">Capas só no Wi-Fi ou cabo</string>
+    <string name="set_covers_wifi_desc">Não baixa capas em redes móveis ou limitadas.</string>
+
+    <!-- Armazenamento -->
+    <string name="storage_games">Jogos</string>
+    <string name="storage_saves">Saves</string>
+    <string name="storage_covers">Capas (cache)</string>
+    <string name="storage_cores">Núcleos</string>
+    <string name="storage_cache">Arquivos temporários</string>
+    <string name="storage_free">Espaço livre</string>
+    <string name="storage_desc">Espaço ocupado no aparelho.</string>
+    <string name="set_clear_cache">Limpar cache</string>
+    <string name="set_clear_cache_desc">Apaga capas baixadas e temporários. Jogos e saves ficam.</string>
+    <string name="cache_cleared">Cache limpo.</string>
+
+    <!-- Controle parental -->
+    <string name="set_pin">PIN dos pais</string>
+    <string name="set_pin_desc">PIN de 4 dígitos para proteger opções.</string>
+    <string name="pin_not_set">Não definido</string>
+    <string name="pin_is_set">Definido</string>
+    <string name="set_lock_settings">Proteger as Configurações</string>
+    <string name="set_lock_settings_desc">Pede o PIN para abrir as Configurações.</string>
+    <string name="set_lock_delete">Proteger a exclusão</string>
+    <string name="set_lock_delete_desc">Pede o PIN para apagar jogos.</string>
+    <string name="pin_required_first">Defina um PIN primeiro.</string>
+    <string name="pin_enter">Digite o PIN</string>
+    <string name="pin_new">Novo PIN (4 dígitos)</string>
+    <string name="pin_wrong">PIN incorreto.</string>
+    <string name="pin_saved">PIN salvo.</string>
+    <string name="pin_removed">PIN removido.</string>
+    <string name="pin_remove">Remover PIN</string>
+    <string name="pin_backspace">Apagar</string>
+    <string name="parental_locked">As Configurações estão protegidas por PIN.</string>
+    <string name="unlock">Desbloquear</string>
+
+    <!-- Sobre -->
+    <string name="about_version">Versão</string>
+    <string name="about_abi">Arquitetura (ABI)</string>
+    <string name="about_device">Aparelho</string>
+    <string name="about_android">Android</string>
+    <string name="about_ram">Memória RAM</string>
+    <string name="about_log">Exportar registro de erros</string>
+    <string name="about_log_desc">Salva os erros registrados num arquivo para enviar ao suporte.</string>
+    <string name="log_empty">Nenhum erro registrado.</string>
+    <string name="log_exported">Registro salvo.</string>
+    <string name="log_entries">%1$d KB</string>
+    <string name="about_licenses">Licenças de código aberto</string>
+    <string name="about_licenses_desc">Bibliotecas e núcleos usados pelo app.</string>
+    <string name="about_legal">Aviso legal</string>
+    <string name="about_legal_desc">Sobre jogos, BIOS e marcas.</string>
+    <string name="legal_text">Retrô Play é um programa livre, sob a licença GPL-3.0. Ele não inclui jogos nem BIOS: use apenas cópias de jogos e BIOS que você possui. Os nomes de consoles são usados só para identificar formatos e não indicam relação com os fabricantes.</string>
+
+    <!-- Configurações de um jogo -->
+    <string name="game_settings">Configurações deste jogo</string>
+    <string name="rename">Renomear</string>
+    <string name="rename_title">Novo nome do jogo</string>
+    <string name="rename_reset">Usar o nome original</string>
+    <string name="save">Salvar</string>
+    <plurals name="folders_count">
+        <item quantity="one">%1$d pasta</item>
+        <item quantity="many">%1$d pastas</item>
+        <item quantity="other">%1$d pastas</item>
+    </plurals>
+    <plurals name="duplicates_count">
+        <item quantity="one">%1$d arquivo</item>
+        <item quantity="many">%1$d arquivos</item>
+        <item quantity="other">%1$d arquivos</item>
+    </plurals>
+    <plurals name="core_options_count">
+        <item quantity="one">%1$d personalizada</item>
+        <item quantity="many">%1$d personalizadas</item>
+        <item quantity="other">%1$d personalizadas</item>
+    </plurals>
+</resources>

@@ -152,6 +152,9 @@ class HomeStreamingTest {
         press(Key.DirectionRight)
         press(Key.DirectionCenter)
         waitFor("options_dialog")
+        // Foco inicial em "Configurações deste jogo"; ↓ desce para as capas.
+        node("options_settings").assertIsFocused()
+        press(Key.DirectionDown)
         node("cover_AUTO").assertIsFocused()
         press(Key.DirectionDown)
         press(Key.DirectionDown)

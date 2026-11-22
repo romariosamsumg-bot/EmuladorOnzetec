@@ -17,7 +17,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
+import com.retroplay.domain.library.arranged
+import com.retroplay.domain.library.visible
+import com.retroplay.domain.settings.AppSettings
+import com.retroplay.domain.settings.SettingsRepository
+import com.retroplay.feature.settings.parseHidden
+import com.retroplay.feature.settings.parseRowOrder
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -37,6 +43,7 @@ class HomeViewModel @Inject constructor(
     launcherFactory: PlayLauncher.Factory,
     val phone: PhoneTransfer,
     private val saves: SaveStateStore,
+    settings: SettingsRepository,
 ) : ViewModel() {
 
     val systems: List<GameSystem> = catalog.all
@@ -45,9 +52,12 @@ class HomeViewModel @Inject constructor(
     /** Semente do destaque aleatório: estável durante a sessão. */
     private val heroSeed = System.nanoTime()
 
-    val state: StateFlow<HomeState> = library.observeAll()
-        .map { games ->
-            val rows = HomeRowsBuilder.build(games, catalog)
+    val state: StateFlow<HomeState> = combine(library.observeAll(), settings.snapshots) { all, snap ->
+            val games = all.visible(snap.value(AppSettings.HIDE_UNIDENTIFIED))
+            val rows = HomeRowsBuilder.build(games, catalog).arranged(
+                parseRowOrder(snap.value(AppSettings.ROW_ORDER)),
+                parseHidden(snap.value(AppSettings.HIDDEN_ROWS)),
+            )
             val thumbs = rows.firstOrNull { it.type == RowType.ContinuePlaying }?.games.orEmpty().mapNotNull { g ->
                 val sys = g.systemId ?: return@mapNotNull null
                 saves.latest(sys, g.fileName)?.thumbnailPath?.let { g.id to it }

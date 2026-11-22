@@ -50,6 +50,8 @@ data class GameEntity(
     /** Consoles possíveis quando ambíguo (separados por vírgula). */
     val candidates: String? = null,
     val title: String,
+    /** Nome dado pelo usuário (sobrevive às varreduras). */
+    @ColumnInfo(name = "custom_title") val customTitle: String? = null,
     @ColumnInfo(name = "dat_name") val datName: String?,
     val region: String?,
     val year: String?,
@@ -126,6 +128,24 @@ interface GameDao {
     @Query("SELECT * FROM game WHERE id = :id")
     fun observeById(id: Long): Flow<GameEntity?>
 
+    @Query("UPDATE game SET custom_title = :title WHERE id = :id")
+    suspend fun rename(id: Long, title: String?)
+
+    /** Mesmo jogo em mais de um arquivo (mesmo CRC ou mesmo nome no DAT). */
+    @Query(
+        "SELECT * FROM game WHERE system IS NOT NULL AND (" +
+            "(crc IS NOT NULL AND crc IN (SELECT crc FROM game WHERE crc IS NOT NULL GROUP BY system, crc HAVING COUNT(*) > 1)) OR " +
+            "(dat_name IS NOT NULL AND dat_name IN (SELECT dat_name FROM game WHERE dat_name IS NOT NULL GROUP BY system, dat_name HAVING COUNT(*) > 1))" +
+            ") ORDER BY title COLLATE NOCASE, file_name",
+    )
+    fun observeDuplicates(): Flow<List<GameEntity>>
+
+    @Query("DELETE FROM game")
+    suspend fun deleteAll()
+
+    @Query("SELECT COALESCE(SUM(size_bytes), 0) FROM game")
+    suspend fun totalBytes(): Long
+
     @Query("UPDATE game SET is_favorite = :favorite WHERE id = :id")
     suspend fun setFavorite(id: Long, favorite: Boolean)
 
@@ -169,13 +189,23 @@ interface BiosDao {
     @Query("DELETE FROM bios WHERE id IN (:ids)")
     suspend fun delete(ids: List<Long>)
 
+    @Query("DELETE FROM bios")
+    suspend fun deleteAll()
+
     @Query("DELETE FROM bios WHERE folder_id = :folderId")
     suspend fun deleteByFolder(folderId: Long)
 }
 
-@Database(entities = [FolderEntity::class, GameEntity::class, BiosEntity::class], version = 1, exportSchema = true)
+@Database(entities = [FolderEntity::class, GameEntity::class, BiosEntity::class], version = 2, exportSchema = true)
 abstract class LibraryDatabase : RoomDatabase() {
     abstract fun folders(): FolderDao
     abstract fun games(): GameDao
     abstract fun bios(): BiosDao
+}
+
+/** v1 → v2: nome personalizado do jogo. */
+val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
+    override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE game ADD COLUMN custom_title TEXT")
+    }
 }

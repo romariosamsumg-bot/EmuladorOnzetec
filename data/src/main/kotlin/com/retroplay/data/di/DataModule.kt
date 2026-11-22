@@ -64,11 +64,31 @@ object CoreRepositoryModule {
     fun coreRepository(
         @ApplicationContext context: Context,
         storage: CoreStorage,
+        installer: CoreInstaller,
         dispatchers: DispatcherProvider,
     ): CoreRepository = WorkManagerCoreRepository(
         workManager = WorkManager.getInstance(context),
         storage = storage,
+        installer = installer,
         abi = AbiDetector.detect()?.abiName,
         dispatchers = dispatchers,
     )
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object SettingsModule {
+    @Provides
+    @Singleton
+    fun settings(@ApplicationContext context: Context): com.retroplay.domain.settings.SettingsRepository =
+        com.retroplay.data.settings.DataStoreSettingsRepository(File(context.filesDir, "datastore/settings.preferences_pb"))
+
+    @Provides
+    @Singleton
+    fun settingsCache(repo: com.retroplay.domain.settings.SettingsRepository) = com.retroplay.data.settings.SettingsCache(repo)
+
+    @Provides
+    @Singleton
+    fun coreOptionsCache(@ApplicationContext context: Context) =
+        com.retroplay.data.settings.CoreOptionsCache(File(context.filesDir, "coreoptions"))
 }

@@ -24,6 +24,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.retroplay.data.saves.SaveStateStore
 import com.retroplay.domain.saves.SaveSlot
+import com.retroplay.domain.settings.AppSettings
+import com.retroplay.domain.settings.SettingsRepository
 import javax.inject.Inject
 
 /** null = carregando; Missing = o jogo não existe mais. */
@@ -40,7 +42,13 @@ class GameDetailsViewModel @Inject constructor(
     private val catalog: SystemCatalog,
     launcherFactory: PlayLauncher.Factory,
     private val saves: SaveStateStore,
+    settings: SettingsRepository,
 ) : ViewModel() {
+
+    /** PIN exigido para apagar (Controle parental), ou null. */
+    val deletePin: StateFlow<String?> = settings.snapshots
+        .map { s -> s.value(AppSettings.PARENTAL_PIN).takeIf { it.isNotEmpty() && s.value(AppSettings.PARENTAL_DELETE) } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val gameId = savedStateHandle.toRoute<GameDetailsRoute>().gameId
     val launcher = launcherFactory.create(viewModelScope)
@@ -67,6 +75,10 @@ class GameDetailsViewModel @Inject constructor(
 
     fun setCover(game: Game, cover: CoverType?) {
         viewModelScope.launch { library.setCover(game.id, cover) }
+    }
+
+    fun rename(game: Game, title: String?) {
+        viewModelScope.launch { library.rename(game.id, title?.trim()?.takeIf { it.isNotEmpty() }) }
     }
 
     fun delete(game: Game) {

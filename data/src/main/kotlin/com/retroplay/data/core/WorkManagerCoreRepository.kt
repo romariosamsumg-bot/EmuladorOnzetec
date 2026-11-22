@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit
 class WorkManagerCoreRepository(
     private val workManager: WorkManager,
     private val storage: CoreStorage,
+    private val installer: CoreInstaller? = null,
     /** ABI do processo; null = aparelho sem suporte. */
     private val abi: String?,
     private val dispatchers: DispatcherProvider,
@@ -74,6 +75,23 @@ class WorkManagerCoreRepository(
         abi?.let { storage.delete(core.id, it) }
         workManager.pruneWork()
         Unit
+    }
+
+    override suspend fun checkForUpdate(core: CoreDescriptor): Boolean? = withContext(dispatchers.io) {
+        val abi = abi ?: return@withContext null
+        val installed = storage.read(core.id, abi) ?: return@withContext null
+        val remote = installer?.remoteVersion(core.id, abi) ?: return@withContext null
+        remote != installed.version
+    }
+
+    override suspend fun hasPrevious(core: CoreDescriptor): Boolean = withContext(dispatchers.io) {
+        abi?.let { storage.hasPrevious(core.id, it) } ?: false
+    }
+
+    override suspend fun rollback(core: CoreDescriptor): Boolean = withContext(dispatchers.io) {
+        val ok = abi?.let { storage.rollback(core.id, it) } ?: false
+        workManager.pruneWork()
+        ok
     }
 
     private fun workName(core: CoreDescriptor) = "core-${core.id}-$abi"

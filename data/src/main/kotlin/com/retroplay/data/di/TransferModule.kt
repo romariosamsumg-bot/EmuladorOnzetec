@@ -54,10 +54,13 @@ object PhoneTransferModule {
         catalog: SystemCatalog,
         destination: TransferDestination,
         library: LibraryRepository,
+        settings: com.retroplay.data.settings.SettingsCache,
     ): PhoneTransfer = PhoneTransferService(
         serverFactory = { port, pin, onFile ->
             PhoneTransferServer(port, pin, catalog, destination, page = { context.assets.open("web/index.html") }, onFileReceived = onFile)
         },
         onLibraryChanged = { library.scanNow() },
+        firstPort = { settings.latest.value.value(com.retroplay.domain.settings.AppSettings.TRANSFER_PORT).toInt() },
+        fixedPin = { settings.latest.value.value(com.retroplay.domain.settings.AppSettings.TRANSFER_FIXED_PIN).ifEmpty { null } },
     )
 }

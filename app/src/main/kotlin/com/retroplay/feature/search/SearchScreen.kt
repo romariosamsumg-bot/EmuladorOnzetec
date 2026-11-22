@@ -49,6 +49,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.retroplay.R
+import com.retroplay.core.ui.theme.LocalRetroUiPrefs
 import com.retroplay.domain.library.Game
 import com.retroplay.domain.system.SystemRegistry
 import com.retroplay.ui.components.GameCard
@@ -150,7 +151,7 @@ fun SearchContent(
                 Text(message, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 64.dp).testTag("search_message"))
             }
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(140.dp),
+                columns = GridCells.Adaptive(140.dp * LocalRetroUiPrefs.current.cardScale),
                 modifier = Modifier.focusRestorer().testTag("search_results"),
                 contentPadding = PaddingValues(top = 56.dp, bottom = 32.dp, start = 12.dp, end = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(20.dp),

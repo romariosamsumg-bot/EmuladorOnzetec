@@ -186,6 +186,21 @@ class LibraryScannerTest {
     }
 
     @Test
+    fun `nome personalizado e duplicatas sobrevivem a varredura`() = runTest {
+        file("Super Nintendo/mario.sfc", CrcForge.fake("smw", 0xB19ED489L))
+        file("outra/Super Mario World (U).smc", CrcForge.fake("smw2", 0xB19ED489L))
+        scanner.scan()
+        val dups = db.games().observeDuplicates().first()
+        assertEquals(2, dups.size)
+        val id = dups.first().id
+        db.games().rename(id, "Meu Mario")
+        File(root, "Super Nintendo/mario.sfc").setLastModified(System.currentTimeMillis() + 50_000)
+        File(root, "outra/Super Mario World (U).smc").setLastModified(System.currentTimeMillis() + 50_000)
+        scanner.scan()
+        assertEquals("Meu Mario", db.games().byId(id)!!.customTitle)
+    }
+
+    @Test
     fun `pasta inacessivel nao apaga os jogos dela`() = runTest {
         file("Super Nintendo/mario.sfc", CrcForge.fake("smw", 0xB19ED489L))
         scanner.scan()

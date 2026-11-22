@@ -50,7 +50,7 @@ class PhoneTransferE2ETest {
             },
             onLibraryChanged = {},
             addresses = { listOf("127.0.0.1") },
-            firstPort = 18080,
+            firstPort = { 18080 },
         )
         service.acquire()
         val running = service.state.value as PhoneTransferState.Running

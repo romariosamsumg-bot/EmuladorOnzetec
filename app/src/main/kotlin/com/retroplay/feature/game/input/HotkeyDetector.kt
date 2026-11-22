@@ -3,7 +3,7 @@ package com.retroplay.feature.game.input
 import android.view.KeyEvent
 
 /** Ações de atalho do gamepad durante o jogo. */
-enum class Hotkey { MENU, FAST_FORWARD, REWIND_START, REWIND_STOP, QUICK_SAVE, QUICK_LOAD }
+enum class Hotkey { MENU, FAST_FORWARD, FAST_FORWARD_RELEASE, REWIND_START, REWIND_STOP, QUICK_SAVE, QUICK_LOAD }
 
 /**
  * Atalhos com Select como modificador (padrão; remapeáveis na Fase 7):
@@ -16,6 +16,7 @@ class HotkeyDetector(
 ) {
     private val held = HashSet<Int>()
     private var rewinding = false
+    private var fastForwarding = false
 
     /** @return o atalho disparado por este evento (ou null). */
     fun onKey(keyCode: Int, down: Boolean): Hotkey? {
@@ -24,15 +25,21 @@ class HotkeyDetector(
             rewinding = false
             return Hotkey.REWIND_STOP
         }
+        if (!down && fastForwarding && (keyCode == modifier || bindings[keyCode] == Hotkey.FAST_FORWARD)) {
+            fastForwarding = false
+            return Hotkey.FAST_FORWARD_RELEASE
+        }
         if (!down || modifier !in held || keyCode == modifier) return null
         val action = bindings[keyCode] ?: return null
         if (action == Hotkey.REWIND_START) rewinding = true
+        if (action == Hotkey.FAST_FORWARD) fastForwarding = true
         return action
     }
 
     fun reset() {
         held.clear()
         rewinding = false
+        fastForwarding = false
     }
 
     companion object {

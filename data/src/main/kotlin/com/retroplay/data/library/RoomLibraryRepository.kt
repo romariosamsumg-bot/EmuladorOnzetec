@@ -11,6 +11,7 @@ import com.retroplay.domain.library.CopyState
 import com.retroplay.domain.library.CoverType
 import com.retroplay.domain.library.DefaultFolders
 import com.retroplay.domain.library.DeleteResult
+import com.retroplay.domain.library.BiosStatus
 import com.retroplay.data.scan.FileAccess
 import com.retroplay.domain.library.Game
 import com.retroplay.domain.library.GameFolder
@@ -68,6 +69,18 @@ class RoomLibraryRepository(
     override suspend fun addPlayTime(id: Long, millis: Long) {
         if (millis > 0) db.games().addPlayTime(id, millis)
     }
+
+    override suspend fun rename(id: Long, title: String?) = db.games().rename(id, title?.trim()?.takeIf { it.isNotEmpty() })
+    override fun observeDuplicates(): Flow<List<Game>> = db.games().observeDuplicates().map { it.map(::toGame) }
+    override fun observeBios(): Flow<List<BiosStatus>> = db.bios().observe().map { list ->
+        list.map { BiosStatus(SystemId(it.system), it.setName, it.uri, it.complete) }
+    }
+    override suspend fun rebuild() {
+        db.games().deleteAll()
+        db.bios().deleteAll()
+        scanNow()
+    }
+    override suspend fun totalBytes(): Long = db.games().totalBytes()
 
     override suspend fun deleteGame(id: Long): DeleteResult = withContext(Dispatchers.IO) {
         val game = db.games().byId(id) ?: return@withContext DeleteResult.NOT_FOUND
@@ -152,7 +165,7 @@ class RoomLibraryRepository(
             fileName = e.fileName,
             sizeBytes = e.sizeBytes,
             systemId = e.system?.let(::SystemId),
-            title = e.title,
+            title = e.customTitle ?: e.title,
             datName = e.datName,
             region = e.region,
             year = e.year,

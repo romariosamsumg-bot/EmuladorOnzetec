@@ -68,4 +68,12 @@ interface CoreRepository {
     suspend fun installed(core: CoreDescriptor): InstalledCore?
 
     suspend fun remove(core: CoreDescriptor)
+
+    /** true = há versão mais nova no buildbot; null = não foi possível verificar. */
+    suspend fun checkForUpdate(core: CoreDescriptor): Boolean? = null
+
+    suspend fun hasPrevious(core: CoreDescriptor): Boolean = false
+
+    /** Volta para a versão instalada antes da última atualização. */
+    suspend fun rollback(core: CoreDescriptor): Boolean = false
 }

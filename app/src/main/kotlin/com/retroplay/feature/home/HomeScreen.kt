@@ -145,7 +145,7 @@ private fun Hero(
     onToggleFavorite: (Game) -> Unit,
 ) {
     val background = MaterialTheme.colorScheme.background
-    val kenBurns = LocalRetroUiPrefs.current.animations == AnimationLevel.COMPLETAS
+    val kenBurns = LocalRetroUiPrefs.current.let { it.animations == AnimationLevel.COMPLETAS && it.heroAnimated }
     Box(Modifier.fillMaxWidth().height(420.dp).testTag("hero")) {
         // Arte de fundo: snap > tela de título > capa (a Coil reduz ao tamanho do banner).
         val art = listOf(CoverType.SNAP, CoverType.TITLE, CoverType.BOXART).firstOrNull { it in game.availableCovers }

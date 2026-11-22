@@ -22,6 +22,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.retroplay.domain.settings.AppSettings
+import com.retroplay.domain.settings.GameKey
+import com.retroplay.domain.settings.SettingsRepository
 
 /** Pedido para abrir um jogo na GameActivity. */
 data class LaunchRequest(
@@ -42,6 +45,7 @@ class PlayLauncher(
     private val scope: CoroutineScope,
     private val cores: CoreRepository,
     private val catalog: SystemCatalog,
+    private val settings: SettingsRepository? = null,
 ) {
     private val _launches = Channel<LaunchRequest>(Channel.BUFFERED)
     val launches: Flow<LaunchRequest> = _launches.receiveAsFlow()
@@ -56,9 +60,16 @@ class PlayLauncher(
         play(LaunchRequest(system, system.defaultCore, game.uri, game.fileName, game.title, game.id, loadSlot))
     }
 
-    fun play(request: LaunchRequest) {
+    /** Núcleo escolhido nas Configurações (jogo > console), ou o padrão do console. */
+    suspend fun coreFor(system: GameSystem, fileName: String): CoreDescriptor {
+        val chosen = settings?.current()?.value(AppSettings.CORE, system.id, GameKey.of(system.id, fileName))
+        return system.cores.firstOrNull { it.id == chosen } ?: system.defaultCore
+    }
+
+    fun play(original: LaunchRequest) {
         pendingJob?.cancel()
         pendingJob = scope.launch {
+            val request = original.copy(core = coreFor(original.system, original.fileName))
             if (cores.installed(request.core) != null) {
                 _launches.send(request)
                 return@launch
@@ -76,8 +87,12 @@ class PlayLauncher(
         }
     }
 
-    class Factory @Inject constructor(private val cores: CoreRepository, private val catalog: SystemCatalog) {
-        fun create(scope: CoroutineScope) = PlayLauncher(scope, cores, catalog)
+    class Factory @Inject constructor(
+        private val cores: CoreRepository,
+        private val catalog: SystemCatalog,
+        private val settings: SettingsRepository,
+    ) {
+        fun create(scope: CoroutineScope) = PlayLauncher(scope, cores, catalog, settings)
     }
 }
 

@@ -170,6 +170,25 @@ class CoreInstallerTest {
     }
 
     @Test
+    fun `atualizar guarda a versao anterior e permite voltar`() = runTest {
+        enqueue(zipOf("snes9x2010_libretro_android.so" to fakeSo), etag = "\"v1\"")
+        installer().install("snes9x2010", "armeabi-v7a")
+        enqueue(zipOf("snes9x2010_libretro_android.so" to fakeSo + byteArrayOf(9)), etag = "\"v2\"")
+        installer().install("snes9x2010", "armeabi-v7a")
+        assertTrue(storage.hasPrevious("snes9x2010", "armeabi-v7a"))
+        assertTrue(storage.rollback("snes9x2010", "armeabi-v7a"))
+        assertEquals("v1", storage.read("snes9x2010", "armeabi-v7a")!!.version)
+        assertFalse(storage.hasPrevious("snes9x2010", "armeabi-v7a"))
+    }
+
+    @Test
+    fun `versao remota sem baixar`() = runTest {
+        server.enqueue(MockResponse.Builder().addHeader("ETag", "\"v9\"").build())
+        assertEquals("v9", installer().remoteVersion("snes9x2010", "armeabi-v7a"))
+        assertEquals("HEAD", server.takeRequest().method)
+    }
+
+    @Test
     fun `so apagado por fora conta como nao instalado`() = runTest {
         enqueue(zipOf("snes9x2010_libretro_android.so" to fakeSo))
         installer().install("snes9x2010", "armeabi-v7a")

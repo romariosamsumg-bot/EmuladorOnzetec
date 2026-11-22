@@ -25,7 +25,9 @@ class PhoneTransferService(
     private val serverFactory: (port: Int, pin: String, onFileReceived: () -> Unit) -> TransferServerHandle,
     private val onLibraryChanged: () -> Unit,
     private val addresses: () -> List<String> = ::localIpv4Addresses,
-    private val firstPort: Int = PhoneTransferServer.DEFAULT_PORT,
+    private val firstPort: () -> Int = { PhoneTransferServer.DEFAULT_PORT },
+    /** PIN fixo escolhido nas Configurações (null = aleatório a cada vez). */
+    private val fixedPin: () -> String? = { null },
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
     private val scanDelayMs: Long = 2_500,
 ) : PhoneTransfer {
@@ -58,8 +60,9 @@ class PhoneTransferService(
             _state.value = PhoneTransferState.Failed(PhoneTransferState.Failed.Reason.NO_NETWORK)
             return
         }
-        val pin = newPin()
-        for (port in firstPort until firstPort + PORT_ATTEMPTS) {
+        val pin = fixedPin()?.takeIf { it.matches(Regex("\\d{4}")) } ?: newPin()
+        val base = firstPort()
+        for (port in base until base + PORT_ATTEMPTS) {
             val s = serverFactory(port, pin, ::scheduleScan)
             try {
                 s.startServer()

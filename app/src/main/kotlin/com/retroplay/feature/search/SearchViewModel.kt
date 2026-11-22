@@ -15,6 +15,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
+import com.retroplay.domain.library.visible
+import com.retroplay.domain.settings.AppSettings
+import com.retroplay.domain.settings.SettingsRepository
 import javax.inject.Inject
 
 data class SearchState(val query: String, val results: List<Game>, val hasLibrary: Boolean)
@@ -24,12 +27,14 @@ data class SearchState(val query: String, val results: List<Game>, val hasLibrar
 class SearchViewModel @Inject constructor(
     private val handle: SavedStateHandle,
     library: LibraryRepository,
+    settings: SettingsRepository,
 ) : ViewModel() {
 
     val query: StateFlow<String> = handle.getStateFlow(KEY, "")
 
     /** Resultados em tempo real (pequeno atraso para não recalcular a cada tecla). */
-    val state: StateFlow<SearchState> = combine(library.observeAll(), query.debounce(120)) { games, q ->
+    val state: StateFlow<SearchState> = combine(library.observeAll(), query.debounce(120), settings.snapshots) { all, q, snap ->
+        val games = all.visible(snap.value(AppSettings.HIDE_UNIDENTIFIED))
         SearchState(q, SearchMatcher.search(games, q), games.isNotEmpty())
     }.flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SearchState("", emptyList(), true))

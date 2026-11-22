@@ -39,6 +39,29 @@ class CoreStorage(private val root: File) {
         }
     }
 
+    private fun previous(f: File) = File(f.parentFile, f.name + ".prev")
+
+    /** Guarda a versão atual como "anterior" antes de instalar uma nova (para poder voltar). */
+    fun backupCurrent(coreId: String, abi: String) {
+        val lib = libraryFile(coreId, abi)
+        val meta = metadataFile(coreId, abi)
+        if (!lib.isFile || !meta.isFile) return
+        previous(lib).delete(); previous(meta).delete()
+        lib.renameTo(previous(lib)); meta.renameTo(previous(meta))
+    }
+
+    fun hasPrevious(coreId: String, abi: String) =
+        previous(libraryFile(coreId, abi)).isFile && previous(metadataFile(coreId, abi)).isFile
+
+    /** Troca a versão atual pela anterior. */
+    fun rollback(coreId: String, abi: String): Boolean {
+        if (!hasPrevious(coreId, abi)) return false
+        val lib = libraryFile(coreId, abi)
+        val meta = metadataFile(coreId, abi)
+        lib.delete(); meta.delete()
+        return previous(lib).renameTo(lib) && previous(meta).renameTo(meta)
+    }
+
     fun delete(coreId: String, abi: String) {
         libraryFile(coreId, abi).delete()
         metadataFile(coreId, abi).delete()

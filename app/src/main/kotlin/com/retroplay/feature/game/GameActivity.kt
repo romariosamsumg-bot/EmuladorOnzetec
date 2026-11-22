@@ -45,6 +45,15 @@ import com.retroplay.data.rom.RomPreparer
 import com.retroplay.data.saves.SaveStateStore
 import com.retroplay.domain.core.CoreRepository
 import com.retroplay.domain.library.LibraryRepository
+import com.retroplay.data.settings.CoreOptionsCache
+import com.retroplay.domain.settings.AppSettings
+import com.retroplay.domain.settings.CoreOption
+import com.retroplay.domain.settings.GameKey
+import com.retroplay.domain.settings.ScopeRef
+import com.retroplay.domain.settings.SettingsRepository
+import com.retroplay.domain.settings.SettingsSnapshot
+import com.retroplay.feature.game.input.MappingCodec
+import com.retroplay.feature.game.input.RetroPadKeys
 import com.retroplay.domain.saves.FpsCounter
 import com.retroplay.domain.saves.RewindBuffer
 import com.retroplay.domain.saves.SaveSlot
@@ -97,6 +106,8 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     @Inject lateinit var romPreparer: RomPreparer
     @Inject lateinit var library: LibraryRepository
     @Inject lateinit var saves: SaveStateStore
+    @Inject lateinit var settings: SettingsRepository
+    @Inject lateinit var coreOptionsCache: CoreOptionsCache
 
     /** Escopo que sobrevive ao finish(): grava estatísticas e saves mesmo ao sair do jogo. */
     private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -112,9 +123,24 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     private var sessionStart = 0L
     private var exiting = false
 
-    private val router = InputRouter()
+    // Entrada (reconfigurada pelas Configurações em start()).
+    private var router = InputRouter()
     private val ports = PortAssigner()
-    private val hotkeys = HotkeyDetector()
+    private var hotkeys = HotkeyDetector()
+    private var hotkeysEnabled = true
+    private var analogToDpad = true
+    private var deadzone = 0.5f
+    private var turboButtons: Set<Int> = emptySet()
+    private val turboJobs = HashMap<Pair<Int, Int>, Job>()
+    private var portsByDescriptor: Map<String, Int> = emptyMap()
+    private var gameKey = ""
+
+    // Preferências da sessão
+    private var autoSave = true
+    private var muteInMenu = true
+    private var audioOn = true
+    private var ffHoldMode = false
+    private var slotCount = 9
 
     // ---- estado observado pela UI Compose sobre o jogo
     private var menu by mutableStateOf<GameMenuState?>(null)
@@ -130,12 +156,16 @@ class GameActivity : ComponentActivity(), GameMenuActions {
 
     // ---- rewind
     private var rewindEnabled = false
-    private val rewind = RewindBuffer(REWIND_BUDGET_BYTES)
+    private var rewind = RewindBuffer(REWIND_BUDGET_BYTES)
     private var rewindJob: Job? = null
     private var rewinding = false
 
     /** Última miniatura capturada (ao abrir o menu), usada nos saves. */
     @Volatile private var lastThumbnail: ByteArray? = null
+
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(com.retroplay.diagnostics.AppLocale.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -152,6 +182,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         }
         system = sys
         coreId = core.id
+        gameKey = GameKey.of(sys.id, intent.getStringExtra(GameLauncher.EXTRA_FILE_NAME) ?: romUri.substringAfterLast('/'))
         fileName = intent.getStringExtra(GameLauncher.EXTRA_FILE_NAME) ?: romUri.substringAfterLast('/')
         gameId = intent.getLongExtra(GameLauncher.EXTRA_GAME_ID, -1)
         aspect = if (CoreAspect.forCore(coreId) != null) AspectChoice.ORIGINAL else null
@@ -191,6 +222,8 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         val systemDir = File(filesDir, "system").apply { mkdirs() }
         val sram = File(savesDir, fileName.substringBeforeLast('.') + ".srm").also { sramFile = it }
         val sramBytes = withContext(Dispatchers.IO) { sram.takeIf { it.isFile }?.readBytes() }
+        val snap = settings.current()
+        applySettings(snap)
 
         val data = GLRetroViewData(this).apply {
             coreFilePath = installed.libraryPath
@@ -198,10 +231,12 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             systemDirectory = systemDir.absolutePath
             savesDirectory = savesDir.absolutePath
             saveRAMState = sramBytes
-            shader = ShaderConfig.Default
-            preferLowLatencyAudio = true
+            shader = shaderConfig(this@GameActivity.shader)
+            preferLowLatencyAudio = snap.value(AppSettings.AUDIO_LATENCY) == "low"
             rumbleEventsEnabled = false
-            skipDuplicateFrames = false
+            // "Modo de baixo consumo": não redesenha quadros repetidos.
+            skipDuplicateFrames = snap.value(AppSettings.LOW_POWER)
+            variables = coreVariables(snap)
         }
         val view = GLRetroView(this, data).apply { isFocusable = false }
         retroView = view
@@ -216,9 +251,16 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             view.getGLRetroEvents().filterIsInstance<GLRetroView.GLRetroEvents.FrameRendered>().first()
             gameRunning = true
             sessionStart = SystemClock.elapsedRealtime()
+            view.audioEnabled = audioOn
+            // Guarda a lista de opções do núcleo para a tela de Configurações.
+            ioScope.launch { runCatching { coreOptionsCache.save(coreId, currentCoreOptions()) } }
             if (gameId > 0) ioScope.launch { library.recordPlayStarted(gameId, System.currentTimeMillis()) }
-            // "Continuar do save": carrega o estado pedido.
-            if (loadSlot >= 0) loadState(loadSlot, showMessage = false)
+            // "Continuar do save": carrega o estado pedido; senão, auto-load (se ligado).
+            when {
+                loadSlot >= 0 -> loadState(loadSlot, showMessage = false)
+                snap.value(AppSettings.AUTO_LOAD, system.id, gameKey) && saves.read(system.id, fileName, SaveSlot.AUTO) != null ->
+                    loadState(SaveSlot.AUTO, showMessage = false)
+            }
         }
         lifecycleScope.launch {
             var lastUpdate = 0L
@@ -231,6 +273,69 @@ class GameActivity : ComponentActivity(), GameMenuActions {
                 }
             }
         }
+    }
+
+    /** Aplica as configurações (global → console → jogo) a esta sessão. */
+    private fun applySettings(snap: SettingsSnapshot) {
+        val sys = system.id
+        shader = when (snap.value(AppSettings.SHADER, sys, gameKey)) {
+            "crt" -> ShaderChoice.CRT
+            "lcd" -> ShaderChoice.LCD
+            "sharp" -> ShaderChoice.SHARP
+            "smooth" -> ShaderChoice.SMOOTH
+            else -> ShaderChoice.DEFAULT
+        }
+        aspect = if (CoreAspect.forCore(coreId) == null) null
+        else if (snap.value(AppSettings.ASPECT, sys, gameKey) == "pixel") AspectChoice.PIXEL_PERFECT else AspectChoice.ORIGINAL
+        showFps = snap.value(AppSettings.SHOW_FPS)
+        audioOn = snap.value(AppSettings.AUDIO_ENABLED, sys, gameKey)
+        muteInMenu = snap.value(AppSettings.MUTE_IN_MENU)
+        val custom = MappingCodec.decode(snap.value(AppSettings.MAPPING, sys, gameKey))
+        router = InputRouter(
+            gamepadMap = MappingCodec.gamepadMap(custom, snap.value(AppSettings.NINTENDO_LAYOUT)),
+            remoteMap = if (snap.value(AppSettings.REMOTE_AS_GAMEPAD)) InputRouter.DEFAULT_REMOTE else emptyMap(),
+        )
+        turboButtons = MappingCodec.decodeTurbo(snap.value(AppSettings.TURBO, sys, gameKey)).map { RetroPadKeys.keyCodeFor(it) }.toSet()
+        analogToDpad = snap.value(AppSettings.ANALOG_TO_DPAD)
+        deadzone = snap.value(AppSettings.DEADZONE).toInt() / 100f
+        hotkeysEnabled = snap.value(AppSettings.HOTKEYS)
+        hotkeys = HotkeyDetector(
+            modifier = if (snap.value(AppSettings.HOTKEY_MODIFIER) == "l3") KeyEvent.KEYCODE_BUTTON_THUMBL else KeyEvent.KEYCODE_BUTTON_SELECT,
+        )
+        portsByDescriptor = MappingCodec.decodePorts(snap.value(AppSettings.PORTS))
+        lastFastSpeed = snap.value(AppSettings.FF_SPEED, sys, gameKey).toInt()
+        ffHoldMode = snap.value(AppSettings.FF_MODE) == "hold"
+        rewindEnabled = snap.value(AppSettings.REWIND, sys, gameKey)
+        rewind = RewindBuffer(snap.value(AppSettings.REWIND_MB).toLong() * 1024 * 1024)
+        autoSave = snap.value(AppSettings.AUTO_SAVE, sys, gameKey)
+        slotCount = snap.value(AppSettings.SLOTS).toInt()
+    }
+
+    /** Opções do núcleo personalizadas (global < console < jogo) + proporção escolhida. */
+    private fun coreVariables(snap: SettingsSnapshot): Array<Variable> {
+        val prefix = AppSettings.coreOptionPrefix(coreId)
+        val merged = LinkedHashMap<String, String>()
+        listOf(ScopeRef.Global, ScopeRef.system(system.id), ScopeRef.game(gameKey)).forEach { scope ->
+            snap.keysIn(scope, prefix).forEach { (k, v) -> merged[k.removePrefix(prefix)] = v }
+        }
+        CoreAspect.forCore(coreId)?.let { opt ->
+            if (aspect == AspectChoice.PIXEL_PERFECT) merged[opt.key] = opt.pixelPerfect
+        }
+        return merged.map { (k, v) -> Variable(k, v) }.toTypedArray()
+    }
+
+    private fun currentCoreOptions(): List<CoreOption> =
+        retroView?.getVariables().orEmpty().mapNotNull { v ->
+            val key = v.key ?: return@mapNotNull null
+            CoreOption.parse(key, v.description.orEmpty(), v.value)
+        }
+
+    private fun shaderConfig(choice: ShaderChoice): ShaderConfig = when (choice) {
+        ShaderChoice.DEFAULT -> ShaderConfig.Default
+        ShaderChoice.CRT -> ShaderConfig.CRT
+        ShaderChoice.LCD -> ShaderConfig.LCD
+        ShaderChoice.SHARP -> ShaderConfig.Sharp
+        ShaderChoice.SMOOTH -> ShaderConfig.CUT2()
     }
 
     /** Camada Compose: menu, FPS e avisos curtos. */
@@ -289,8 +394,9 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             shader = shader,
             aspect = aspect,
             showFps = showFps,
+            slotCount = slotCount,
             coreOptions = if ((page ?: current.page) == MenuPage.CORE_OPTIONS) {
-                runCatching { retroView?.getVariables().orEmpty().mapNotNull { v -> v.key?.let { it to v.value.orEmpty() } } }.getOrDefault(emptyList())
+                runCatching { currentCoreOptions() }.getOrDefault(emptyList())
             } else current.coreOptions,
         )
     }
@@ -382,12 +488,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
 
     override fun cycleShader() {
         shader = ShaderChoice.entries[(shader.ordinal + 1) % ShaderChoice.entries.size]
-        retroView?.shader = when (shader) {
-            ShaderChoice.DEFAULT -> ShaderConfig.Default
-            ShaderChoice.CRT -> ShaderConfig.CRT
-            ShaderChoice.LCD -> ShaderConfig.LCD
-            ShaderChoice.SHARP -> ShaderConfig.Sharp
-        }
+        retroView?.shader = shaderConfig(shader)
         retroView?.requestRender()
         refreshMenu()
     }
@@ -419,11 +520,19 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         }
     }
 
+    /** Opção do núcleo (menu do jogo): vale na hora e fica gravada para este jogo. */
+    override fun setCoreOption(key: String, value: String) {
+        runCatching { retroView?.updateVariables(Variable(key, value)) }
+        ioScope.launch { settings.setRaw(AppSettings.coreOptionKey(coreId, key), ScopeRef.game(gameKey), value) }
+        val current = menu ?: return
+        menu = current.copy(coreOptions = current.coreOptions.map { if (it.key == key) it.copy(current = value) else it })
+    }
+
     override fun exit() {
         exiting = true
         val thumb = lastThumbnail
         ioScope.launch {
-            writeState(SaveSlot.AUTO, thumb, onEmulationThread = true)
+            if (autoSave) writeState(SaveSlot.AUTO, thumb, onEmulationThread = true)
             withContext(Dispatchers.Main) { finish() }
         }
     }
@@ -432,7 +541,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         val view = retroView ?: return
         // Congela a emulação (o GL para de chamar step) e silencia o áudio.
         view.renderMode = if (paused) GLSurfaceView.RENDERMODE_WHEN_DIRTY else GLSurfaceView.RENDERMODE_CONTINUOUSLY
-        view.audioEnabled = !paused
+        view.audioEnabled = audioOn && !(paused && muteInMenu)
     }
 
     // ================================================================== rewind / acelerar
@@ -461,9 +570,13 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         when (h) {
             Hotkey.MENU -> openMenu()
             Hotkey.FAST_FORWARD -> {
-                speed = if (speed == 1) lastFastSpeed else 1
+                speed = if (ffHoldMode || speed == 1) lastFastSpeed else 1
                 retroView?.frameSpeed = speed
                 flash(if (speed == 1) getString(R.string.speed_normal) else "${speed}x")
+            }
+            Hotkey.FAST_FORWARD_RELEASE -> if (ffHoldMode) {
+                speed = 1
+                retroView?.frameSpeed = 1
             }
             Hotkey.REWIND_START -> if (rewindEnabled) rewinding = true else flash(getString(R.string.rewind_disabled_hint))
             Hotkey.REWIND_STOP -> rewinding = false
@@ -486,7 +599,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         val view = retroView ?: return super.dispatchKeyEvent(event)
         val fromGamepad = event.isFromSource(InputDevice.SOURCE_GAMEPAD) || event.isFromSource(InputDevice.SOURCE_JOYSTICK)
         if (menu != null) return super.dispatchKeyEvent(translateForMenu(event))
-        if (fromGamepad && event.repeatCount == 0) {
+        if (fromGamepad && hotkeysEnabled && event.repeatCount == 0) {
             val hotkey = hotkeys.onKey(event.keyCode, event.action == KeyEvent.ACTION_DOWN)
             if (hotkey != null) {
                 // Solta Select e o botão do atalho no núcleo, para não ficarem "presos".
@@ -499,7 +612,11 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         }
         return when (val action = router.route(event.keyCode, fromGamepad)) {
             is InputAction.Forward -> {
-                if (event.repeatCount == 0) view.sendKeyEvent(event.action, action.retroKeyCode, ports.portFor(event.deviceId, fromGamepad))
+                if (event.repeatCount == 0) {
+                    val port = portFor(event.deviceId, fromGamepad)
+                    if (action.retroKeyCode in turboButtons) turbo(view, action.retroKeyCode, port, event.action == KeyEvent.ACTION_DOWN)
+                    else view.sendKeyEvent(event.action, action.retroKeyCode, port)
+                }
                 true
             }
             InputAction.Menu -> {
@@ -508,6 +625,32 @@ class GameActivity : ComponentActivity(), GameMenuActions {
                 true
             }
             InputAction.Ignore -> super.dispatchKeyEvent(event)
+        }
+    }
+
+    /** Porta do jogador: a escolhida nas Configurações para este controle, ou a ordem de uso. */
+    private fun portFor(deviceId: Int, isGamepad: Boolean): Int {
+        if (isGamepad && !ports.has(deviceId)) {
+            InputDevice.getDevice(deviceId)?.descriptor?.let { portsByDescriptor[it] }?.let { ports.assign(deviceId, it) }
+        }
+        return ports.portFor(deviceId, isGamepad)
+    }
+
+    /** Turbo: enquanto o botão está pressionado, aperta e solta ~10 vezes por segundo. */
+    private fun turbo(view: GLRetroView, key: Int, port: Int, down: Boolean) {
+        val id = key to port
+        turboJobs.remove(id)?.cancel()
+        if (!down) {
+            view.sendKeyEvent(KeyEvent.ACTION_UP, key, port)
+            return
+        }
+        turboJobs[id] = lifecycleScope.launch {
+            var pressed = false
+            while (isActive) {
+                pressed = !pressed
+                view.sendKeyEvent(if (pressed) KeyEvent.ACTION_DOWN else KeyEvent.ACTION_UP, key, port)
+                delay(TURBO_HALF_PERIOD_MS)
+            }
         }
     }
 
@@ -529,8 +672,8 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         if (view != null && event.isFromSource(InputDevice.SOURCE_JOYSTICK) && event.action == MotionEvent.ACTION_MOVE) {
             val x = event.getAxisValue(MotionEvent.AXIS_X)
             val y = event.getAxisValue(MotionEvent.AXIS_Y)
-            val dx = StickToDpad.combine(event.getAxisValue(MotionEvent.AXIS_HAT_X), x)
-            val dy = StickToDpad.combine(event.getAxisValue(MotionEvent.AXIS_HAT_Y), y)
+            val dx = StickToDpad.combine(event.getAxisValue(MotionEvent.AXIS_HAT_X), x, deadzone, analogToDpad)
+            val dy = StickToDpad.combine(event.getAxisValue(MotionEvent.AXIS_HAT_Y), y, deadzone, analogToDpad)
             if (menu != null) {
                 // Direcional/analógico do gamepad também navega no menu.
                 hatToKey(hatX, dx, KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT)
@@ -538,7 +681,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
                 hatX = dx; hatY = dy
                 return true
             }
-            val port = ports.portFor(event.deviceId, isGamepad = true)
+            val port = portFor(event.deviceId, isGamepad = true)
             view.sendMotionEvent(GLRetroView.MOTION_SOURCE_DPAD, dx, dy, port)
             view.sendMotionEvent(GLRetroView.MOTION_SOURCE_ANALOG_LEFT, x, y, port)
             view.sendMotionEvent(GLRetroView.MOTION_SOURCE_ANALOG_RIGHT, event.getAxisValue(MotionEvent.AXIS_Z), event.getAxisValue(MotionEvent.AXIS_RZ), port)
@@ -579,8 +722,10 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         if (!exiting) {
             // Botão Home / perda de foco: save automático (a emulação já está parada aqui).
             wasPausedBySystem = true
-            writeState(SaveSlot.AUTO, lastThumbnail, onEmulationThread = false)
-            captureThumbnail { thumb -> thumb?.let { saves.writeThumbnail(system.id, fileName, SaveSlot.AUTO, it) } }
+            if (autoSave) {
+                writeState(SaveSlot.AUTO, lastThumbnail, onEmulationThread = false)
+                captureThumbnail { thumb -> thumb?.let { saves.writeThumbnail(system.id, fileName, SaveSlot.AUTO, it) } }
+            }
         }
         if (gameId > 0 && sessionStart > 0) {
             val played = SystemClock.elapsedRealtime() - sessionStart
@@ -679,6 +824,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         const val THUMB_W = 384
         const val THUMB_H = 216
         const val QUICK_SLOT = 9
+        const val TURBO_HALF_PERIOD_MS = 50L
         const val REWIND_CAPTURES_PER_SECOND = 6
         /** Orçamento padrão do rewind (Configurações → Emulação na Fase 7). */
         const val REWIND_BUDGET_BYTES = 32L * 1024 * 1024

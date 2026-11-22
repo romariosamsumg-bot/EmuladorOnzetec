@@ -90,3 +90,24 @@ fun List<Game>.applyFilter(filter: GameFilter): List<Game> = when (filter) {
     GameFilter.MOST_PLAYED -> sortedWith(compareByDescending<Game> { it.playCount }.thenBy { it.title.lowercase() })
     GameFilter.FAVORITES -> filter { it.isFavorite }.sortedBy { it.title.lowercase() }
 }
+
+/** Grupo de configuração da fileira (ver HomeRowGroups nas configurações). */
+val RowType.group: String
+    get() = when (this) {
+        RowType.ContinuePlaying -> "continue"
+        RowType.Favorites -> "favorites"
+        RowType.RecentlyAdded -> "recent"
+        is RowType.BySystem -> "systems"
+        RowType.MostPlayed -> "most_played"
+        is RowType.ByGenre -> "genres"
+    }
+
+/** Aplica as preferências da Início: remove grupos ocultos e ordena pelos grupos (ordem estável dentro do grupo). */
+fun List<HomeRow>.arranged(order: List<String>, hidden: Set<String>): List<HomeRow> {
+    val rank = order.withIndex().associate { it.value to it.index }
+    return filter { it.type.group !in hidden }.sortedBy { rank[it.type.group] ?: Int.MAX_VALUE }
+}
+
+/** "Ocultar não identificados": esconde jogos sem correspondência no banco de dados. */
+fun List<Game>.visible(hideUnidentified: Boolean): List<Game> =
+    if (hideUnidentified) filter { it.status != IdentStatus.UNIDENTIFIED } else this

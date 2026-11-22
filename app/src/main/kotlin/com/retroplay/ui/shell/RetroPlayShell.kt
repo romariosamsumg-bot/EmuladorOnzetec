@@ -51,7 +51,8 @@ import com.retroplay.feature.consoles.ConsolesEntry
 import com.retroplay.feature.favorites.FavoritesScreen
 import com.retroplay.feature.home.HomeEntry
 import com.retroplay.feature.search.SearchScreen
-import com.retroplay.feature.settings.SettingsScreen
+import com.retroplay.feature.settings.SettingsEntry
+import com.retroplay.navigation.GameSettingsRoute
 import com.retroplay.feature.transfer.TransferScreen
 import com.retroplay.navigation.ConsoleDetailRoute
 import com.retroplay.navigation.ConsolesRoute
@@ -157,7 +158,12 @@ fun RetroPlayShell(navController: NavHostController = rememberNavController()) {
                 composable<SearchRoute> { SearchScreen(onOpenGame = { navController.navigate(GameDetailsRoute(it.id)) }) }
                 composable<ConsolesRoute> { ConsolesEntry(onOpenConsole = { navController.navigate(ConsoleDetailRoute(it.id.value)) }) }
                 composable<ConsoleDetailRoute> { ConsoleEntry(onOpenGame = { navController.navigate(GameDetailsRoute(it.id)) }) }
-                composable<GameDetailsRoute> { GameDetailsEntry(onBack = { navController.popBackStack() }) }
+                composable<GameDetailsRoute> {
+                    GameDetailsEntry(
+                        onBack = { navController.popBackStack() },
+                        onOpenSettings = { navController.navigate(GameSettingsRoute(it)) },
+                    )
+                }
                 composable<FavoritesRoute> {
                     FavoritesScreen(
                         onOpenGame = { navController.navigate(GameDetailsRoute(it.id)) },
@@ -165,7 +171,8 @@ fun RetroPlayShell(navController: NavHostController = rememberNavController()) {
                     )
                 }
                 composable<TransferRoute> { TransferScreen() }
-                composable<SettingsRoute> { SettingsScreen() }
+                composable<SettingsRoute> { SettingsEntry(onOpenTransfer = { navController.navigateTopLevel(TopLevelDestination.TRANSFER) }) }
+                composable<GameSettingsRoute> { SettingsEntry(onOpenTransfer = { navController.navigateTopLevel(TopLevelDestination.TRANSFER) }) }
             }
             // Declarado DEPOIS do NavHost para ter prioridade sobre o "voltar" padrão dele.
             // Em telas internas o NavHost cuida do Voltar (volta para a tela anterior).

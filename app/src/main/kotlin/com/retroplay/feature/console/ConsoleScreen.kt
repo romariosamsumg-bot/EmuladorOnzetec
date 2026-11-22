@@ -51,6 +51,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.OutlinedButton
 import androidx.tv.material3.Text
 import com.retroplay.R
+import com.retroplay.core.ui.theme.LocalRetroUiPrefs
 import com.retroplay.core.ui.components.SystemIcons
 import com.retroplay.domain.core.CoreError
 import com.retroplay.domain.core.CoreInstallState
@@ -123,7 +124,7 @@ fun ConsoleScreen(
     val list = games.orEmpty()
 
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(150.dp),
+        columns = GridCells.Adaptive(150.dp * LocalRetroUiPrefs.current.cardScale),
         modifier = Modifier.fillMaxSize().testTag("screen_console_${system.id.value}"),
         contentPadding = PaddingValues(start = 48.dp, end = 48.dp, top = 36.dp, bottom = 40.dp),
         horizontalArrangement = Arrangement.spacedBy(24.dp),

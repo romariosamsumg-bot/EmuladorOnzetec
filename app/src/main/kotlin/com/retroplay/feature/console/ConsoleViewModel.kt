@@ -30,6 +30,13 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.retroplay.domain.library.visible
+import com.retroplay.domain.settings.AppSettings
+import com.retroplay.domain.settings.SettingsRepository
+import com.retroplay.domain.system.CoreDescriptor
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,20 +47,28 @@ class ConsoleViewModel @Inject constructor(
     private val library: LibraryRepository,
     private val roms: LocalRomSource,
     launcherFactory: PlayLauncher.Factory,
+    settings: SettingsRepository,
 ) : ViewModel() {
 
     val system: GameSystem = catalog.byId(SystemId(handle.toRoute<ConsoleDetailRoute>().systemId)) ?: catalog.all.first()
-    val core = system.defaultCore
+    /** Núcleo escolhido para o console (Configurações → Emulação), ou o padrão. */
+    val selectedCore: StateFlow<CoreDescriptor> = settings.snapshots
+        .map { snap -> system.cores.firstOrNull { it.id == snap.value(AppSettings.CORE, system.id) } ?: system.defaultCore }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, system.defaultCore)
+    val core: CoreDescriptor get() = selectedCore.value
+    private val hideUnidentified = settings.snapshots.map { it.value(AppSettings.HIDE_UNIDENTIFIED) }.distinctUntilChanged()
     val launcher = launcherFactory.create(viewModelScope)
     val hasTestRom = system.id == SystemRegistry.Ids.SNES
 
-    val coreState: StateFlow<CoreInstallState> = cores.observe(core)
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val coreState: StateFlow<CoreInstallState> = selectedCore.flatMapLatest { cores.observe(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CoreInstallState.NotInstalled)
 
     val filter: StateFlow<GameFilter> = handle.getStateFlow(KEY_FILTER, GameFilter.AZ)
 
     /** null enquanto carrega. */
-    val games: StateFlow<List<Game>?> = combine(library.observeGames(system.id), filter) { list, f -> list.applyFilter(f) }
+    val games: StateFlow<List<Game>?> = combine(library.observeGames(system.id), filter, hideUnidentified) { list, f, hide -> list.visible(hide).applyFilter(f) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val scan: StateFlow<ScanState> = library.observeScan()

@@ -26,7 +26,7 @@ baixados sob demanda.
 | 4 | UI streaming (hero, fileiras, detalhes, busca, páginas de console) | ✅ |
 | 5 | Transferência pelo celular (servidor local, QR code, PIN) | ✅ |
 | 6 | Menu de jogo e saves | ✅ |
-| 7 | Configurações completas | ⏳ |
+| 7 | Configurações completas (12 categorias, global → console → jogo) | ✅ |
 | 8 | Mega Drive, Master System e Neo Geo | ⏳ |
 | 9 | Polimento (perfis, backup, SMB, baseline profile) | ⏳ |
 | 10 | Release assinado + GitHub Actions | ⏳ |
@@ -131,6 +131,42 @@ O banco de identificação (`data/src/main/assets/db/retroplay-dat.sqlite`) é g
 - **Atalhos do gamepad**: Select+R1 acelera · Select+L1 (segurar) volta no tempo (com o rewind
   ligado no menu) · Select+R2 / Select+L2 salvam / carregam rápido (espaço 9).
 - O botão **Home** da TV não pode ser capturado por apps Android; por isso o menu usa Voltar.
+
+## Configurações
+
+Categorias à esquerda, opções à direita (nome, descrição e valor atual). Tudo pelo D-pad.
+
+- **Níveis**: nas categorias Vídeo, Áudio, Controles e Emulação há um seletor no topo — Global,
+  SNES, MD, SMS, NEO. O valor de um console vale só para ele; o de um jogo (Detalhes → Opções →
+  **Configurações deste jogo**) vale só para aquele jogo. A linha mostra **● Personalizado aqui**
+  quando o valor foi mudado naquele nível, ou "Herdado do global/console". Na lista de valores,
+  **Usar o valor herdado** desfaz a personalização.
+- **Vídeo**: filtro (Nenhum, CRT, LCD, Nítido, Suave), proporção (original ou pixel perfeito),
+  mostrar FPS, modo econômico.
+- **Áudio**: som do jogo, latência (baixa/normal), silenciar no menu.
+- **Controles**: controles conectados com perfil (Xbox, PlayStation, 8BitDo, genérico) e porta
+  (jogador 1–4 ou automática); **Remapear botões** com o assistente "pressione o botão…" (por
+  console e por jogo; OK do remoto pula um botão); turbo por botão; controle remoto como gamepad;
+  analógico como direcional; zona morta; layout Nintendo; atalhos e botão modificador (Select ou L3).
+- **Emulação**: velocidade e modo da aceleração (alternar/segurar), voltar no tempo e memória
+  usada (com aviso de RAM), salvar ao sair, continuar automaticamente, espaços de save, núcleo de
+  cada console e **opções de cada núcleo** (lidas do próprio núcleo, com "Restaurar padrões").
+- **BIOS**: situação da `neogeo.zip` e importação de um pendrive/pasta.
+- **Biblioteca**: pastas monitoradas, procurar agora, procurar ao abrir, ocultar não
+  identificados, duplicados (apagar o arquivo repetido) e reconstruir a biblioteca.
+- **Núcleos**: versão e tamanho de cada núcleo, baixar/atualizar/remover, voltar à versão
+  anterior, baixar todos e canal (Estável: só quando você pede; Nightly: verifica 1× por dia).
+- **Interface**: idioma (Português, English, Español), tema escuro ou preto OLED, cor de
+  destaque, animações, destaque animado, som de navegação, tamanho das capas e fileiras da Início
+  (mostrar/ocultar/ordenar).
+- **Rede**: porta e PIN fixo da transferência pelo celular; baixar capas e capas só no Wi-Fi.
+- **Armazenamento**: espaço usado por jogos, saves, capas, núcleos e temporários; limpar cache.
+- **Controle parental**: PIN de 4 dígitos para abrir as Configurações e/ou apagar jogos.
+- **Sobre**: versão, ABI, aparelho, RAM, exportar o registro de erros, licenças e aviso legal.
+
+Não disponíveis porque o motor de emulação (LibretroDroid) não oferece: esticar a imagem,
+intensidade de scanlines, rotação, VSync, volume/taxa de amostragem próprios, pular quadros e
+run-ahead.
 
 ## Testando a emulação (Fase 2)
 

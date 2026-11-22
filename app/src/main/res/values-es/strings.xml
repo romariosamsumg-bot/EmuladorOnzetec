@@ -19,8 +19,6 @@
     <string name="favorites_title">Favoritos</string>
 
     <string name="settings_title">Ajustes</string>
-    <string name="settings_body">Video, audio, controles, emulación, BIOS, biblioteca, núcleos y más.</string>
-    <string name="settings_device_abi">ABI detectado: %1$s</string>
     <string name="abi_unknown">desconocido</string>
 
     <string name="coming_soon">Próximamente</string>
@@ -257,10 +255,11 @@
     <string name="pad_right">Botón derecho (B / ○)</string>
     <string name="pad_left">Botón izquierdo (X / □)</string>
     <string name="pad_top">Botón superior (Y / △)</string>
-    <string name="core_options_note">Valores actuales del núcleo. La edición llega en Ajustes (Fase 7).</string>
+    <string name="core_options_note">OK cambia el valor. Se aplica al momento y se guarda para este juego.</string>
     <string name="core_options_empty">Este núcleo no informó opciones.</string>
     <string name="continue_from_save">Continuar partida</string>
     <string name="play_from_start">Jugar desde el inicio</string>
     <string name="details_save_auto">Último guardado automático: %1$s</string>
     <string name="details_save_slot">Último guardado: %1$s (espacio %2$d)</string>
+    <string name="shader_smooth">Suave</string>
 </resources>

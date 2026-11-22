@@ -15,6 +15,14 @@ class PortAssigner(private val maxPorts: Int = 4) {
         return free
     }
 
+    /** Porta fixa escolhida nas Configurações (Controles → Multijogador). */
+    fun assign(deviceId: Int, port: Int) {
+        ports.entries.removeAll { it.value == port && it.key != deviceId }
+        ports[deviceId] = port.coerceIn(0, maxPorts - 1)
+    }
+
+    fun has(deviceId: Int) = deviceId in ports
+
     /** Libera a porta quando o controle é desconectado. */
     fun release(deviceId: Int) {
         ports.remove(deviceId)
@@ -23,7 +31,9 @@ class PortAssigner(private val maxPorts: Int = 4) {
 
 /** Combina direcional digital (HAT) com o analógico esquerdo para jogos que só leem o D-pad. */
 object StickToDpad {
-    fun combine(hat: Float, stick: Float, threshold: Float = 0.5f): Float = when {
+    fun combine(hat: Float, stick: Float, threshold: Float = 0.5f, enabled: Boolean = true): Float = when {
+        hat != 0f -> hat
+        !enabled -> 0f
         hat != 0f -> hat
         stick >= threshold -> 1f
         stick <= -threshold -> -1f

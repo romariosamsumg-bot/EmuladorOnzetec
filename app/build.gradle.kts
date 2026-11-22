@@ -28,6 +28,11 @@ android {
         localeFilters += listOf("pt-rBR", "en", "es")
     }
 
+    // O idioma é trocado dentro do app (Interface → Idioma): o bundle precisa de todos os idiomas.
+    bundle {
+        language { enableSplit = false }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"

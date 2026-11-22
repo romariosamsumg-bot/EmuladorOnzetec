@@ -30,8 +30,6 @@
 
     <!-- Configurações -->
     <string name="settings_title">Configurações</string>
-    <string name="settings_body">Vídeo, áudio, controles, emulação, BIOS, biblioteca, núcleos e mais.</string>
-    <string name="settings_device_abi">ABI detectado: %1$s</string>
     <string name="abi_unknown">desconhecido</string>
 
     <string name="coming_soon">Em breve</string>
@@ -268,10 +266,11 @@
     <string name="pad_right">Botão da direita (B / ○)</string>
     <string name="pad_left">Botão da esquerda (X / □)</string>
     <string name="pad_top">Botão de cima (Y / △)</string>
-    <string name="core_options_note">Valores atuais do núcleo. A edição chega nas Configurações (Fase 7).</string>
+    <string name="core_options_note">OK troca o valor. Vale na hora e fica salvo para este jogo.</string>
     <string name="core_options_empty">Este núcleo não informou opções.</string>
     <string name="continue_from_save">Continuar do save</string>
     <string name="play_from_start">Jogar do início</string>
     <string name="details_save_auto">Último save automático: %1$s</string>
     <string name="details_save_slot">Último save: %1$s (espaço %2$d)</string>
+    <string name="shader_smooth">Suave</string>
 </resources>

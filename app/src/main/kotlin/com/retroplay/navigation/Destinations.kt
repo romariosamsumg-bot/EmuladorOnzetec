@@ -34,3 +34,6 @@ enum class TopLevelDestination(
 
 /** Detalhes de um jogo da biblioteca. */
 @Serializable data class GameDetailsRoute(val gameId: Long)
+
+/** Configurações de um jogo (nível "jogo" da hierarquia). */
+@Serializable data class GameSettingsRoute(val gameId: Long)

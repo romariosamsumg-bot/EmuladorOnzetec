@@ -26,6 +26,8 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
     }
+    // Esquemas exportados do Room disponíveis para o teste de migração.
+    sourceSets.getByName("test").assets.srcDir("$projectDir/schemas")
 }
 
 dependencies {
@@ -41,6 +43,7 @@ dependencies {
     implementation(libs.commons.compress)
     implementation(libs.xz)
     implementation(libs.nanohttpd)
+    implementation(libs.datastore.preferences)
     implementation(libs.work.runtime.ktx)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
@@ -53,6 +56,7 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.work.testing)
+    testImplementation(libs.room.testing)
 }
 
 tasks.withType<Test>().configureEach {

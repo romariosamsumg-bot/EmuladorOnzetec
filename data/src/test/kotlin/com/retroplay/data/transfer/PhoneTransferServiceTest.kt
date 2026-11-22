@@ -50,6 +50,18 @@ class PhoneTransferServiceTest {
     }
 
     @Test
+    fun `porta e pin fixos das configuracoes`() {
+        val service = PhoneTransferService(
+            { p, _, _ -> FakeServer(p, false) }, {}, addresses = { listOf("10.0.0.2") }, scope = scope,
+            firstPort = { 9000 }, fixedPin = { "1234" },
+        )
+        service.acquire()
+        val r = service.state.value as PhoneTransferState.Running
+        assertEquals("http://10.0.0.2:9000", r.url)
+        assertEquals("1234", r.pin)
+    }
+
+    @Test
     fun `sem rede avisa`() {
         val service = PhoneTransferService({ p, _, _ -> FakeServer(p, false) }, {}, addresses = { emptyList() }, scope = scope)
         service.acquire()

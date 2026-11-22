@@ -65,7 +65,7 @@ fun GameCard(
             showTitle = true
         }
     }
-    Column(modifier.width(width)) {
+    Column(modifier.width(width * LocalRetroUiPrefs.current.cardScale)) {
         Card(
             onClick = onClick,
             modifier = cardModifier

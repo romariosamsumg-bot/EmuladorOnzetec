@@ -22,6 +22,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.retroplay.R
+import com.retroplay.core.ui.theme.LocalRetroUiPrefs
 import com.retroplay.domain.library.Game
 import com.retroplay.domain.library.GameFilter
 import com.retroplay.domain.library.LibraryRepository
@@ -70,7 +71,7 @@ fun FavoritesScreen(onOpenGame: (Game) -> Unit, onBrowse: () -> Unit, viewModel:
     Column(Modifier.fillMaxSize().padding(top = 40.dp).testTag("screen_favorites")) {
         Text(stringResource(R.string.favorites_title), style = MaterialTheme.typography.displaySmall, modifier = Modifier.padding(horizontal = 48.dp))
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(150.dp),
+            columns = GridCells.Adaptive(150.dp * LocalRetroUiPrefs.current.cardScale),
             contentPadding = PaddingValues(horizontal = 48.dp, vertical = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(24.dp),
         ) {

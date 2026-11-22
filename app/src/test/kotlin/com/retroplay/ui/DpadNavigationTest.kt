@@ -152,6 +152,8 @@ class DpadNavigationTest {
                 // Sem permissão de arquivos (padrão do repositório falso): foco no botão de permitir.
                 "screen_transfer" -> node("grant_access").assertIsFocused()
                 "screen_search" -> node("key_a").assertIsFocused()
+                // Configurações: foco na primeira categoria (Vídeo).
+                "screen_settings" -> node("cat_VIDEO").assertIsFocused()
                 else -> primary.assertIsFocused()
             }
         }
