@@ -46,6 +46,11 @@ object DataModule {
 
     @Provides
     @Singleton
+    fun saveStates(@ApplicationContext context: Context): com.retroplay.data.saves.SaveStateStore =
+        com.retroplay.data.saves.SaveStateStore(File(context.filesDir, "states"))
+
+    @Provides
+    @Singleton
     fun romPreparer(@ApplicationContext context: Context, files: com.retroplay.data.scan.FileAccess): RomPreparer =
         RomPreparer(context.cacheDir, files)
 }

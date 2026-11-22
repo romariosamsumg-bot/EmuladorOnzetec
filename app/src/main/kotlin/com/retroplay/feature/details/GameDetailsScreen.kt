@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,6 +56,7 @@ import com.retroplay.domain.library.DeleteResult
 import com.retroplay.domain.library.Game
 import com.retroplay.domain.library.IdentStatus
 import com.retroplay.domain.library.RomsetStatus
+import com.retroplay.domain.saves.SaveSlot
 import com.retroplay.domain.system.GameSystem
 import com.retroplay.feature.console.coreErrorMessage
 import com.retroplay.feature.home.genreName
@@ -86,6 +89,8 @@ fun GameDetailsEntry(onBack: () -> Unit, viewModel: GameDetailsViewModel = hiltV
             game = s.game,
             system = s.system,
             coreDownload = download,
+            latestSave = s.latestSave,
+            onContinue = { s.latestSave?.let { viewModel.continueFrom(s.game, it) } },
             onPlay = { viewModel.play(s.game) },
             onToggleFavorite = { viewModel.toggleFavorite(s.game) },
             onSetCover = { viewModel.setCover(s.game, it) },
@@ -94,11 +99,14 @@ fun GameDetailsEntry(onBack: () -> Unit, viewModel: GameDetailsViewModel = hiltV
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun GameDetailsScreen(
     game: Game,
     system: GameSystem,
     coreDownload: CoreInstallState?,
+    latestSave: SaveSlot? = null,
+    onContinue: () -> Unit = {},
     onPlay: () -> Unit,
     onToggleFavorite: () -> Unit,
     onSetCover: (CoverType?) -> Unit,
@@ -144,6 +152,18 @@ fun GameDetailsScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (latestSave != null) {
+                    Text(
+                        stringResource(
+                            if (latestSave.isAuto) R.string.details_save_auto else R.string.details_save_slot,
+                            DateUtils.getRelativeTimeSpanString(latestSave.savedAt).toString(),
+                            latestSave.slot,
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.testTag("details_save"),
+                    )
+                }
                 if (game.lastPlayedAt != null) {
                     Text(
                         stringResource(
@@ -162,11 +182,24 @@ fun GameDetailsScreen(
                     Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("details_romset"))
                 }
                 Spacer(Modifier.height(12.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Button(onClick = onPlay, modifier = Modifier.focusRequester(playFocus).testTag("details_play")) {
-                        Icon(painterResource(UiR.drawable.ic_play), null, modifier = Modifier.size(20.dp))
-                        Spacer(Modifier.size(8.dp))
-                        Text(stringResource(R.string.play))
+                // Quebra de linha quando os botões não cabem (ex.: "Continuar do save" + "Jogar do início").
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    if (latestSave != null) {
+                        // "Continuar do save" vem primeiro e recebe o foco.
+                        Button(onClick = onContinue, modifier = Modifier.focusRequester(playFocus).testTag("details_continue")) {
+                            Icon(painterResource(UiR.drawable.ic_play), null, modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.size(8.dp))
+                            Text(stringResource(R.string.continue_from_save))
+                        }
+                        OutlinedButton(onClick = onPlay, modifier = Modifier.testTag("details_play")) {
+                            Text(stringResource(R.string.play_from_start))
+                        }
+                    } else {
+                        Button(onClick = onPlay, modifier = Modifier.focusRequester(playFocus).testTag("details_play")) {
+                            Icon(painterResource(UiR.drawable.ic_play), null, modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.size(8.dp))
+                            Text(stringResource(R.string.play))
+                        }
                     }
                     OutlinedButton(onClick = onToggleFavorite, modifier = Modifier.testTag("details_favorite")) {
                         Text(stringResource(if (game.isFavorite) R.string.remove_favorite else R.string.add_favorite))

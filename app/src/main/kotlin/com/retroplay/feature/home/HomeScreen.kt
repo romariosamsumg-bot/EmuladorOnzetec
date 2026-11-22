@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -129,7 +130,7 @@ fun HomeScreen(
             }
         }
         items(state.rows, key = { it.type.key }) { row ->
-            GameRow(row, catalog, memory, onOpenGame, onOpenConsole)
+            GameRow(row, catalog, memory, onOpenGame, onOpenConsole, state.continueThumbs)
         }
     }
 }
@@ -206,6 +207,7 @@ private fun GameRow(
     memory: FocusMemory,
     onOpenGame: (Game) -> Unit,
     onOpenConsole: (GameSystem) -> Unit,
+    continueThumbs: Map<Long, String> = emptyMap(),
 ) {
     val rowSystem = (row.type as? RowType.BySystem)?.let { catalog.byId(it.system) }
     Column(Modifier.testTag("row_${row.type.key}")) {
@@ -223,6 +225,10 @@ private fun GameRow(
             items(row.games, key = { it.id }) { game ->
                 val system = game.systemId?.let { catalog.byId(it) } ?: return@items
                 val key = "${row.type.key}/${game.id}"
+                if (row.type == RowType.ContinuePlaying) {
+                    ContinueCard(system, game, continueThumbs[game.id], { onOpenGame(game) }, Modifier.rememberFocus(memory, key), "card_$key")
+                    return@items
+                }
                 GameCard(
                     system = system,
                     game = game,
@@ -335,5 +341,36 @@ private fun EmptyHome(
                 }
             }
         }
+    }
+}
+
+/** Card largo de "Continuar jogando": miniatura do último save (ou a capa) + tempo jogado. */
+@Composable
+private fun ContinueCard(system: GameSystem, game: Game, thumbnail: String?, onClick: () -> Unit, cardModifier: Modifier, tag: String) {
+    val shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
+    Column(Modifier.width(240.dp)) {
+        androidx.tv.material3.Card(
+            onClick = onClick,
+            modifier = cardModifier.fillMaxWidth().aspectRatio(4f / 3f).testTag(tag),
+            shape = androidx.tv.material3.CardDefaults.shape(shape),
+            scale = androidx.tv.material3.CardDefaults.scale(focusedScale = 1.08f),
+            border = androidx.tv.material3.CardDefaults.border(
+                focusedBorder = androidx.tv.material3.Border(androidx.compose.foundation.BorderStroke(3.dp, MaterialTheme.colorScheme.primary), shape = shape),
+            ),
+            glow = androidx.tv.material3.CardDefaults.glow(focusedGlow = androidx.tv.material3.Glow(MaterialTheme.colorScheme.primary, 12.dp)),
+        ) {
+            if (thumbnail != null) {
+                AsyncImage(model = java.io.File(thumbnail), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            } else {
+                com.retroplay.ui.components.GameCover(system, game, game.title, Modifier.fillMaxSize())
+            }
+        }
+        Text(game.title, style = MaterialTheme.typography.bodyMedium, maxLines = 1, modifier = Modifier.padding(top = 10.dp))
+        val minutes = game.playTimeMs / 60_000
+        Text(
+            if (minutes < 60) stringResource(R.string.duration_minutes, minutes) else stringResource(R.string.duration_hours, minutes / 60, minutes % 60),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }

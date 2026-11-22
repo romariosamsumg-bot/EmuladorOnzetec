@@ -13,6 +13,8 @@ object GameLauncher {
     const val EXTRA_TITLE = "title"
     const val EXTRA_FILE_NAME = "file_name"
     const val EXTRA_GAME_ID = "game_id"
+    /** Save state a carregar ao abrir (0 = automático, 1–9 = manual; ausente = nenhum). */
+    const val EXTRA_LOAD_SLOT = "load_slot"
 
     /** @param romUri caminho de arquivo ou URI content:// (pendrive/SAF). */
     fun intent(
@@ -23,9 +25,11 @@ object GameLauncher {
         fileName: String,
         title: String,
         gameId: Long? = null,
+        loadSlot: Int? = null,
     ): Intent =
         Intent(context, GameActivity::class.java)
             .putExtra(EXTRA_GAME_ID, gameId ?: -1L)
+            .putExtra(EXTRA_LOAD_SLOT, loadSlot ?: -1)
             .putExtra(EXTRA_SYSTEM, system.id.value)
             .putExtra(EXTRA_CORE, core.id)
             .putExtra(EXTRA_ROM_PATH, romUri)

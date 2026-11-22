@@ -31,6 +31,7 @@ data class LaunchRequest(
     val fileName: String,
     val title: String,
     val gameId: Long?,
+    val loadSlot: Int? = null,
 )
 
 /**
@@ -50,9 +51,9 @@ class PlayLauncher(
     val coreDownload: StateFlow<CoreInstallState?> = _coreDownload.asStateFlow()
     private var pendingJob: Job? = null
 
-    fun play(game: Game) {
+    fun play(game: Game, loadSlot: Int? = null) {
         val system = game.systemId?.let { catalog.byId(it) } ?: return
-        play(LaunchRequest(system, system.defaultCore, game.uri, game.fileName, game.title, game.id))
+        play(LaunchRequest(system, system.defaultCore, game.uri, game.fileName, game.title, game.id, loadSlot))
     }
 
     fun play(request: LaunchRequest) {
@@ -90,5 +91,5 @@ fun LaunchGamesEffect(launcher: PlayLauncher) {
 }
 
 fun Context.startGame(r: LaunchRequest) {
-    startActivity(GameLauncher.intent(this, r.system, r.core, r.uri, r.fileName, r.title, r.gameId))
+    startActivity(GameLauncher.intent(this, r.system, r.core, r.uri, r.fileName, r.title, r.gameId, r.loadSlot))
 }

@@ -25,7 +25,7 @@ baixados sob demanda.
 | 3 | Biblioteca (Room, pasta Jogos, USB/SAF, varredura, CRC + DAT, capas) | ✅ |
 | 4 | UI streaming (hero, fileiras, detalhes, busca, páginas de console) | ✅ |
 | 5 | Transferência pelo celular (servidor local, QR code, PIN) | ✅ |
-| 6 | Menu de jogo e saves | ⏳ |
+| 6 | Menu de jogo e saves | ✅ |
 | 7 | Configurações completas | ⏳ |
 | 8 | Mega Drive, Master System e Neo Geo | ⏳ |
 | 9 | Polimento (perfis, backup, SMB, baseline profile) | ⏳ |
@@ -116,6 +116,21 @@ O banco de identificação (`data/src/main/assets/db/retroplay-dat.sqlite`) é g
   digita, sem diferenciar acentos.
 - **Consoles**: grade de capas por console com filtros A–Z, Recentes, Mais jogados e Favoritos.
 - Ao voltar de uma tela, o foco volta ao card de onde você saiu.
+
+## Durante o jogo
+
+- **Menu rápido**: botão **Voltar** do controle remoto, **Guide** do gamepad ou **Select+Start**.
+  O jogo fica congelado e mudo enquanto o menu está aberto. Opções: Continuar · Salvar estado
+  (espaços 1–9, com miniatura e data) · Carregar estado (inclui o automático) · Rewind ·
+  Voltar 5 segundos · Reiniciar · Inserir ficha (Neo Geo) · Acelerar (2x/4x/8x) · Shader (CRT,
+  LCD, Nítido) · Proporção (original ou pixel perfeito, no SNES e Mega Drive/Master System) ·
+  Controles · Opções do núcleo · Mostrar FPS · Screenshot (vai para Imagens/Retro Play) · Sair.
+- **Save automático** ao sair pelo menu e ao apertar Home na TV; ao voltar, o menu aparece.
+  Nos detalhes do jogo, **Continuar do save** abre direto no último save; "Continuar jogando"
+  na tela inicial mostra a miniatura do último save e o tempo jogado.
+- **Atalhos do gamepad**: Select+R1 acelera · Select+L1 (segurar) volta no tempo (com o rewind
+  ligado no menu) · Select+R2 / Select+L2 salvam / carregam rápido (espaço 9).
+- O botão **Home** da TV não pode ser capturado por apps Android; por isso o menu usa Voltar.
 
 ## Testando a emulação (Fase 2)
 

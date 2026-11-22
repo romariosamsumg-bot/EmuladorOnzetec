@@ -54,6 +54,12 @@ class HomeStreamingTest {
     @Inject
     lateinit var library: FakeLibraryRepository
 
+    @Inject
+    lateinit var saves: com.retroplay.data.saves.SaveStateStore
+
+    @Inject
+    lateinit var cores: com.retroplay.fakes.FakeCoreRepository
+
     private val snes = SystemRegistry.Ids.SNES
     private val md = SystemRegistry.Ids.MEGA_DRIVE
 
@@ -106,16 +112,17 @@ class HomeStreamingTest {
         press(Key.DirectionDown)
         // 1ª fileira: Continuar jogando → Super Mario World
         node("card_continue/1").assertIsFocused()
-        node("card_continue/1_title").assertDoesNotExist()
-        compose.mainClock.advanceTimeBy(700)
-        compose.waitForIdle()
-        node("card_continue/1_title").assertExists()
         press(Key.DirectionDown) // Favoritos → Sonic
         node("card_favorites/3").assertIsFocused()
         press(Key.DirectionDown) // Recentes: o mais novo primeiro (id 6)
         node("card_recent/6").assertIsFocused()
         press(Key.DirectionRight)
         node("card_recent/5").assertIsFocused()
+        // O nome aparece abaixo do card só depois de 600 ms de foco.
+        node("card_recent/5_title").assertDoesNotExist()
+        compose.mainClock.advanceTimeBy(700)
+        compose.waitForIdle()
+        node("card_recent/5_title").assertExists()
         screenshot("31_home_fileiras")
         press(Key.DirectionCenter)
         waitFor("screen_details")
@@ -212,6 +219,31 @@ class HomeStreamingTest {
         press(Key.DirectionCenter)
         waitFor("details_title")
         node("details_title").assertTextEquals("Sonic The Hedgehog")
+    }
+
+    @Test
+    fun continuar_do_save_abre_o_jogo_no_save() {
+        saves.write(snes, "Super Mario World.sfc", 0, byteArrayOf(1, 2, 3))
+        cores.complete()
+        waitFor("hero_play")
+        press(Key.DirectionDown)
+        node("card_continue/1").assertIsFocused()
+        press(Key.DirectionCenter)
+        waitFor("details_continue")
+        node("details_continue").assertIsFocused()
+        compose.onNodeWithTag("details_save").assertTextContains("save automático", substring = true)
+        screenshot("35_detalhes_continuar")
+        press(Key.DirectionCenter)
+        var intent: android.content.Intent? = null
+        repeat(100) {
+            org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+            intent = org.robolectric.Shadows.shadowOf(compose.activity).peekNextStartedActivity()
+            if (intent != null) return@repeat
+            Thread.sleep(20)
+        }
+        assertEquals(0, intent!!.getIntExtra(com.retroplay.feature.game.GameLauncher.EXTRA_LOAD_SLOT, -1))
+        assertEquals(1L, intent!!.getLongExtra(com.retroplay.feature.game.GameLauncher.EXTRA_GAME_ID, -1))
+        saves.delete(snes, "Super Mario World.sfc", 0)
     }
 
     @Test

@@ -20,13 +20,17 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import com.retroplay.data.saves.SaveStateStore
+import com.retroplay.domain.saves.SaveSlot
 import javax.inject.Inject
 
 /** null = carregando; Missing = o jogo não existe mais. */
 sealed interface DetailsState {
     data object Loading : DetailsState
     data object Missing : DetailsState
-    data class Ready(val game: Game, val system: GameSystem) : DetailsState
+    data class Ready(val game: Game, val system: GameSystem, val latestSave: SaveSlot? = null) : DetailsState
 }
 
 @HiltViewModel
@@ -35,6 +39,7 @@ class GameDetailsViewModel @Inject constructor(
     private val library: LibraryRepository,
     private val catalog: SystemCatalog,
     launcherFactory: PlayLauncher.Factory,
+    private val saves: SaveStateStore,
 ) : ViewModel() {
 
     private val gameId = savedStateHandle.toRoute<GameDetailsRoute>().gameId
@@ -43,7 +48,8 @@ class GameDetailsViewModel @Inject constructor(
     val state: StateFlow<DetailsState> = library.observeGame(gameId)
         .map { game ->
             val system = game?.systemId?.let { catalog.byId(it) }
-            if (game == null || system == null) DetailsState.Missing else DetailsState.Ready(game, system)
+            if (game == null || system == null) DetailsState.Missing
+            else DetailsState.Ready(game, system, withContext(Dispatchers.IO) { saves.latest(system.id, game.fileName) })
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DetailsState.Loading)
 
@@ -51,6 +57,9 @@ class GameDetailsViewModel @Inject constructor(
     val deleteResults = _deleted.receiveAsFlow()
 
     fun play(game: Game) = launcher.play(game)
+
+    /** Abre o jogo já no save mais recente. */
+    fun continueFrom(game: Game, slot: SaveSlot) = launcher.play(game, loadSlot = slot.slot)
 
     fun toggleFavorite(game: Game) {
         viewModelScope.launch { library.setFavorite(game.id, !game.isFavorite) }

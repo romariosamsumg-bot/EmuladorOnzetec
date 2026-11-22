@@ -223,4 +223,55 @@
     <string name="home_phone_title">Ou envie pelo celular</string>
     <string name="home_step_2">Copie seus jogos para a subpasta do console (Jogos/Super Nintendo, Jogos/Mega Drive…) por pendrive, gerenciador de arquivos ou app Downloader — ou envie pelo celular com o QR code ao lado.</string>
     <string name="phone_compact_hint">Leia com a câmera do celular (mesma rede Wi-Fi) ou abra:</string>
+
+    <!-- Fase 6: menu do jogo e saves -->
+    <string name="on">Ligado</string>
+    <string name="off">Desligado</string>
+    <string name="menu_resume">Continuar</string>
+    <string name="menu_save">Salvar estado</string>
+    <string name="menu_load">Carregar estado</string>
+    <string name="menu_rewind">Rewind (voltar no tempo)</string>
+    <string name="menu_rewind_back">Voltar 5 segundos</string>
+    <string name="menu_reset">Reiniciar</string>
+    <string name="menu_coin">Inserir ficha</string>
+    <string name="menu_speed">Acelerar</string>
+    <string name="menu_shader">Shader</string>
+    <string name="menu_aspect">Proporção</string>
+    <string name="menu_controls">Controles</string>
+    <string name="menu_core_options">Opções do núcleo</string>
+    <string name="menu_fps">Mostrar FPS</string>
+    <string name="menu_screenshot">Tirar screenshot</string>
+    <string name="menu_exit">Sair (salva automaticamente)</string>
+    <string name="menu_save_title">Escolha um espaço para salvar</string>
+    <string name="menu_load_title">Escolha o save para carregar</string>
+    <string name="shader_none">Nenhum</string>
+    <string name="shader_crt">CRT</string>
+    <string name="shader_lcd">LCD</string>
+    <string name="shader_sharp">Nítido</string>
+    <string name="aspect_original">Original (4:3)</string>
+    <string name="aspect_pixel">Pixel perfeito</string>
+    <string name="aspect_unavailable">Não disponível</string>
+    <string name="slot_empty">Vazio</string>
+    <string name="slot_auto">Automático</string>
+    <string name="slot_n">Espaço %1$d</string>
+    <string name="saved_slot">Salvo no espaço %1$d</string>
+    <string name="save_failed">Não foi possível salvar (espaço %1$d)</string>
+    <string name="loaded_slot">Save carregado</string>
+    <string name="load_failed">Não foi possível carregar o save</string>
+    <string name="screenshot_saved">Screenshot salva em Imagens/Retro Play</string>
+    <string name="screenshot_failed">Não foi possível tirar a screenshot</string>
+    <string name="speed_normal">Velocidade normal</string>
+    <string name="rewind_disabled_hint">Ative o rewind no menu (Voltar) para voltar no tempo</string>
+    <string name="controls_title">Botões do console → gamepad</string>
+    <string name="controls_hotkeys">Atalhos: Select+Start = menu · Select+R1 = acelerar · Select+L1 (segurar) = rewind · Select+R2/L2 = salvar/carregar rápido (espaço 9). No controle remoto: Voltar abre o menu.</string>
+    <string name="pad_bottom">Botão de baixo (A no Xbox, ✕ no PlayStation)</string>
+    <string name="pad_right">Botão da direita (B / ○)</string>
+    <string name="pad_left">Botão da esquerda (X / □)</string>
+    <string name="pad_top">Botão de cima (Y / △)</string>
+    <string name="core_options_note">Valores atuais do núcleo. A edição chega nas Configurações (Fase 7).</string>
+    <string name="core_options_empty">Este núcleo não informou opções.</string>
+    <string name="continue_from_save">Continuar do save</string>
+    <string name="play_from_start">Jogar do início</string>
+    <string name="details_save_auto">Último save automático: %1$s</string>
+    <string name="details_save_slot">Último save: %1$s (espaço %2$d)</string>
 </resources>
