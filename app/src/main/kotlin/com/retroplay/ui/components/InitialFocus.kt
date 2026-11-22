@@ -6,15 +6,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.focus.FocusRequester
 
 /**
- * Cria um [FocusRequester] que recebe o foco quando a tela entra na composição,
- * garantindo que nunca exista "foco perdido" ao abrir uma tela.
+ * Cria um [FocusRequester] que recebe o foco quando a tela fica pronta, garantindo
+ * que nunca exista "foco perdido" ao abrir uma tela.
+ *
+ * @param ready passe false enquanto o conteúdo ainda carrega (ex.: lista assíncrona);
+ *  o foco é pedido assim que virar true.
  */
 @Composable
-fun rememberInitialFocus(): FocusRequester {
+fun rememberInitialFocus(ready: Boolean = true): FocusRequester {
     val requester = remember { FocusRequester() }
-    LaunchedEffect(requester) {
-        // requestFocus pode falhar se o nó ainda não foi anexado; tenta no próximo frame.
-        runCatching { requester.requestFocus() }
+    LaunchedEffect(requester, ready) {
+        if (ready) runCatching { requester.requestFocus() }
     }
     return requester
 }

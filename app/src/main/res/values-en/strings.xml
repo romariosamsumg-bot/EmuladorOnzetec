@@ -30,4 +30,40 @@
     <string name="abi_unknown">unknown</string>
 
     <string name="coming_soon">Coming soon</string>
+
+    <!-- Fase 2: console, núcleos e jogo -->
+    <string name="ok">OK</string>
+    <string name="console_games">Games</string>
+    <string name="console_core_label">Core: %1$s</string>
+    <string name="core_state_not_installed">Not downloaded yet. It downloads automatically when you open the first game.</string>
+    <string name="core_download">Download core</string>
+    <string name="core_retry">Try again</string>
+    <string name="core_queued">Waiting for an internet connection…</string>
+    <string name="core_downloading">Downloading… %1$s of %2$s</string>
+    <string name="core_downloading_unknown">Downloading… %1$s</string>
+    <string name="core_installed">Ready · version %1$s · %2$s</string>
+    <string name="core_error_no_network">No internet. Check the TV Wi-Fi and try again.</string>
+    <string name="core_error_server">The core server did not respond as expected. Try again later.</string>
+    <string name="core_error_corrupted">The core download was corrupted. Try again.</string>
+    <string name="core_error_abi">This device is not compatible with the available cores.</string>
+    <string name="core_error_unknown">Could not download the core.</string>
+    <string name="error_no_space">Not enough space on the TV. Free some space (delete games or apps) and try again.</string>
+    <string name="test_rom_title">Retrô Play test ROM</string>
+    <string name="test_rom_subtitle">Free homebrew: the D-pad moves the square; buttons change the color and play sounds</string>
+    <string name="pick_file">Choose file…</string>
+    <string name="pick_file_subtitle">Open a ROM from a USB drive or the TV storage</string>
+    <string name="no_picker">This TV has no file picker. Copy ROMs to the folder shown below (via USB or adb).</string>
+    <string name="roms_hint">Tip: ROMs copied to %1$s show up here.</string>
+    <string name="import_ok">Game added.</string>
+    <string name="import_wrong_type">This file is not a game for this console.</string>
+    <string name="import_failed">Could not copy the file.</string>
+    <string name="rom_error_not_found">The game file was not found. It may have been deleted or the USB drive removed.</string>
+    <string name="rom_error_corrupted">The game file is corrupted or incomplete.</string>
+    <string name="rom_error_no_rom_inside">This .zip does not contain any game for this console.</string>
+    <string name="game_error_title">Could not open the game</string>
+    <string name="game_error_core_missing">The %1$s core is not installed. Go back and download it on the console page.</string>
+    <string name="game_error_load_library">The core could not be loaded. Delete it and download it again in settings.</string>
+    <string name="game_error_load_game">The core did not recognize this file. It may be corrupted or from another console.</string>
+    <string name="game_error_gl">This TV does not support the required graphics (OpenGL ES 2.0).</string>
+    <string name="game_error_generic">An unexpected error happened while starting the game.</string>
 </resources>

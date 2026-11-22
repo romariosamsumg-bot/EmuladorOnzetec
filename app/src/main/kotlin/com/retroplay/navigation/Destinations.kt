@@ -28,3 +28,6 @@ enum class TopLevelDestination(
     TRANSFER(TransferRoute, R.string.nav_transfer, UiR.drawable.ic_nav_transfer, "nav_transfer"),
     SETTINGS(SettingsRoute, R.string.nav_settings, UiR.drawable.ic_nav_settings, "nav_settings"),
 }
+
+/** Página de um console (lista de jogos e status do núcleo). */
+@Serializable data class ConsoleDetailRoute(val systemId: String)

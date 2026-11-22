@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,12 +47,14 @@ import androidx.tv.material3.ModalNavigationDrawer
 import androidx.tv.material3.NavigationDrawerItem
 import androidx.tv.material3.Text
 import androidx.tv.material3.rememberDrawerState
+import com.retroplay.feature.console.ConsoleEntry
 import com.retroplay.feature.consoles.ConsolesEntry
 import com.retroplay.feature.favorites.FavoritesScreen
 import com.retroplay.feature.home.HomeEntry
 import com.retroplay.feature.search.SearchScreen
 import com.retroplay.feature.settings.SettingsScreen
 import com.retroplay.feature.transfer.TransferScreen
+import com.retroplay.navigation.ConsoleDetailRoute
 import com.retroplay.navigation.ConsolesRoute
 import com.retroplay.navigation.FavoritesRoute
 import com.retroplay.navigation.HomeRoute
@@ -75,9 +78,14 @@ private val CollapsedDrawerWidth = 88.dp
 @Composable
 fun RetroPlayShell(navController: NavHostController = rememberNavController()) {
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val current = TopLevelDestination.entries.firstOrNull { dest ->
+    val topLevelMatch = TopLevelDestination.entries.firstOrNull { dest ->
         backStackEntry?.destination?.hierarchy?.any { it.hasRoute(dest.route::class) } == true
-    } ?: TopLevelDestination.HOME
+    }
+    // Em telas internas (ex.: página do console) o menu mantém selecionada a seção de origem.
+    var lastTopLevel by rememberSaveable { mutableStateOf(TopLevelDestination.HOME) }
+    if (topLevelMatch != null && topLevelMatch != lastTopLevel) lastTopLevel = topLevelMatch
+    val current = topLevelMatch ?: lastTopLevel
+    val isTopLevelScreen = topLevelMatch != null
 
     val itemRequesters = remember { TopLevelDestination.entries.associateWith { FocusRequester() } }
     val contentRequester = remember { FocusRequester() }
@@ -106,7 +114,7 @@ fun RetroPlayShell(navController: NavHostController = rememberNavController()) {
                     NavigationDrawerItem(
                         selected = dest == current,
                         onClick = {
-                            if (dest == current) contentRequester.requestFocus()
+                            if (dest == current && isTopLevelScreen) contentRequester.requestFocus()
                             else navController.navigateTopLevel(dest)
                         },
                         leadingContent = { Icon(painterResource(dest.iconRes), contentDescription = null) },
@@ -139,17 +147,19 @@ fun RetroPlayShell(navController: NavHostController = rememberNavController()) {
                 composable<HomeRoute> {
                     HomeEntry(
                         onOpenTransfer = { navController.navigateTopLevel(TopLevelDestination.TRANSFER) },
-                        onOpenConsole = { navController.navigateTopLevel(TopLevelDestination.CONSOLES) },
+                        onOpenConsole = { navController.navigate(ConsoleDetailRoute(it.id.value)) },
                     )
                 }
                 composable<SearchRoute> { SearchScreen() }
-                composable<ConsolesRoute> { ConsolesEntry(onOpenConsole = { /* Fase 4: página do console */ }) }
+                composable<ConsolesRoute> { ConsolesEntry(onOpenConsole = { navController.navigate(ConsoleDetailRoute(it.id.value)) }) }
+                composable<ConsoleDetailRoute> { ConsoleEntry() }
                 composable<FavoritesRoute> { FavoritesScreen() }
                 composable<TransferRoute> { TransferScreen() }
                 composable<SettingsRoute> { SettingsScreen() }
             }
             // Declarado DEPOIS do NavHost para ter prioridade sobre o "voltar" padrão dele.
-            BackHandler(enabled = !drawerHasFocus || current != TopLevelDestination.HOME) {
+            // Em telas internas o NavHost cuida do Voltar (volta para a tela anterior).
+            BackHandler(enabled = isTopLevelScreen && (!drawerHasFocus || current != TopLevelDestination.HOME)) {
                 if (!drawerHasFocus) {
                     itemRequesters.getValue(current).requestFocus()
                 } else {

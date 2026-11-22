@@ -8,6 +8,13 @@
         <item name="android:windowActivityTransitions">false</item>
     </style>
 
+    <!-- Tela de jogo: preta, sem barras, sem animação de janela. -->
+    <style name="Theme.RetroPlay.Game" parent="Theme.RetroPlay">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
     <!-- Splash curta (core-splashscreen): fica só enquanto a primeira tela é composta. -->
     <style name="Theme.RetroPlay.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/retro_background</item>
