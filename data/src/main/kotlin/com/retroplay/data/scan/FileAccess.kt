@@ -3,6 +3,8 @@ package com.retroplay.data.scan
 import android.content.ContentResolver
 import android.net.Uri
 import android.provider.DocumentsContract
+import com.retroplay.data.smb.SmbAccess
+import com.retroplay.data.smb.SmbLocation
 import com.retroplay.domain.library.GameSource
 import java.io.File
 import java.io.FileInputStream
@@ -20,21 +22,32 @@ data class FoundFile(
     val parents: List<String>,
 )
 
-/** Abre arquivos de caminhos comuns ou de URIs do seletor do sistema (SAF), de forma uniforme. */
-class FileAccess(private val resolver: ContentResolver) {
+/**
+ * Abre arquivos de caminhos comuns, de URIs do seletor do sistema (SAF) e de pastas da rede
+ * (smb://), de forma uniforme.
+ */
+class FileAccess(private val resolver: ContentResolver, private val smb: SmbAccess? = null) {
 
-    fun openStream(uri: String): InputStream =
-        if (isDocument(uri)) resolver.openInputStream(Uri.parse(uri)) ?: error("Não foi possível abrir $uri")
-        else File(uri).inputStream()
+    private fun smb() = smb ?: throw IOException("Pasta da rede indisponível")
+
+    fun openStream(uri: String): InputStream = when {
+        SmbLocation.isSmb(uri) -> smb().openStream(uri)
+        isDocument(uri) -> resolver.openInputStream(Uri.parse(uri)) ?: error("Não foi possível abrir $uri")
+        else -> File(uri).inputStream()
+    }
 
     /** Apaga o arquivo. Lança [SecurityException] se não houver permissão de escrita. */
-    fun delete(uri: String): Boolean =
-        if (isDocument(uri)) DocumentsContract.deleteDocument(resolver, Uri.parse(uri))
-        else File(uri).let { !it.exists() || it.delete() }
+    fun delete(uri: String): Boolean = when {
+        SmbLocation.isSmb(uri) -> smb().delete(uri)
+        isDocument(uri) -> DocumentsContract.deleteDocument(resolver, Uri.parse(uri))
+        else -> File(uri).let { !it.exists() || it.delete() }
+    }
 
     /** Canal com posicionamento: permite ler só o índice de um .zip/.7z grande. */
     fun openChannel(uri: String): SeekableByteChannel =
-        if (isDocument(uri)) {
+        if (SmbLocation.isSmb(uri)) {
+            smb().openChannel(uri)
+        } else if (isDocument(uri)) {
             val pfd = resolver.openFileDescriptor(Uri.parse(uri), "r") ?: error("Não foi possível abrir $uri")
             val stream = FileInputStream(pfd.fileDescriptor)
             ClosingChannel(stream.channel) { stream.close(); pfd.close() }
@@ -48,7 +61,9 @@ class FileAccess(private val resolver: ContentResolver) {
      * para que a varredura NÃO apague os jogos dessa pasta.
      */
     fun walk(rootUri: String, source: GameSource, maxDepth: Int = 6): Sequence<FoundFile> =
-        if (source == GameSource.DOCUMENT) {
+        if (source == GameSource.SMB) {
+            smb().walk(rootUri, maxDepth)
+        } else if (source == GameSource.DOCUMENT) {
             val tree = Uri.parse(rootUri)
             val probe = DocumentsContract.buildChildDocumentsUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
             resolver.query(probe, arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID), null, null, null)?.close()
@@ -111,6 +126,9 @@ class FileAccess(private val resolver: ContentResolver) {
 
     companion object {
         fun isDocument(uri: String) = uri.startsWith("content://")
+
+        /** O núcleo precisa de um caminho de arquivo: SAF e rede são copiados para o cache. */
+        fun needsCopy(uri: String) = isDocument(uri) || SmbLocation.isSmb(uri)
     }
 }
 

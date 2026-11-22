@@ -72,6 +72,10 @@ object AppSettings {
     val COVERS_DOWNLOAD = Bool("net.covers", true)
     val COVERS_WIFI_ONLY = Bool("net.covers_wifi_only", false)
 
+    // ---- Perfis
+    val ACTIVE_PROFILE = Text("profile.active", "1")
+    val PROFILE_ASK = Bool("profile.ask", true)
+
     // ---- Controle parental
     val PARENTAL_PIN = Text("parental.pin", "")
     val PARENTAL_SETTINGS = Bool("parental.settings", false)

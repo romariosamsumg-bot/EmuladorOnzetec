@@ -36,6 +36,8 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
+    // Pasta da rede (SMB/compartilhamento do Windows).
+    implementation(libs.smbj)
     implementation(libs.okhttp)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
@@ -50,6 +52,7 @@ dependencies {
     implementation(libs.hilt.work)
     ksp(libs.hilt.work.compiler)
 
+    testImplementation(libs.work.testing)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockwebserver)
@@ -62,4 +65,5 @@ dependencies {
 tasks.withType<Test>().configureEach {
     systemProperty("retroplay.network", providers.gradleProperty("retroplay.network").getOrElse("false"))
     systemProperty("retroplay.e2e", providers.gradleProperty("retroplay.e2e").getOrElse("false"))
+    systemProperty("retroplay.smb", providers.gradleProperty("retroplay.smb").getOrElse("false"))
 }

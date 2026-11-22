@@ -237,6 +237,13 @@ class SettingsPane(
     }
 
     private fun LazyListScope.ui() {
+        item(key = "profiles") {
+            val active by vm.activeProfile.collectAsStateWithLifecycle()
+            SettingRow(stringResource(R.string.set_profiles), stringResource(R.string.set_profiles_desc), active?.name, "ui_profiles") {
+                openDialog { ProfilesHost() }
+            }
+        }
+        bool(AppSettings.PROFILE_ASK, R.string.set_profile_ask, R.string.set_profile_ask_desc)
         choice(AppSettings.LANGUAGE, R.string.set_language, R.string.set_language_desc)
         choice(AppSettings.THEME, R.string.set_theme, R.string.set_theme_desc)
         choice(AppSettings.ACCENT, R.string.set_accent, R.string.set_accent_desc)
@@ -278,6 +285,11 @@ class SettingsPane(
                 }
             }
         }
+        item(key = "smb") {
+            SettingRow(stringResource(R.string.set_smb), stringResource(R.string.set_smb_desc), null, "net_smb") {
+                openDialog { SmbDialog(onSubmit = { form -> vm.addSmbFolder(form) { ok -> if (ok) closeDialog() } }, onDismiss = closeDialog) }
+            }
+        }
         bool(AppSettings.COVERS_DOWNLOAD, R.string.set_covers, R.string.set_covers_desc)
         bool(AppSettings.COVERS_WIFI_ONLY, R.string.set_covers_wifi, R.string.set_covers_wifi_desc)
     }
@@ -301,6 +313,39 @@ class SettingsPane(
             }
         }
         item(key = "clear") { SettingRow(stringResource(R.string.set_clear_cache), stringResource(R.string.set_clear_cache_desc), null, "storage_clear") { vm.clearCache() } }
+        item(key = "backup_h") { Header(stringResource(R.string.backup_header)) }
+        item(key = "backup") {
+            val launcher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri -> uri?.let(vm::exportBackup) }
+            SettingRow(stringResource(R.string.set_backup), stringResource(R.string.set_backup_desc), null, "backup_export") {
+                runCatching { launcher.launch("retroplay-backup-${java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())}.zip") }
+                    .onFailure { vm.message(R.string.backup_failed) }
+            }
+        }
+        item(key = "restore") {
+            val title = stringResource(R.string.set_restore)
+            val confirm = stringResource(R.string.restore_confirm)
+            val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(vm::restoreBackup) }
+            SettingRow(title, stringResource(R.string.set_restore_desc), null, "backup_restore") {
+                openDialog {
+                    ConfirmDialog(title, confirm, onConfirm = {
+                        closeDialog()
+                        runCatching { launcher.launch(arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream")) }.onFailure { vm.message(R.string.backup_failed) }
+                    }, onDismiss = closeDialog)
+                }
+            }
+        }
+        item(key = "export_settings") {
+            val launcher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri -> uri?.let(vm::exportSettings) }
+            SettingRow(stringResource(R.string.set_export_settings), stringResource(R.string.set_export_settings_desc), null, "settings_export") {
+                runCatching { launcher.launch("retroplay-configuracoes.json") }.onFailure { vm.message(R.string.backup_failed) }
+            }
+        }
+        item(key = "import_settings") {
+            val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(vm::importSettings) }
+            SettingRow(stringResource(R.string.set_import_settings), stringResource(R.string.set_import_settings_desc), null, "settings_import") {
+                runCatching { launcher.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }.onFailure { vm.message(R.string.backup_failed) }
+            }
+        }
     }
 
     private fun LazyListScope.parental() {
@@ -675,6 +720,41 @@ class SettingsPane(
         }
     }
 
+    // ------------------------------------------------------------------ perfis
+
+    private enum class ProfileStep { LIST, NEW, RENAME, DELETE }
+
+    @Composable
+    private fun ProfilesHost() {
+        val profiles by vm.profiles.collectAsStateWithLifecycle()
+        val active by vm.activeProfile.collectAsStateWithLifecycle()
+        var step by remember { mutableStateOf(ProfileStep.LIST) }
+        val current = active ?: return
+        when (step) {
+            ProfileStep.NEW -> TextInputDialog(stringResource(R.string.profile_name_title), "", onSave = { vm.createProfile(it); step = ProfileStep.LIST }, onDismiss = { step = ProfileStep.LIST }, maxLength = 20)
+            ProfileStep.RENAME -> TextInputDialog(stringResource(R.string.profile_name_title), current.name, onSave = { vm.renameActiveProfile(it); step = ProfileStep.LIST }, onDismiss = { step = ProfileStep.LIST }, maxLength = 20)
+            ProfileStep.DELETE -> ConfirmDialog(
+                stringResource(R.string.profile_delete), stringResource(R.string.profile_delete_confirm, current.name),
+                onConfirm = { vm.deleteActiveProfile(); step = ProfileStep.LIST }, onDismiss = { step = ProfileStep.LIST },
+            )
+            ProfileStep.LIST -> {
+                val first = rememberInitialFocus()
+                SettingsDialog("profiles_dialog", stringResource(R.string.set_profiles), closeDialog, stringResource(R.string.set_profiles_desc)) {
+                    profiles.forEach { p ->
+                        item(key = "p${p.id}") {
+                            DialogOption(p.name, "profile_${p.id}", selected = p.id == current.id, modifier = if (p.id == current.id) Modifier.focusRequester(first) else Modifier) {
+                                vm.switchProfile(p.id)
+                            }
+                        }
+                    }
+                    item(key = "new") { DialogOption(stringResource(R.string.profile_new), "profile_new") { step = ProfileStep.NEW } }
+                    item(key = "rename") { DialogOption(stringResource(R.string.profile_rename), "profile_rename") { step = ProfileStep.RENAME } }
+                    if (profiles.size > 1) item(key = "delete") { DialogOption(stringResource(R.string.profile_delete), "profile_delete") { step = ProfileStep.DELETE } }
+                }
+            }
+        }
+    }
+
     // ------------------------------------------------------------------ biblioteca
 
     @Composable
@@ -830,6 +910,10 @@ Apache Commons Compress — Apache 2.0
 XZ for Java — domínio público (0BSD)
 NanoHTTPD — BSD 3-Clause
 ZXing — Apache 2.0
+smbj, asn-one (pasta da rede) — Apache 2.0
+Bouncy Castle — MIT
+MBassador — MIT
+SLF4J — MIT
 
 Bancos de dados: No-Intro e libretro-database (metadados), FBNeo DAT.
 Capas: projeto libretro-thumbnails."""

@@ -46,8 +46,11 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun saveStates(@ApplicationContext context: Context): com.retroplay.data.saves.SaveStateStore =
-        com.retroplay.data.saves.SaveStateStore(File(context.filesDir, "states"))
+    fun saveStates(@ApplicationContext context: Context, cache: com.retroplay.data.settings.SettingsCache): com.retroplay.data.saves.SaveStateStore =
+        // Saves do perfil ativo (o processo do jogo usa forProfile com o perfil lido ao abrir).
+        com.retroplay.data.saves.SaveStateStore(File(context.filesDir, "states")) {
+            cache.latest.value.value(com.retroplay.domain.settings.AppSettings.ACTIVE_PROFILE).toLongOrNull() ?: 1L
+        }
 
     @Provides
     @Singleton
@@ -91,4 +94,12 @@ object SettingsModule {
     @Singleton
     fun coreOptionsCache(@ApplicationContext context: Context) =
         com.retroplay.data.settings.CoreOptionsCache(File(context.filesDir, "coreoptions"))
+
+    @Provides
+    @Singleton
+    fun backupManager(
+        @ApplicationContext context: Context,
+        db: com.retroplay.data.library.LibraryDatabase,
+        settings: com.retroplay.domain.settings.SettingsRepository,
+    ) = com.retroplay.data.backup.BackupManager(context.filesDir, db, settings)
 }

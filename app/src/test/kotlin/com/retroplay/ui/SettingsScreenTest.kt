@@ -18,6 +18,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performClick
+import kotlinx.coroutines.flow.first
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.retroplay.MainActivity
 import com.retroplay.domain.settings.AppSettings
@@ -55,6 +58,9 @@ class SettingsScreenTest {
 
     @Inject
     lateinit var settings: SettingsRepository
+
+    @Inject
+    lateinit var profiles: com.retroplay.domain.profile.ProfileRepository
 
     @Before
     fun setUp() {
@@ -262,6 +268,38 @@ class SettingsScreenTest {
         screenshot("05_neogeo_options")
         // O Mega Drive não foi afetado.
         assertEquals(false, runBlocking { settings.current() }.value(com.retroplay.domain.settings.ConsoleSettings.NEOGEO_FREEPLAY, SystemRegistry.Ids.MEGA_DRIVE))
+    }
+
+    @Test
+    fun criar_perfil_pelo_dialogo_e_trocar() {
+        openSettings()
+        press(Key.DirectionDown, 7)
+        node("cat_INTERFACE").assertIsFocused()
+        press(Key.DirectionRight)
+        node("ui_profiles").assertIsFocused()
+        merged("ui_profiles").assertTextContains("Jogador 1")
+        press(Key.DirectionCenter)
+        waitFor("profiles_dialog")
+        node("profile_1").assertIsFocused()
+        press(Key.DirectionDown)
+        node("profile_new").assertIsFocused()
+        press(Key.DirectionCenter)
+        waitFor("text_dialog_input")
+        node("tkey_A").assertIsFocused()
+        press(Key.DirectionCenter) // A
+        press(Key.DirectionDown); press(Key.DirectionRight, 4); press(Key.DirectionCenter) // N
+        press(Key.DirectionUp); press(Key.DirectionLeft, 4); press(Key.DirectionCenter) // A
+        repeat(8) { if (compose.onAllNodes(hasTestTag("text_input_save") and androidx.compose.ui.test.isFocused()).fetchSemanticsNodes().isEmpty()) press(Key.DirectionDown) }
+        node("text_input_save").assertIsFocused()
+        press(Key.DirectionCenter)
+        compose.waitUntil(5_000) { runBlocking { profiles.profiles.first() }.size == 2 }
+        val ana = runBlocking { profiles.profiles.first() }.last()
+        assertEquals("Ana", ana.name)
+        waitSetting { runBlocking { profiles.activeId() } == ana.id }
+        compose.waitUntil(5_000) {
+            compose.onAllNodes(hasTestTag("profile_${ana.id}") and androidx.compose.ui.test.isSelected().not()).fetchSemanticsNodes().isNotEmpty()
+        }
+        screenshot("06_profiles")
     }
 
     private fun screenshot(name: String) {

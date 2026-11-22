@@ -39,14 +39,8 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.TextFieldValue
 import com.retroplay.feature.settings.PinDialog
+import com.retroplay.feature.settings.TextInputDialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Button
@@ -334,31 +328,14 @@ private fun OptionsDialog(
     }
 }
 
-/** Renomear: campo de texto (abre o teclado da TV) + salvar / voltar ao nome original. */
+/** Renomear: teclado em grade + salvar / voltar ao nome original. */
 @Composable
 private fun RenameDialog(current: String, onSave: (String?) -> Unit, onDismiss: () -> Unit) {
-    var text by remember { mutableStateOf(TextFieldValue(current, TextRange(current.length))) }
-    Dialog(onDismissRequest = onDismiss) {
-        val field = rememberInitialFocus()
-        DialogColumn("rename_dialog") {
-            Text(stringResource(R.string.rename_title), style = MaterialTheme.typography.headlineSmall)
-            BasicTextField(
-                value = text,
-                onValueChange = { text = it },
-                singleLine = true,
-                textStyle = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { onSave(text.text) }),
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(14.dp).focusRequester(field).testTag("rename_field"),
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                Button(onClick = { onSave(text.text) }, modifier = Modifier.testTag("rename_save")) { Text(stringResource(R.string.save)) }
-                OutlinedButton(onClick = { onSave(null) }, modifier = Modifier.testTag("rename_reset")) { Text(stringResource(R.string.rename_reset)) }
-            }
-        }
-    }
+    TextInputDialog(
+        stringResource(R.string.rename_title), current,
+        onSave = { onSave(it) }, onDismiss = onDismiss, maxLength = 60,
+        extraAction = stringResource(R.string.rename_reset) to { onSave(null) },
+    )
 }
 
 private fun coverLabel(type: CoverType?) = when (type) {

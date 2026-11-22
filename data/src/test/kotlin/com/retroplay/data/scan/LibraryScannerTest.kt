@@ -68,7 +68,8 @@ class LibraryScannerTest {
         return zip("$folder/$setName.zip", files)
     }
 
-    private suspend fun games() = db.games().observeAll().first()
+    private suspend fun games() = db.games().observeAll(1).first().map { it.game }
+    private suspend fun gamesWithStats() = db.games().observeAll(1).first()
 
     @Test
     fun `identifica snes mega drive neo geo e ignora o que nao e jogo`() = runTest {
@@ -147,7 +148,9 @@ class LibraryScannerTest {
     fun `varredura incremental adiciona altera e remove`() = runTest {
         val mario = file("Super Nintendo/mario.sfc", CrcForge.fake("smw", 0xB19ED489L))
         scanner.scan()
-        db.games().upsert(listOf(games().single().copy(isFavorite = true, playCount = 3)))
+        val id = games().single().id
+        db.stats().setFavorite(1, id, true)
+        repeat(3) { db.stats().recordPlayStarted(1, id, 100) }
 
         // Sem mudanças: nada é reidentificado.
         val again = scanner.scan()
@@ -158,10 +161,13 @@ class LibraryScannerTest {
         mario.setLastModified(mario.lastModified() + 10_000)
         val changed = scanner.scan()
         assertEquals(1, changed.updated)
-        val updated = games().single()
-        assertEquals(IdentStatus.UNIDENTIFIED.name, updated.status)
-        assertTrue(updated.isFavorite)
+        val updated = gamesWithStats().single()
+        assertEquals(IdentStatus.UNIDENTIFIED.name, updated.game.status)
+        assertEquals("snes/mario", updated.game.gameKey)
+        assertEquals(true, updated.favorite)
         assertEquals(3, updated.playCount)
+        // Perfil 2 não vê o favorito do perfil 1.
+        assertEquals(null, db.games().observeAll(2).first().single().favorite)
 
         // Arquivo apagado: sai da biblioteca.
         mario.delete()
@@ -173,11 +179,11 @@ class LibraryScannerTest {
     fun `arquivo corrompido pede o console e a escolha e lembrada`() = runTest {
         file("quebrado.zip", ByteArray(200) { 9 })
         scanner.scan()
-        val broken = db.games().observeNeedsSystem().first().single()
+        val broken = db.games().observeNeedsSystem(1).first().single().game
         assertTrue(broken.corrupted)
         assertNull(broken.system)
 
-        db.games().assignSystem(broken.id, "megadrive")
+        db.games().assignSystem(broken.id, "megadrive", "megadrive/quebrado")
         scanner.scan()
         val after = db.games().byId(broken.id)!!
         assertEquals("megadrive", after.system)
@@ -190,7 +196,7 @@ class LibraryScannerTest {
         file("Super Nintendo/mario.sfc", CrcForge.fake("smw", 0xB19ED489L))
         file("outra/Super Mario World (U).smc", CrcForge.fake("smw2", 0xB19ED489L))
         scanner.scan()
-        val dups = db.games().observeDuplicates().first()
+        val dups = db.games().observeDuplicates(1).first().map { it.game }
         assertEquals(2, dups.size)
         val id = dups.first().id
         db.games().rename(id, "Meu Mario")

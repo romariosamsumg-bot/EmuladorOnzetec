@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.baselineprofile)
 }
 
 android {
@@ -67,6 +68,7 @@ android {
 }
 
 dependencies {
+    baselineProfile(project(":baselineprofile"))
     implementation(project(":domain"))
     implementation(project(":core:common"))
     implementation(project(":core:ui"))

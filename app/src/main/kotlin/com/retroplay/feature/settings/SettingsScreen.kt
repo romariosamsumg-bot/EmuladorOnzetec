@@ -65,6 +65,10 @@ fun SettingsEntry(
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
     }
+    val resources = androidx.compose.ui.platform.LocalResources.current
+    LaunchedEffect(viewModel) {
+        viewModel.formattedMessages.collect { (res, args) -> Toast.makeText(context, resources.getString(res, *args.toTypedArray()), Toast.LENGTH_LONG).show() }
+    }
     val snap = snapshot ?: run { Box(Modifier.fillMaxSize().testTag("screen_settings")); return }
     var unlocked by rememberSaveable { mutableStateOf(false) }
     val pin = snap.value(AppSettings.PARENTAL_PIN)

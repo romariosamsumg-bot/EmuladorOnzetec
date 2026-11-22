@@ -18,6 +18,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.map
 import javax.inject.Singleton
 
 @Module
@@ -30,7 +31,8 @@ object LibraryModule {
         Room.databaseBuilder(context, LibraryDatabase::class.java, "library.db")
             // O jogo roda no processo ":game": mantém os dois processos sincronizados.
             .enableMultiInstanceInvalidation()
-            .addMigrations(com.retroplay.data.library.MIGRATION_1_2)
+            .addMigrations(com.retroplay.data.library.MIGRATION_1_2, com.retroplay.data.library.MIGRATION_2_3)
+            .addCallback(com.retroplay.data.library.CREATE_DEFAULT_PROFILE)
             .build()
 
     @Provides
@@ -39,7 +41,15 @@ object LibraryModule {
 
     @Provides
     @Singleton
-    fun fileAccess(@ApplicationContext context: Context): FileAccess = FileAccess(context.contentResolver)
+    fun fileAccess(@ApplicationContext context: Context, smb: com.retroplay.data.smb.SmbAccess): FileAccess = FileAccess(context.contentResolver, smb)
+
+    @Provides
+    @Singleton
+    fun smbCredentials(@ApplicationContext context: Context) = com.retroplay.data.smb.SmbCredentialStore(context)
+
+    @Provides
+    @Singleton
+    fun smbAccess(store: com.retroplay.data.smb.SmbCredentialStore) = com.retroplay.data.smb.SmbAccess(store::get)
 
     @Provides
     @Singleton
@@ -62,7 +72,12 @@ object LibraryModule {
         db: LibraryDatabase,
         gamesFolder: GamesFolderManager,
         files: FileAccess,
-    ): RoomLibraryRepository = RoomLibraryRepository(db, WorkManager.getInstance(context), gamesFolder, files)
+        settings: com.retroplay.domain.settings.SettingsRepository,
+    ): RoomLibraryRepository = RoomLibraryRepository(
+        db, WorkManager.getInstance(context), gamesFolder, files,
+        activeProfile = settings.snapshots.map { it.value(com.retroplay.domain.settings.AppSettings.ACTIVE_PROFILE).toLongOrNull() ?: 1L },
+    )
+
 }
 
 /** Separado para que os testes de UI troquem por um repositório falso. */
@@ -72,4 +87,18 @@ object LibraryRepositoryModule {
     @Provides
     @Singleton
     fun libraryRepository(impl: RoomLibraryRepository): LibraryRepository = impl
+}
+
+/** Separado para que os testes de UI troquem por perfis em memória. */
+@Module
+@InstallIn(SingletonComponent::class)
+object ProfileModule {
+    @Provides
+    @Singleton
+    fun profileRepository(
+        @ApplicationContext context: Context,
+        db: LibraryDatabase,
+        settings: com.retroplay.domain.settings.SettingsRepository,
+    ): com.retroplay.domain.profile.ProfileRepository =
+        com.retroplay.data.library.RoomProfileRepository(db, settings, listOf(java.io.File(context.filesDir, "states"), java.io.File(context.filesDir, "saves")))
 }

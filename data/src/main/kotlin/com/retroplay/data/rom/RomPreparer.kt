@@ -38,7 +38,7 @@ class RomPreparer(
     fun prepare(uri: String, fileName: String, acceptedExtensions: Set<String>, extractArchives: Boolean = true): File {
         val ext = fileName.substringAfterLast('.', "").lowercase()
         val outDir = File(cacheDir, "rom-run").apply { mkdirs() }
-        val local: File = if (FileAccess.isDocument(uri)) {
+        val local: File = if (FileAccess.needsCopy(uri)) {
             // Copia do pendrive/SAF para o cache (o núcleo precisa de um caminho de arquivo).
             outDir.listFiles()?.forEach { it.delete() }
             val dest = File(outDir, safeName(fileName))
@@ -123,7 +123,7 @@ class RomPreparer(
      */
     fun prepareArcade(uri: String, fileName: String, companions: List<RomCompanion> = emptyList()): File {
         val all = listOf(RomCompanion(uri, fileName)) + companions
-        if (all.none { FileAccess.isDocument(it.uri) }) {
+        if (all.none { FileAccess.needsCopy(it.uri) }) {
             val main = File(uri)
             if (!main.isFile) throw RomPrepareException(RomPrepareException.Reason.NOT_FOUND, "Arquivo não encontrado: $fileName")
             if (companions.all { File(it.uri).parentFile?.canonicalPath == main.parentFile?.canonicalPath }) return main
@@ -142,7 +142,7 @@ class RomPreparer(
         val dest = File(systemDir, "fbneo/" + safeName(fileName))
         dest.parentFile?.mkdirs()
         val src = File(uri)
-        val upToDate = !FileAccess.isDocument(uri) && java.nio.file.Files.isSymbolicLink(dest.toPath()) &&
+        val upToDate = !FileAccess.needsCopy(uri) && java.nio.file.Files.isSymbolicLink(dest.toPath()) &&
             runCatching { java.nio.file.Files.readSymbolicLink(dest.toPath()).toFile().canonicalPath == src.canonicalPath }.getOrDefault(false)
         if (!upToDate) {
             java.nio.file.Files.deleteIfExists(dest.toPath())
@@ -164,7 +164,7 @@ class RomPreparer(
 
     /** Arquivo comum: link simbólico (sem gastar espaço); pendrive/SAF ou falha do link: cópia. */
     private fun stage(uri: String, dest: File) {
-        if (!FileAccess.isDocument(uri)) {
+        if (!FileAccess.needsCopy(uri)) {
             val src = File(uri)
             if (!src.isFile) throw RomPrepareException(RomPrepareException.Reason.NOT_FOUND, "Arquivo não encontrado: ${src.name}")
             val linked = runCatching { java.nio.file.Files.createSymbolicLink(dest.toPath(), src.toPath()) }.isSuccess

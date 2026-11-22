@@ -11,6 +11,7 @@ import com.retroplay.domain.library.IdentStatus
 import com.retroplay.domain.library.IdentifyOutcome
 import com.retroplay.domain.library.RomIdentifier
 import com.retroplay.domain.library.RomsetStatus
+import com.retroplay.domain.settings.GameKey
 import com.retroplay.domain.library.ScanTarget
 import com.retroplay.domain.system.SystemCatalog
 import com.retroplay.domain.system.SystemDetector
@@ -144,25 +145,23 @@ class LibraryScanner(
             romsetStatus = id.romsetStatus.name,
             missingFiles = id.missingFiles,
             corrupted = false,
-            isFavorite = old?.isFavorite ?: false,
-            playCount = old?.playCount ?: 0,
-            lastPlayedAt = old?.lastPlayedAt,
             addedAt = old?.addedAt ?: clock(),
-            playTimeMs = old?.playTimeMs ?: 0,
+            gameKey = id.system?.let { GameKey.of(it, file.name) },
         )
     }
 
     private fun corruptedEntity(folder: FolderEntity, file: FoundFile, old: GameEntity?): GameEntity {
         val ext = SystemDetector.extensionOf(file.name)
+        val system = old?.userSystem ?: old?.system ?: if (ext == "bin") "megadrive" else null
         return GameEntity(
             id = old?.id ?: 0, uri = file.uri, source = folder.source, folderId = folder.id, fileName = file.name,
             sizeBytes = file.size, lastModified = file.lastModified,
-            system = old?.userSystem ?: old?.system ?: if (ext == "bin") "megadrive" else null,
+            system = system,
             userSystem = old?.userSystem, title = file.name.substringBeforeLast('.'), customTitle = old?.customTitle, datName = null, region = null,
             year = null, developer = null, genre = null, players = null, thumbs = 0, thumbName = null, crc = null,
             status = (if (old?.userSystem != null) IdentStatus.UNIDENTIFIED else IdentStatus.NEEDS_SYSTEM).name,
             romsetStatus = RomsetStatus.NOT_APPLICABLE.name, missingFiles = 0, corrupted = true,
-            isFavorite = old?.isFavorite ?: false, playCount = old?.playCount ?: 0, addedAt = old?.addedAt ?: clock(),
+            addedAt = old?.addedAt ?: clock(), gameKey = system?.let { GameKey.of(SystemId(it), file.name) },
         )
     }
 

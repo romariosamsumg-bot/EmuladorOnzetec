@@ -106,5 +106,8 @@ fun LaunchGamesEffect(launcher: PlayLauncher) {
 }
 
 fun Context.startGame(r: LaunchRequest) {
+    // O jogo roda em outro processo: libera as capas da memória para sobrar RAM ao emulador
+    // (numa TV de 2 GB isso faz diferença). O cache em disco fica, e as capas voltam rápido.
+    runCatching { coil3.SingletonImageLoader.get(this).memoryCache?.clear() }
     startActivity(GameLauncher.intent(this, r.system, r.core, r.uri, r.fileName, r.title, r.gameId, r.loadSlot))
 }

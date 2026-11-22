@@ -295,4 +295,56 @@
         <item quantity="many">%1$d personalizadas</item>
         <item quantity="other">%1$d personalizadas</item>
     </plurals>
+    <!-- Perfis -->
+    <string name="set_profiles">Perfis</string>
+    <string name="set_profiles_desc">Cada perfil tem favoritos, histórico e saves próprios.</string>
+    <string name="profile_new">Novo perfil</string>
+    <string name="profile_rename">Renomear perfil atual</string>
+    <string name="profile_delete">Excluir perfil atual</string>
+    <string name="profile_delete_confirm">Excluir o perfil %1$s? Os favoritos, o histórico e os saves dele serão apagados. Os jogos continuam.</string>
+    <string name="profile_name_title">Nome do perfil</string>
+    <string name="set_profile_ask">Perguntar o perfil ao abrir</string>
+    <string name="set_profile_ask_desc">Com mais de um perfil, mostra "Quem vai jogar?" ao abrir o app.</string>
+    <string name="who_plays">Quem vai jogar?</string>
+    <!-- Backup -->
+    <string name="backup_header">Backup</string>
+    <string name="set_backup">Fazer backup</string>
+    <string name="set_backup_desc">Saves, configurações, perfis e favoritos num .zip (ex.: no pendrive).</string>
+    <string name="set_restore">Restaurar backup</string>
+    <string name="set_restore_desc">Traz de volta um backup. Saves com o mesmo nome são substituídos.</string>
+    <string name="restore_confirm">Restaurar este backup? As configurações atuais serão trocadas pelas do backup e os saves com o mesmo nome serão substituídos.</string>
+    <string name="set_export_settings">Exportar configurações</string>
+    <string name="set_export_settings_desc">Só as configurações, num arquivo .json.</string>
+    <string name="set_import_settings">Importar configurações</string>
+    <string name="set_import_settings_desc">Troca as configurações pelas de um arquivo exportado.</string>
+    <string name="backup_done">Backup salvo: %1$d arquivos de save, %2$d perfis.</string>
+    <string name="restore_done">Backup restaurado: %1$d arquivos de save, %2$d perfis.</string>
+    <string name="settings_exported">Configurações exportadas.</string>
+    <string name="settings_imported">Configurações importadas.</string>
+    <string name="backup_invalid">Este arquivo não é um backup do Retrô Play.</string>
+    <string name="backup_newer">Este backup é de uma versão mais nova do app. Atualize o app primeiro.</string>
+    <string name="backup_failed">Não foi possível ler ou gravar o arquivo.</string>
+    <!-- Pasta da rede (SMB) -->
+    <string name="set_smb">Adicionar pasta da rede (SMB)</string>
+    <string name="set_smb_desc">Jogos num computador, NAS ou roteador com pendrive, na mesma rede.</string>
+    <string name="smb_title">Pasta da rede</string>
+    <string name="smb_host">Servidor</string>
+    <string name="smb_host_hint">Nome ou IP, ex.: 192.168.0.10</string>
+    <string name="smb_share">Compartilhamento</string>
+    <string name="smb_share_hint">Nome da pasta compartilhada, ex.: Jogos</string>
+    <string name="smb_path">Subpasta (opcional)</string>
+    <string name="smb_user">Usuário</string>
+    <string name="smb_user_hint">Vazio = convidado</string>
+    <string name="smb_password">Senha</string>
+    <string name="smb_empty">(vazio)</string>
+    <string name="smb_add">Testar e adicionar</string>
+    <string name="smb_added">Pasta da rede adicionada (%1$d itens). Procurando jogos…</string>
+    <string name="smb_invalid">Preencha o servidor e o compartilhamento.</string>
+    <string name="smb_unreachable">Não foi possível conectar ao servidor. Confira o endereço e se ele está ligado na mesma rede.</string>
+    <string name="smb_login_failed">Usuário ou senha incorretos.</string>
+    <string name="smb_share_not_found">Compartilhamento não encontrado ou sem permissão.</string>
+    <string name="smb_path_not_found">Subpasta não encontrada.</string>
+    <string name="smb_failed">Não foi possível acessar a pasta da rede.</string>
+    <string name="smb_note">A senha fica só nesta TV, fora do backup. Os jogos são copiados para a TV na hora de jogar.</string>
+    <string name="key_shift">Maiúsc.</string>
 </resources>

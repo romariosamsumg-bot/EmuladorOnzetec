@@ -4,7 +4,8 @@ import com.retroplay.domain.system.SystemId
 import kotlinx.coroutines.flow.Flow
 
 /** De onde vem o arquivo: caminho comum ou documento do seletor do sistema (SAF / pendrive). */
-enum class GameSource { FILE, DOCUMENT }
+/** Origem da pasta: caminho comum, pasta do seletor do sistema (SAF) ou pasta da rede (SMB). */
+enum class GameSource { FILE, DOCUMENT, SMB }
 
 enum class IdentStatus {
     /** Casou com o DAT (nome oficial, ano, gênero...). */

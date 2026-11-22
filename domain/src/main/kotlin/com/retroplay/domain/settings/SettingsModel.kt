@@ -91,4 +91,26 @@ interface SettingsRepository {
 
     /** Remove todas as chaves de um nível que começam com [keyPrefix]. */
     suspend fun clear(scope: ScopeRef, keyPrefix: String = "")
+
+    /**
+     * Importa chaves já com prefixo de nível ("g|...", "s|snes|...", "j|snes/jogo|..."), como no
+     * backup. Com [replace], o que não está em [raw] é apagado.
+     */
+    suspend fun importRaw(raw: Map<String, String>, replace: Boolean = true) {
+        if (replace) current().raw.keys.filter { it !in raw }.forEach { k -> SettingsKeys.parse(k)?.let { (scope, key) -> setRaw(key, scope, null) } }
+        raw.forEach { (k, v) -> SettingsKeys.parse(k)?.let { (scope, key) -> setRaw(key, scope, v) } }
+    }
+}
+
+/** Decodifica a chave gravada ("g|chave", "s|console|chave", "j|jogo|chave"). */
+object SettingsKeys {
+    fun parse(stored: String): Pair<ScopeRef, String>? {
+        val parts = stored.split('|')
+        return when {
+            parts.size == 2 && parts[0] == "g" && parts[1].isNotEmpty() -> ScopeRef.Global to parts[1]
+            parts.size == 3 && parts[0] == "s" && parts[1].isNotEmpty() -> ScopeRef(Scope.SYSTEM, parts[1]) to parts[2]
+            parts.size == 3 && parts[0] == "j" && parts[1].isNotEmpty() -> ScopeRef(Scope.GAME, parts[1]) to parts[2]
+            else -> null
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.retroplay.data.saves
 
 import com.retroplay.domain.saves.SaveSlot
 import com.retroplay.domain.system.SystemId
+import com.retroplay.domain.profile.Profile
 import java.io.File
 
 /**
@@ -9,7 +10,13 @@ import java.io.File
  * A chave do jogo é o nome do arquivo (sem extensão): os saves sobrevivem a uma nova varredura.
  * Usado pelo processo do jogo (grava) e pela UI (lista, "Continuar jogando").
  */
-class SaveStateStore(private val root: File) {
+class SaveStateStore(private val baseRoot: File, private val profile: () -> Long = { Profile.DEFAULT_ID }) {
+
+    /** Cada perfil tem seus saves; o perfil 1 usa a raiz (saves de versões anteriores). */
+    private val root: File get() = Profile.dirName(profile())?.let { File(baseRoot, it) } ?: baseRoot
+
+    /** Os saves de um perfil específico (o processo do jogo usa o perfil lido ao abrir). */
+    fun forProfile(id: Long) = SaveStateStore(baseRoot) { id }
 
     fun dir(system: SystemId, fileName: String): File =
         File(root, "${system.value}/${key(fileName)}")

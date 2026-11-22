@@ -73,7 +73,101 @@ class SettingsViewModel @Inject constructor(
     val catalog: SystemCatalog,
     private val coreOptionsCache: CoreOptionsCache,
     private val gamesFolder: GamesFolderManager,
+    private val profileRepo: com.retroplay.domain.profile.ProfileRepository,
+    // Preguiçoso: só abre o banco quando o usuário pede um backup.
+    private val backup: dagger.Lazy<com.retroplay.data.backup.BackupManager>,
+    private val smb: dagger.Lazy<com.retroplay.data.smb.SmbAccess>,
+    private val smbCredentials: dagger.Lazy<com.retroplay.data.smb.SmbCredentialStore>,
 ) : ViewModel() {
+
+    /** Testa a conexão e, se der certo, adiciona a pasta da rede e procura jogos. true = adicionada. */
+    fun addSmbFolder(form: SmbForm, onDone: (Boolean) -> Unit = {}) {
+        val loc = com.retroplay.data.smb.SmbLocation.fromInput(form.host, form.share, form.path)
+        if (loc == null) {
+            message(R.string.smb_invalid); onDone(false); return
+        }
+        viewModelScope.launch {
+            val creds = com.retroplay.data.smb.SmbCredentials(form.user, form.password)
+            runCatching { withContext(Dispatchers.IO) { smb.get().test(loc, creds) } }
+                .onSuccess { count ->
+                    withContext(Dispatchers.IO) { smbCredentials.get().put(loc, creds) }
+                    library.addFolder(loc.uri(), com.retroplay.domain.library.GameSource.SMB, loc.label)
+                    library.scanNow()
+                    _formatted.send(R.string.smb_added to listOf(count))
+                    onDone(true)
+                }
+                .onFailure { e ->
+                    _messages.send(
+                        when ((e as? com.retroplay.data.smb.SmbException)?.reason) {
+                            com.retroplay.data.smb.SmbException.Reason.UNREACHABLE -> R.string.smb_unreachable
+                            com.retroplay.data.smb.SmbException.Reason.LOGIN_FAILED -> R.string.smb_login_failed
+                            com.retroplay.data.smb.SmbException.Reason.SHARE_NOT_FOUND -> R.string.smb_share_not_found
+                            com.retroplay.data.smb.SmbException.Reason.PATH_NOT_FOUND -> R.string.smb_path_not_found
+                            else -> R.string.smb_failed
+                        },
+                    )
+                    onDone(false)
+                }
+        }
+    }
+
+    /** Mensagem com valores (ex.: "Backup salvo: 12 arquivos"). */
+    private val _formatted = Channel<Pair<Int, List<Any>>>(Channel.BUFFERED)
+    val formattedMessages = _formatted.receiveAsFlow()
+
+    private fun backupError(e: Throwable) = when ((e as? com.retroplay.data.backup.BackupException)?.reason) {
+        com.retroplay.data.backup.BackupException.Reason.NEWER_FORMAT -> R.string.backup_newer
+        com.retroplay.data.backup.BackupException.Reason.NOT_A_BACKUP, com.retroplay.data.backup.BackupException.Reason.CORRUPTED -> R.string.backup_invalid
+        null -> R.string.backup_failed
+    }
+
+    fun exportBackup(uri: Uri) {
+        viewModelScope.launch {
+            runCatching { withContext(Dispatchers.IO) { context.contentResolver.openOutputStream(uri)!!.use { backup.get().export(it) } } }
+                .onSuccess { _formatted.send(R.string.backup_done to listOf(it.files, it.profiles)) }
+                .onFailure { _messages.send(R.string.backup_failed) }
+        }
+    }
+
+    fun restoreBackup(uri: Uri) {
+        viewModelScope.launch {
+            runCatching { withContext(Dispatchers.IO) { context.contentResolver.openInputStream(uri)!!.use { backup.get().restore(it) } } }
+                .onSuccess { _formatted.send(R.string.restore_done to listOf(it.files, it.profiles)) }
+                .onFailure { _messages.send(backupError(it)) }
+        }
+    }
+
+    fun exportSettings(uri: Uri) {
+        viewModelScope.launch {
+            runCatching { withContext(Dispatchers.IO) { context.contentResolver.openOutputStream(uri)!!.use { backup.get().exportSettings(it) } } }
+                .onSuccess { _messages.send(R.string.settings_exported) }
+                .onFailure { _messages.send(R.string.backup_failed) }
+        }
+    }
+
+    fun importSettings(uri: Uri) {
+        viewModelScope.launch {
+            runCatching { withContext(Dispatchers.IO) { context.contentResolver.openInputStream(uri)!!.use { backup.get().importSettings(it) } } }
+                .onSuccess { _messages.send(R.string.settings_imported) }
+                .onFailure { _messages.send(backupError(it)) }
+        }
+    }
+
+    val profiles: StateFlow<List<com.retroplay.domain.profile.Profile>> =
+        profileRepo.profiles.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val activeProfile: StateFlow<com.retroplay.domain.profile.Profile?> =
+        profileRepo.active.map<com.retroplay.domain.profile.Profile, com.retroplay.domain.profile.Profile?> { it }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    fun switchProfile(id: Long) { viewModelScope.launch { profileRepo.switchTo(id) } }
+
+    fun createProfile(name: String) {
+        viewModelScope.launch { profileRepo.switchTo(profileRepo.create(name).id) }
+    }
+
+    fun renameActiveProfile(name: String) { viewModelScope.launch { profileRepo.rename(profileRepo.activeId(), name) } }
+
+    fun deleteActiveProfile() { viewModelScope.launch { profileRepo.delete(profileRepo.activeId()) } }
 
     /** null até o DataStore carregar (evita mostrar a tela antes do bloqueio por PIN). */
     val snapshot: StateFlow<SettingsSnapshot?> = settings.snapshots

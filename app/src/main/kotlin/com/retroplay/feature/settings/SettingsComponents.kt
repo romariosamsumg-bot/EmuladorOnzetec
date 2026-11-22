@@ -269,3 +269,89 @@ fun PinDialog(
         }
     }
 }
+
+/** Teclas do teclado em grade (mesma ideia da Busca). */
+private val TEXT_KEYS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".map { it.toString() }
+private const val TEXT_COLUMNS = 9
+
+/** Teclado completo (servidor, usuário, senha): minúsculas, maiúsculas e símbolos. */
+private val RAW_KEYS = "abcdefghijklmnopqrstuvwxyz1234567890".map { it.toString() } + listOf(".", "-", "_", "@", ":", "/", "\\", "#", "$", "!", "&", "*")
+
+/** Tecla no modo completo: sem maiúscula automática (o ⇧ alterna). */
+fun applyRawKey(text: String, key: String, shift: Boolean, maxLength: Int): String = when (key) {
+    "⌫" -> text.dropLast(1)
+    else -> if (text.length >= maxLength) text else text + if (shift) key.uppercase() else key
+}
+
+/** Aplica uma tecla ao texto: letras em maiúscula só no início de cada palavra. */
+fun applyTextKey(text: String, key: String, maxLength: Int): String = when (key) {
+    "⌫" -> text.dropLast(1)
+    " " -> if (text.isEmpty() || text.endsWith(" ") || text.length >= maxLength) text else "$text "
+    else -> if (text.length >= maxLength) text else text + if (text.isEmpty() || text.endsWith(" ")) key.uppercase() else key.lowercase()
+}
+
+/**
+ * Entrada de texto pelo direcional: teclado em grade na própria tela (o teclado do sistema da
+ * TV nem sempre é confortável no controle remoto).
+ */
+@Composable
+fun TextInputDialog(
+    title: String,
+    initial: String,
+    onSave: (String) -> Unit,
+    onDismiss: () -> Unit,
+    maxLength: Int = 40,
+    extraAction: Pair<String, () -> Unit>? = null,
+    /** Teclado completo (minúsculas, símbolos, ⇧), sem maiúscula automática. */
+    raw: Boolean = false,
+    /** Esconde o texto (senha), mostrando só o último caractere. */
+    secret: Boolean = false,
+    hint: String? = null,
+) {
+    var text by remember { mutableStateOf(initial.take(maxLength)) }
+    var shift by remember { mutableStateOf(false) }
+    val first = rememberInitialFocus()
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            Modifier.width(620.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface).padding(24.dp).testTag("text_dialog_input"),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(title, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface)
+            hint?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            Box(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceVariant).padding(14.dp),
+            ) {
+                val shown = if (secret && text.isNotEmpty()) "•".repeat(text.length - 1) + text.last() else text
+                Text(shown + "▏", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface, maxLines = 1, modifier = Modifier.testTag("text_input_value"))
+            }
+            val rows = if (raw) RAW_KEYS.chunked(12) + listOf(listOf("⇧", "⌫")) else TEXT_KEYS.chunked(TEXT_COLUMNS) + listOf(listOf(" ", "⌫"))
+            rows.forEachIndexed { r, row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    row.forEachIndexed { c, key ->
+                        val label = when (key) {
+                            " " -> "␣"
+                            "⇧" -> (if (shift) "● " else "") + stringResource(R.string.key_shift)
+                            else -> if (raw && shift) key.uppercase() else key
+                        }
+                        Button(
+                            onClick = {
+                                when {
+                                    key == "⇧" -> shift = !shift
+                                    raw -> text = applyRawKey(text, key, shift, maxLength)
+                                    else -> text = applyTextKey(text, key, maxLength)
+                                }
+                            },
+                            modifier = Modifier.width(if (key == " " || key == "⌫" || key == "⇧") 120.dp else if (raw) 42.dp else 56.dp)
+                                .testTag("tkey_${when (key) { " " -> "space"; "⌫" -> "back"; "⇧" -> "shift"; else -> key }}")
+                                .let { if (r == 0 && c == 0) it.focusRequester(first) else it },
+                            colors = ButtonDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurface),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                        ) { Text(label, modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.Center) }
+                    }
+                }
+            }
+            DialogOption(stringResource(R.string.save), "text_input_save") { onSave(if (raw) text else text.trim()) }
+            extraAction?.let { (label, action) -> DialogOption(label, "text_input_extra", onClick = action) }
+        }
+    }
+}

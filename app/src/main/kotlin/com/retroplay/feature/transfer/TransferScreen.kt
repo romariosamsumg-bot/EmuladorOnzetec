@@ -315,7 +315,11 @@ private fun FolderRow(folder: GameFolder, onRemove: (GameFolder) -> Unit, onCopy
             Text(name, style = MaterialTheme.typography.titleMedium)
             Text(
                 pluralStringResource(
-                    if (folder.source == GameSource.DOCUMENT) R.plurals.folder_info_document else R.plurals.folder_info_file,
+                    when (folder.source) {
+                        GameSource.DOCUMENT -> R.plurals.folder_info_document
+                        GameSource.SMB -> R.plurals.folder_info_smb
+                        GameSource.FILE -> R.plurals.folder_info_file
+                    },
                     folder.gameCount,
                     folder.gameCount,
                 ),
@@ -323,7 +327,7 @@ private fun FolderRow(folder: GameFolder, onRemove: (GameFolder) -> Unit, onCopy
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        if (folder.source == GameSource.DOCUMENT && folder.gameCount > 0) {
+        if (folder.source != GameSource.FILE && folder.gameCount > 0) {
             OutlinedButton(onClick = { onCopy(folder) }, modifier = Modifier.testTag("copy_folder_${folder.id}")) {
                 Text(stringResource(R.string.copy_to_tv))
             }

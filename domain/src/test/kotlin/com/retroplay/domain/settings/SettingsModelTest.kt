@@ -59,4 +59,12 @@ class SettingsModelTest {
         assertEquals("auto", CoreOption.parse("k", "D; a|b|auto", "auto").current)
         assertNull(SettingsSnapshot().get(AppSettings.SHADER, ScopeRef.Global))
     }
+
+    @org.junit.Test
+    fun `chaves gravadas sao decodificadas para o backup`() {
+        org.junit.Assert.assertEquals(ScopeRef.Global to "video.shader", SettingsKeys.parse("g|video.shader"))
+        org.junit.Assert.assertEquals(ScopeRef(Scope.GAME, "snes/Super Mario World (USA)") to "emu.rewind", SettingsKeys.parse("j|snes/Super Mario World (USA)|emu.rewind"))
+        org.junit.Assert.assertEquals(null, SettingsKeys.parse("lixo"))
+        org.junit.Assert.assertEquals(null, SettingsKeys.parse("s||x"))
+    }
 }

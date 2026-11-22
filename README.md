@@ -28,11 +28,39 @@ baixados sob demanda.
 | 6 | Menu de jogo e saves | ✅ |
 | 7 | Configurações completas (12 categorias, global → console → jogo) | ✅ |
 | 8 | Mega Drive, Master System e Neo Geo (opções por console, BIOS, romsets, núcleos) | ✅ |
-| 9 | Polimento (perfis, backup, SMB, baseline profile) | ⏳ |
+| 9 | Polimento (perfis, backup, pasta da rede SMB, Baseline Profile, memória) | ✅ |
 | 10 | Release assinado + GitHub Actions | ⏳ |
 
-As instruções completas (importar jogos, BIOS do Neo Geo, instalar na TV, baixar o APK pelo
-GitHub) serão escritas nas fases 9 e 10.
+O download do APK pronto pelo GitHub (Releases) chega na Fase 10; até lá, compile o APK
+(veja [Como compilar](#como-compilar-linha-de-comando)).
+
+## Como instalar na TV (Google TV / Android TV)
+
+Testado para a TCL P7K (Google TV, Android 11+); vale para outras TVs e boxes Android TV.
+
+1. **Ative o modo desenvolvedor**: Configurações → Sistema → Sobre → clique 7 vezes em
+   **Build do Android TV OS** até aparecer "Você agora é um desenvolvedor".
+2. **Permita instalar apps de fora da Play Store**: Configurações → Apps → Segurança e
+   restrições → **Fontes desconhecidas** → ligue para o app que vai instalar o APK
+   (Downloader ou o gerenciador de arquivos).
+3. Escolha **um** jeito de levar o APK até a TV:
+   - **Downloader** (o mais fácil): instale o app *Downloader* pela Play Store da TV, digite o
+     endereço do APK (link do GitHub Releases) e confirme a instalação.
+   - **Pendrive**: copie o `.apk` para um pendrive, ligue na TV e abra-o com um gerenciador de
+     arquivos (ex.: *File Commander* ou *X-plore*).
+   - **ADB pelo computador**: em Configurações → Sistema → Opções do desenvolvedor, ligue a
+     **Depuração USB** (e a depuração pela rede, se houver). Veja o IP da TV em Configurações →
+     Rede e, no computador:
+     ```bash
+     adb connect 192.168.0.20:5555     # aceite o pedido que aparece na TV
+     adb install -r app-release.apk
+     ```
+4. Abra o **Retrô Play** na tela inicial da TV (ícone/banner em "Apps").
+5. Na primeira vez, em **Transferir jogos**, toque em **Permitir acesso aos arquivos** para o app
+   criar a pasta **Jogos**. Os núcleos de emulação são baixados sozinhos na primeira vez que você
+   joga cada console (precisa de internet só nessa hora).
+
+Para atualizar, instale o APK novo por cima (os jogos, saves e configurações ficam).
 
 ## Como colocar os jogos na TV
 
@@ -82,6 +110,15 @@ Em **Transferir jogos → Adicionar pasta ou pendrive…**, escolha qualquer pas
 sistema (a permissão fica guardada). Os jogos podem ser **jogados direto do USB** ou, com
 **Copiar para a TV**, copiados para a pasta Jogos (o espaço livre é conferido arquivo a arquivo e
 o pendrive sai da biblioteca ao final, para não duplicar).
+
+### Pasta da rede (SMB)
+
+Jogos num computador, NAS ou roteador com pendrive, na mesma rede: **Configurações → Rede →
+Adicionar pasta da rede (SMB)**. Informe o servidor (nome ou IP), o compartilhamento, a subpasta
+(opcional) e o usuário/senha (vazio = convidado). **Testar e adicionar** confere a conexão e já
+procura os jogos. Funciona com SMB 2/3 (Windows 10/11, Samba, a maioria dos NAS). Na hora de
+jogar, o arquivo é copiado para a TV (romsets de Neo Geo grandes podem demorar alguns segundos).
+A senha fica só na TV, fora do backup. Para tirar a pasta, use **Transferir jogos → Remover**.
 
 ### Como os jogos são identificados
 
@@ -137,8 +174,14 @@ O banco de identificação (`data/src/main/assets/db/retroplay-dat.sqlite`) é g
 - **Início**: jogo em destaque (o último jogado ou um aleatório) com ▶ Jogar e ＋ Favoritos, e
   fileiras: Continuar jogando, Favoritos, Adicionados recentemente, uma por console, Mais jogados
   e gêneros. O nome do jogo aparece sob o card depois de um instante com o foco nele.
-- **Detalhes do jogo** (OK num card): Jogar, Favoritar, Opções do jogo (escolher a capa: caixa,
-  tela de título ou cena) e Apagar (pede confirmação; o foco começa em "Cancelar").
+- **Detalhes do jogo** (OK num card): Jogar, Favoritar, Opções do jogo (Configurações deste jogo,
+  Renomear, escolher a capa: caixa, tela de título ou cena) e Apagar (pede confirmação; o foco
+  começa em "Cancelar").
+- **Perfis**: cada pessoa da casa tem seus favoritos, "Continuar jogando", mais jogados, tempo de
+  jogo e saves. Crie e troque em **Configurações → Interface → Perfis**; com mais de um perfil o app
+  pergunta **"Quem vai jogar?"** ao abrir (dá para desligar). Os jogos e as configurações são
+  comuns a todos. Favoritos e histórico ficam ligados ao arquivo do jogo e sobrevivem a uma nova
+  varredura ou a "reconstruir a biblioteca".
 - **Buscar**: teclado em grade pelo D-pad (ou busca por voz, se a TV tiver); resultados enquanto
   digita, sem diferenciar acentos.
 - **Consoles**: grade de capas por console com filtros A–Z, Recentes, Mais jogados e Favoritos.
@@ -183,11 +226,15 @@ Categorias à esquerda, opções à direita (nome, descrição e valor atual). T
   identificados, duplicados (apagar o arquivo repetido) e reconstruir a biblioteca.
 - **Núcleos**: versão e tamanho de cada núcleo, baixar/atualizar/remover, voltar à versão
   anterior, baixar todos e canal (Estável: só quando você pede; Nightly: verifica 1× por dia).
-- **Interface**: idioma (Português, English, Español), tema escuro ou preto OLED, cor de
+- **Interface**: perfis, perguntar o perfil ao abrir, idioma (Português, English, Español), tema escuro ou preto OLED, cor de
   destaque, animações, destaque animado, som de navegação, tamanho das capas e fileiras da Início
   (mostrar/ocultar/ordenar).
-- **Rede**: porta e PIN fixo da transferência pelo celular; baixar capas e capas só no Wi-Fi.
-- **Armazenamento**: espaço usado por jogos, saves, capas, núcleos e temporários; limpar cache.
+- **Rede**: porta e PIN fixo da transferência pelo celular; pasta da rede (SMB); baixar capas e
+  capas só no Wi-Fi.
+- **Armazenamento**: espaço usado por jogos, saves, capas, núcleos e temporários; limpar cache;
+  **backup** e **restauração** (um `.zip` no pendrive com saves de bateria, save states,
+  configurações, perfis, favoritos, histórico e nomes/capas escolhidos — jogos e núcleos não
+  entram); **exportar/importar só as configurações** (`.json`).
 - **Controle parental**: PIN de 4 dígitos para abrir as Configurações e/ou apagar jogos.
 - **Sobre**: versão, ABI, aparelho, RAM, exportar o registro de erros, licenças e aviso legal.
 
@@ -195,7 +242,20 @@ Não disponíveis porque o motor de emulação (LibretroDroid) não oferece: est
 intensidade de scanlines, rotação, VSync, volume/taxa de amostragem próprios, pular quadros e
 run-ahead.
 
-## Testando a emulação (Fase 2)
+## Solução de problemas
+
+- **Jogo lento ou com som picotado**: em Vídeo, use o filtro "Nenhum" e ligue o modo econômico;
+  em Emulação, desligue "Voltar no tempo"; no SNES, prefira o núcleo Snes9x 2010.
+- **Controle não funciona**: veja em Configurações → Controles se ele aparece; remapeie com o
+  assistente; o controle remoto também joga (setas + OK).
+- **Neo Geo não abre**: a mensagem diz se falta a BIOS, o romset principal (clones) ou se o
+  romset é de outra versão (troque por um compatível com o FBNeo atual).
+- **Pasta da rede não conecta**: confira o IP, se o compartilhamento existe e se o SMB 2/3 está
+  ligado no computador/NAS; teste o usuário e a senha num computador da mesma rede.
+- **Algo travou**: Configurações → Sobre → **Exportar registro de erros** salva um arquivo para
+  enviar ao suporte.
+
+## Testando a emulação
 
 1. Instale o APK na TV e abra **Consoles → Super Nintendo**.
 2. Escolha **ROM de teste do Retrô Play** e aperte OK. Na primeira vez o núcleo `snes9x2010`
@@ -204,7 +264,7 @@ run-ahead.
 3. Com o gamepad: o D-pad (ou o analógico) move o quadrado; B, A, Y e X mudam a cor de fundo e
    tocam tons diferentes; L, R, Start e Select só mudam a cor. Pelo controle remoto da TV, as
    setas movem o quadrado e o OK equivale ao B.
-4. **Voltar** sai do jogo. O menu rápido chega na Fase 6.
+4. **Voltar** abre o menu rápido (Sair fica no fim da lista).
 
 Para testar outros jogos, coloque-os na pasta **Jogos** (veja acima) ou use **Escolher
 arquivo…** na página do console. `.zip`/`.7z` de consoles domésticos são extraídos para um
@@ -230,7 +290,9 @@ core/common/  Utilitários Android (detecção de ABI, dispatchers)
 core/ui/      Tema escuro/OLED, cores de destaque, ícones genéricos
 domain/       Kotlin puro: registro de consoles, detecção por extensão, modelos de núcleo
 data/         Núcleos (OkHttp + WorkManager), biblioteca (Room), varredura, banco de DATs, preparo de ROMs
-tools/        Scripts: ícone/banner, ROM de teste + mini frontend libretro, gerador do banco de DATs
+baselineprofile/  Gerador do Baseline Profile (inicialização e Início) para rodar numa TV/emulador
+tools/        Scripts: ícone/banner, ROM de teste + mini frontend libretro, gerador do banco de DATs,
+              listagem das opções de cada núcleo (tools/cores)
 ```
 
 Para **adicionar um console**: crie um `GameSystem` em
@@ -248,8 +310,14 @@ echo "sdk.dir=/caminho/para/android-sdk" > local.properties
 ./gradlew test               # testes unitários + testes de navegação por D-pad (Robolectric)
 ./gradlew :data:testDebugUnitTest -Pretroplay.network=true --tests '*BuildbotLiveTest*'  # baixa núcleos reais
 ./gradlew :data:testDebugUnitTest -Pretroplay.e2e=true --tests '*PhoneTransferE2ETest*'   # página do celular no Chromium (Node + Playwright)
+./gradlew :data:testDebugUnitTest -Pretroplay.smb=true --tests '*SmbE2ETest*'            # pasta da rede contra um Samba local (root + samba instalado)
 ./gradlew assembleDebug      # app/build/outputs/apk/debug/app-debug.apk
 ```
+
+**Baseline Profile**: o app traz um perfil da inicialização e da tela Início
+(`app/src/main/baseline-prof.txt`), que o Android usa para compilar esse caminho antes de
+abrir o app pela primeira vez. Para medir e gerar um perfil novo com uma TV ou emulador
+conectado (Android 9+): `./gradlew :app:generateReleaseBaselineProfile`.
 
 Screenshots das telas geradas pelos testes: `./gradlew :app:testDebugUnitTest -Pretroplay.screenshots=true`
 (saída em `app/build/screenshots/`).

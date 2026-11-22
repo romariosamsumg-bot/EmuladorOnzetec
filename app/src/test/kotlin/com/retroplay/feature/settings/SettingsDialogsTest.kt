@@ -7,12 +7,15 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.retroplay.core.ui.theme.RetroPlayTheme
 import com.retroplay.domain.settings.HomeRowGroups
@@ -36,7 +39,7 @@ class SettingsDialogsTest {
     @get:Rule
     val compose = createAndroidComposeRule<ComponentActivity>()
 
-    private fun press(key: Key) {
+    private fun press(key: Key, times: Int = 1) = repeat(times) {
         compose.onAllNodes(isRoot()).onLast().performKeyInput { pressKey(key) }
         compose.mainClock.advanceTimeBy(200)
         compose.waitForIdle()
@@ -125,5 +128,64 @@ class SettingsDialogsTest {
         assertEquals(OverrideBadge.FROM_GLOBAL, overrideBadge(Scope.GAME, null, true))
         assertEquals("/storage/emulated/0/Jogos/a.sfc", readablePath("/storage/emulated/0/Jogos/a.sfc"))
         assertTrue(readablePath("content://x/tree/primary%3AJogos%2FBIOS/document/primary%3AJogos%2FBIOS%2Fneogeo.zip")== "Jogos/BIOS/neogeo.zip")
+    }
+
+    @Test
+    fun quem_vai_jogar_comeca_no_perfil_ativo() {
+        val list = listOf(com.retroplay.domain.profile.Profile(1, "Pai", 0), com.retroplay.domain.profile.Profile(2, "Ana", 0), com.retroplay.domain.profile.Profile(3, "Leo", 0))
+        var picked: Long? = null
+        compose.setContent { RetroPlayTheme { com.retroplay.feature.profiles.ProfilePickerScreen(list, activeId = 2) { picked = it.id } } }
+        compose.waitForIdle()
+        node("profile_2").assertIsFocused()
+        press(Key.DirectionRight)
+        node("profile_3").assertIsFocused()
+        press(Key.DirectionCenter)
+        assertEquals(3L, picked)
+    }
+
+    @Test
+    fun teclado_em_grade_digita_pelo_direcional() {
+        var saved: String? = null
+        compose.setContent { RetroPlayTheme { TextInputDialog("Nome", "", onSave = { saved = it }, onDismiss = {}) } }
+        compose.waitForIdle()
+        node("tkey_A").assertIsFocused()
+        press(Key.DirectionCenter) // A
+        press(Key.DirectionDown); press(Key.DirectionRight, 4) // N (linha 2, coluna 5)
+        node("tkey_N").assertIsFocused()
+        press(Key.DirectionCenter)
+        press(Key.DirectionUp); press(Key.DirectionLeft, 4)
+        press(Key.DirectionCenter) // A
+        node("text_input_value").assertTextContains("Ana▏")
+        repeat(8) { if (compose.onAllNodes(hasTestTag("text_input_save") and androidx.compose.ui.test.isFocused()).fetchSemanticsNodes().isEmpty()) press(Key.DirectionDown) }
+        node("text_input_save").assertIsFocused()
+        press(Key.DirectionCenter)
+        assertEquals("Ana", saved)
+        assertEquals("Ana Lu", applyTextKey(applyTextKey(applyTextKey("Ana", " ", 20), "L", 20), "U", 20))
+        assertEquals("Ab", applyTextKey("Ab", "C", 2))
+        assertEquals("A", applyTextKey("A ", "⌫", 20))
+    }
+
+    @Test
+    fun teclado_completo_para_senha() {
+        var saved: String? = null
+        compose.setContent { RetroPlayTheme { TextInputDialog("Senha", "", onSave = { saved = it }, onDismiss = {}, raw = true, secret = true) } }
+        compose.waitForIdle()
+        node("tkey_a").assertIsFocused()
+        press(Key.DirectionCenter) // a
+        // ⇧ fica na última linha; liga, digita B (segunda tecla da primeira linha), desliga.
+        repeat(6) { if (compose.onAllNodes(hasTestTag("tkey_shift") and androidx.compose.ui.test.isFocused()).fetchSemanticsNodes().isEmpty()) press(Key.DirectionDown) }
+        node("tkey_shift").assertIsFocused()
+        press(Key.DirectionCenter)
+        repeat(6) { press(Key.DirectionUp) }
+        repeat(12) { press(Key.DirectionLeft) }
+        node("tkey_a").assertIsFocused()
+        press(Key.DirectionRight)
+        node("tkey_b").assertIsFocused()
+        press(Key.DirectionCenter)
+        node("text_input_value").assertTextContains("•B▏")
+        repeat(8) { if (compose.onAllNodes(hasTestTag("text_input_save") and androidx.compose.ui.test.isFocused()).fetchSemanticsNodes().isEmpty()) press(Key.DirectionDown) }
+        press(Key.DirectionCenter)
+        assertEquals("aB", saved)
+        assertEquals("x.y", applyRawKey(applyRawKey("x", ".", false, 10), "y", false, 10))
     }
 }

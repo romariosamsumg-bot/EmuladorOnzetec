@@ -273,4 +273,9 @@
     <string name="details_save_auto">Último save automático: %1$s</string>
     <string name="details_save_slot">Último save: %1$s (espaço %2$d)</string>
     <string name="shader_smooth">Suave</string>
+    <plurals name="folder_info_smb">
+        <item quantity="one">%1$d jogo · pasta da rede</item>
+        <item quantity="many">%1$d jogos · pasta da rede</item>
+        <item quantity="other">%1$d jogos · pasta da rede</item>
+    </plurals>
 </resources>

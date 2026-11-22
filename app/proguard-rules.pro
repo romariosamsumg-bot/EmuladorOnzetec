@@ -14,3 +14,13 @@
 -keepclasseswithmembernames,includedescriptorclasses class * {
     native <methods>;
 }
+
+# Pasta da rede (smbj): o barramento de eventos (mbassador) encontra os handlers por anotação.
+-keep class com.hierynomus.** { *; }
+-keep class net.engio.mbassy.** { *; }
+-keepattributes *Annotation*
+-dontwarn org.slf4j.**
+-dontwarn javax.el.**
+-dontwarn org.ietf.jgss.**
+-dontwarn javax.security.auth.kerberos.**
+-dontwarn java.beans.**

@@ -44,6 +44,16 @@ class SettingsRepositoryTest {
         assertEquals("lcd", s.value(AppSettings.SHADER, snes))
     }
 
+    @Test
+    fun `importacao do backup substitui tudo de uma vez`() = runTest {
+        val repo = DataStoreSettingsRepository(File(tmp.root, "i.preferences_pb"), backgroundScope)
+        repo.set(AppSettings.THEME, ScopeRef.Global, "oled")
+        repo.importRaw(mapOf("g|video.shader" to "crt", "j|$game|emu.rewind" to "true", "lixo" to "x"))
+        assertEquals(mapOf("g|video.shader" to "crt", "j|$game|emu.rewind" to "true"), repo.current().raw)
+        repo.importRaw(mapOf("g|ui.theme" to "oled"), replace = false)
+        assertEquals(3, repo.current().raw.size)
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun `configuracao global nao aceita nivel de console`() = runTest {
         DataStoreSettingsRepository(File(tmp.root, "x.preferences_pb"), backgroundScope).set(AppSettings.THEME, ScopeRef.system(snes), "oled")

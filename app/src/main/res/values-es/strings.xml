@@ -262,4 +262,9 @@
     <string name="details_save_auto">Último guardado automático: %1$s</string>
     <string name="details_save_slot">Último guardado: %1$s (espacio %2$d)</string>
     <string name="shader_smooth">Suave</string>
+    <plurals name="folder_info_smb">
+        <item quantity="one">%1$d juego · carpeta de red</item>
+        <item quantity="many">%1$d juegos · carpeta de red</item>
+        <item quantity="other">%1$d juegos · carpeta de red</item>
+    </plurals>
 </resources>

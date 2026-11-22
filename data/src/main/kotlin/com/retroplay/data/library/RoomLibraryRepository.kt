@@ -26,19 +26,32 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import com.retroplay.domain.profile.Profile
+import com.retroplay.domain.settings.GameKey
 import kotlinx.coroutines.withContext
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class RoomLibraryRepository(
     private val db: LibraryDatabase,
     private val workManager: WorkManager,
     private val gamesFolder: GamesFolderManager,
     private val files: FileAccess,
     private val clock: () -> Long = System::currentTimeMillis,
+    /** Perfil ativo: favoritos e histórico são dele. */
+    private val activeProfile: Flow<Long> = flowOf(Profile.DEFAULT_ID),
 ) : LibraryRepository {
 
-    override fun observeGames(system: SystemId): Flow<List<Game>> = db.games().observeBySystem(system.value).map { it.map(::toGame) }
-    override fun observeAll(): Flow<List<Game>> = db.games().observeAll().map { it.map(::toGame) }
-    override fun observeNeedsSystem(): Flow<List<Game>> = db.games().observeNeedsSystem().map { it.map(::toGame) }
+    private val profile = activeProfile.distinctUntilChanged()
+    private suspend fun profileId() = activeProfile.first()
+
+    private fun <T> withProfile(query: (Long) -> Flow<T>): Flow<T> = profile.flatMapLatest(query)
+
+    override fun observeGames(system: SystemId): Flow<List<Game>> = withProfile { p -> db.games().observeBySystem(system.value, p) }.map { it.map(::toGame) }
+    override fun observeAll(): Flow<List<Game>> = withProfile { p -> db.games().observeAll(p) }.map { it.map(::toGame) }
+    override fun observeNeedsSystem(): Flow<List<Game>> = withProfile { p -> db.games().observeNeedsSystem(p) }.map { it.map(::toGame) }
     override fun observeCount(): Flow<Int> = db.games().observeCount()
 
     override fun observeFolders(): Flow<List<GameFolder>> = db.folders().observe().map { list ->
@@ -60,18 +73,18 @@ class RoomLibraryRepository(
             }
         }.distinctUntilChanged()
 
-    override suspend fun game(id: Long): Game? = db.games().byId(id)?.let(::toGame)
-    override fun observeGame(id: Long): Flow<Game?> = db.games().observeById(id).map { it?.let(::toGame) }
+    override suspend fun game(id: Long): Game? = db.games().byIdWithStats(id, profileId())?.let(::toGame)
+    override fun observeGame(id: Long): Flow<Game?> = withProfile { p -> db.games().observeById(id, p) }.map { it?.let(::toGame) }
 
-    override suspend fun setFavorite(id: Long, favorite: Boolean) = db.games().setFavorite(id, favorite)
+    override suspend fun setFavorite(id: Long, favorite: Boolean) = db.stats().setFavorite(profileId(), id, favorite)
     override suspend fun setCover(id: Long, cover: CoverType?) = db.games().setCover(id, cover?.name)
-    override suspend fun recordPlayStarted(id: Long, atMillis: Long) = db.games().recordPlayStarted(id, atMillis)
+    override suspend fun recordPlayStarted(id: Long, atMillis: Long) = db.stats().recordPlayStarted(profileId(), id, atMillis)
     override suspend fun addPlayTime(id: Long, millis: Long) {
-        if (millis > 0) db.games().addPlayTime(id, millis)
+        if (millis > 0) db.stats().addPlayTime(profileId(), id, millis)
     }
 
     override suspend fun rename(id: Long, title: String?) = db.games().rename(id, title?.trim()?.takeIf { it.isNotEmpty() })
-    override fun observeDuplicates(): Flow<List<Game>> = db.games().observeDuplicates().map { it.map(::toGame) }
+    override fun observeDuplicates(): Flow<List<Game>> = withProfile { p -> db.games().observeDuplicates(p) }.map { it.map(::toGame) }
     override fun observeBios(): Flow<List<BiosStatus>> = db.bios().observe().map { list ->
         list.map { BiosStatus(SystemId(it.system), it.setName, it.uri, it.complete) }
     }
@@ -142,7 +155,8 @@ class RoomLibraryRepository(
         }.distinctUntilChanged()
 
     override suspend fun assignSystem(gameId: Long, system: SystemId) {
-        db.games().assignSystem(gameId, system.value)
+        val game = db.games().byId(gameId) ?: return
+        db.games().assignSystem(gameId, system.value, GameKey.of(system, game.fileName))
         scanNow()
     }
 
@@ -156,6 +170,13 @@ class RoomLibraryRepository(
 
     companion object {
         const val APP_FOLDER_LABEL = "app"
+
+        fun toGame(w: GameWithStats) = toGame(w.game).copy(
+            isFavorite = w.favorite ?: false,
+            playCount = w.playCount ?: 0,
+            lastPlayedAt = w.lastPlayedAt,
+            playTimeMs = w.playTimeMs ?: 0,
+        )
 
         fun toGame(e: GameEntity) = Game(
             id = e.id,
@@ -178,11 +199,11 @@ class RoomLibraryRepository(
             status = IdentStatus.valueOf(e.status),
             romsetStatus = RomsetStatus.valueOf(e.romsetStatus),
             missingFiles = e.missingFiles,
-            isFavorite = e.isFavorite,
-            playCount = e.playCount,
-            lastPlayedAt = e.lastPlayedAt,
+            isFavorite = false,
+            playCount = 0,
+            lastPlayedAt = null,
             addedAt = e.addedAt,
-            playTimeMs = e.playTimeMs,
+            playTimeMs = 0,
         )
     }
 }

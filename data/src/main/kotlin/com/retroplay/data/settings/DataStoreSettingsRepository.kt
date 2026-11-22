@@ -50,6 +50,15 @@ class DataStoreSettingsRepository(
         store.edit { prefs -> if (value == null) prefs.remove(prefKey) else prefs[prefKey] = value }
     }
 
+    /** Uma única gravação (atômica) para o backup inteiro. */
+    override suspend fun importRaw(raw: Map<String, String>, replace: Boolean) {
+        val valid = raw.filterKeys { com.retroplay.domain.settings.SettingsKeys.parse(it) != null }
+        store.edit { prefs ->
+            if (replace) prefs.asMap().keys.filter { it.name !in valid }.forEach { prefs.remove(it) }
+            valid.forEach { (k, v) -> prefs[stringPreferencesKey(k)] = v }
+        }
+    }
+
     override suspend fun clear(scope: ScopeRef, keyPrefix: String) {
         store.edit { prefs ->
             prefs.asMap().keys.filter { it.name.startsWith(scope.prefix + keyPrefix) }.forEach { prefs.remove(it) }

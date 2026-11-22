@@ -47,6 +47,7 @@ import com.retroplay.domain.core.CoreRepository
 import com.retroplay.domain.library.LibraryRepository
 import com.retroplay.data.settings.CoreOptionsCache
 import com.retroplay.domain.settings.AppSettings
+import com.retroplay.domain.profile.Profile
 import com.retroplay.domain.settings.ConsoleCoreOptions
 import android.app.ActivityManager
 import com.retroplay.domain.settings.CoreOption
@@ -107,7 +108,10 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     @Inject lateinit var coreRepository: CoreRepository
     @Inject lateinit var romPreparer: RomPreparer
     @Inject lateinit var library: LibraryRepository
-    @Inject lateinit var saves: SaveStateStore
+    @Inject lateinit var allSaves: SaveStateStore
+
+    /** Saves do perfil ativo, fixado ao abrir o jogo. */
+    private lateinit var saves: SaveStateStore
     @Inject lateinit var settings: SettingsRepository
     @Inject lateinit var coreOptionsCache: CoreOptionsCache
     @Inject lateinit var dat: com.retroplay.domain.library.DatLookup
@@ -246,7 +250,10 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         warnings.forEach { w ->
             flash(getString(if (w == ArcadeWarning.LOW_MEMORY) R.string.neogeo_low_memory else R.string.neogeo_bios_incomplete))
         }
-        val savesDir = File(filesDir, "saves/${system.id.value}").apply { mkdirs() }
+        // Cada perfil tem seus saves (de bateria e save states); o perfil 1 usa as pastas originais.
+        val profileId = settings.current().value(AppSettings.ACTIVE_PROFILE).toLongOrNull() ?: Profile.DEFAULT_ID
+        saves = allSaves.forProfile(profileId)
+        val savesDir = File(filesDir, listOfNotNull("saves", Profile.dirName(profileId), system.id.value).joinToString("/")).apply { mkdirs() }
         val sram = File(savesDir, fileName.substringBeforeLast('.') + ".srm").also { sramFile = it }
         val sramBytes = withContext(Dispatchers.IO) { sram.takeIf { it.isFile }?.readBytes() }
         val snap = settings.current()

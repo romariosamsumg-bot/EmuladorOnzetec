@@ -8,7 +8,6 @@ import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -30,6 +29,13 @@ import com.retroplay.domain.settings.SettingsRepository
 import com.retroplay.domain.settings.SettingsSnapshot
 import com.retroplay.feature.cores.CoreAutoUpdater
 import com.retroplay.ui.shell.RetroPlayShell
+import com.retroplay.domain.profile.ProfileRepository
+import com.retroplay.feature.profiles.ProfilePickerScreen
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -44,8 +50,34 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var settings: SettingsRepository
     @Inject lateinit var settingsCache: SettingsCache
     @Inject lateinit var coreUpdater: CoreAutoUpdater
+    @Inject lateinit var profiles: ProfileRepository
+
+    /**
+     * "Quem vai jogar?": com mais de um perfil e a opção ligada, pergunta uma vez ao abrir o app.
+     */
+    @Composable
+    private fun ProfileGate(snap: SettingsSnapshot, content: @Composable () -> Unit) {
+        // Decidido uma única vez, ao abrir: criar um perfil depois não mostra a pergunta no meio do uso.
+        var ask by rememberSaveable { mutableStateOf<Boolean?>(null) }
+        val list by profiles.profiles.collectAsStateWithLifecycle(null)
+        val all = list
+        if (ask == null && ready && all != null) ask = snap.value(AppSettings.PROFILE_ASK) && all.size > 1
+        if (ask == true && all != null) {
+            val activeId = snap.value(AppSettings.ACTIVE_PROFILE).toLongOrNull() ?: 1L
+            ProfilePickerScreen(all, activeId) { p ->
+                lifecycleScope.launch { profiles.switchTo(p.id) }
+                ask = false
+            }
+        } else {
+            // Enquanto decide (fração de segundo, coberta pela splash), a interface já aparece.
+            content()
+        }
+    }
 
     @Volatile private var settingsReady = false
+
+    /** Mesmo sinal, observável pela composição. */
+    private var ready by mutableStateOf(false)
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(AppLocale.wrap(newBase))
@@ -65,13 +97,14 @@ class MainActivity : ComponentActivity() {
                     shape = RectangleShape,
                     colors = SurfaceDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
                 ) {
-                    RetroPlayShell()
+                    ProfileGate(snap) { RetroPlayShell() }
                 }
             }
         }
         lifecycleScope.launch {
             val snap = settings.current()
             settingsReady = true
+            ready = true
             // Idioma: aplica na hora se o valor gravado e o espelho síncrono divergirem.
             if (AppLocale.store(this@MainActivity, snap.value(AppSettings.LANGUAGE))) recreate()
             library.ensureDefaultFolders()

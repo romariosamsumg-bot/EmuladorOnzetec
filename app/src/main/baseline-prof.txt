@@ -1,0 +1,31 @@
+# Baseline Profile escrito à mão: inicialização e tela Início (caminho crítico na TV).
+# Para gerar um perfil medido numa TV/emulador conectado: ./gradlew :app:generateReleaseBaselineProfile
+# As bibliotecas (Compose, Room, Coil...) já trazem os próprios perfis, que o build junta a este.
+HSPLcom/retroplay/RetroPlayApplication;->**(**)**
+HSPLcom/retroplay/MainActivity;->**(**)**
+HSPLcom/retroplay/MainActivity$**;->**(**)**
+HSPLcom/retroplay/ui/shell/**;->**(**)**
+HSPLcom/retroplay/ui/components/**;->**(**)**
+HSPLcom/retroplay/navigation/**;->**(**)**
+HSPLcom/retroplay/feature/home/**;->**(**)**
+HSPLcom/retroplay/feature/play/**;->**(**)**
+HSPLcom/retroplay/core/ui/**;->**(**)**
+HSPLcom/retroplay/domain/library/**;->**(**)**
+HSPLcom/retroplay/domain/settings/**;->**(**)**
+HSPLcom/retroplay/domain/system/**;->**(**)**
+HSPLcom/retroplay/domain/profile/**;->**(**)**
+HSPLcom/retroplay/data/settings/**;->**(**)**
+HSPLcom/retroplay/data/library/**;->**(**)**
+HSPLcom/retroplay/data/di/**;->**(**)**
+Lcom/retroplay/RetroPlayApplication;
+Lcom/retroplay/MainActivity;
+Lcom/retroplay/ui/shell/**;
+Lcom/retroplay/ui/components/**;
+Lcom/retroplay/navigation/**;
+Lcom/retroplay/feature/home/**;
+Lcom/retroplay/core/ui/**;
+Lcom/retroplay/domain/library/**;
+Lcom/retroplay/domain/settings/**;
+Lcom/retroplay/domain/system/**;
+Lcom/retroplay/data/settings/**;
+Lcom/retroplay/data/library/**;
