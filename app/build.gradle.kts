@@ -68,6 +68,9 @@ dependencies {
     implementation(project(":data"))
 
     implementation(libs.libretrodroid)
+    implementation(libs.okhttp)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
     implementation(libs.work.runtime.ktx)
     implementation(libs.hilt.work)
     ksp(libs.hilt.work.compiler)
@@ -95,6 +98,8 @@ dependencies {
     testImplementation(platform(libs.compose.bom))
     testImplementation(libs.compose.ui.test.junit4)
     testImplementation(libs.hilt.android.testing)
+    testImplementation(libs.mockwebserver)
+    testImplementation(libs.kotlinx.coroutines.test)
     kspTest(libs.hilt.compiler)
 }
 

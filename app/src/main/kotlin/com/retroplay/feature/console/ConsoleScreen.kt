@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -54,6 +55,10 @@ import com.retroplay.core.ui.components.SystemIcons
 import com.retroplay.domain.core.CoreError
 import com.retroplay.domain.core.CoreInstallState
 import com.retroplay.domain.system.GameSystem
+import com.retroplay.domain.library.Game
+import com.retroplay.domain.library.RomsetStatus
+import com.retroplay.domain.library.ScanState
+import com.retroplay.ui.components.GameCover
 import com.retroplay.feature.game.GameLauncher
 import com.retroplay.ui.components.rememberInitialFocus
 import com.retroplay.core.ui.R as UiR
@@ -73,7 +78,7 @@ fun ConsoleEntry(viewModel: ConsoleViewModel = hiltViewModel()) {
             when (event) {
                 is ConsoleEvent.Launch -> context.startActivity(
                     GameLauncher.intent(
-                        context, viewModel.system, viewModel.core, event.game.path,
+                        context, viewModel.system, viewModel.core, event.game.uri, event.game.fileName,
                         if (event.game.isTestRom) testRomTitle else event.game.title,
                     ),
                 )
@@ -82,12 +87,14 @@ fun ConsoleEntry(viewModel: ConsoleViewModel = hiltViewModel()) {
         }
     }
 
+    val scan by viewModel.scan.collectAsStateWithLifecycle()
     ConsoleScreen(
         system = viewModel.system,
         coreName = viewModel.core.displayName,
         coreState = coreState,
         games = games,
-        romsFolder = LocalRomSourcePath.describe(viewModel.system),
+        scanning = scan is ScanState.Scanning,
+        romsFolder = "Jogos/${viewModel.system.displayName}",
         onDownloadCore = viewModel::downloadCore,
         onPlay = viewModel::play,
         onPickFile = {
@@ -100,20 +107,16 @@ fun ConsoleEntry(viewModel: ConsoleViewModel = hiltViewModel()) {
     )
 }
 
-/** Caminho amigável da pasta de ROMs, para a dica na tela. */
-object LocalRomSourcePath {
-    fun describe(system: GameSystem) = "Android/data/com.retroplay.tv/files/roms/${system.id.value}"
-}
-
 @Composable
 fun ConsoleScreen(
     system: GameSystem,
     coreName: String,
     coreState: CoreInstallState,
-    games: List<LocalGame>?,
+    games: List<ConsoleGame>?,
+    scanning: Boolean,
     romsFolder: String,
     onDownloadCore: () -> Unit,
-    onPlay: (LocalGame) -> Unit,
+    onPlay: (ConsoleGame) -> Unit,
     onPickFile: () -> Unit,
 ) {
     val firstGameFocus = rememberInitialFocus(ready = games != null)
@@ -147,11 +150,13 @@ fun ConsoleScreen(
                 contentPadding = PaddingValues(vertical = 8.dp, horizontal = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                itemsIndexed(games.orEmpty(), key = { _, g -> g.path }) { index, game ->
+                itemsIndexed(games.orEmpty(), key = { _, g -> g.key }) { index, game ->
                     GameRow(
+                        system = system,
+                        item = game,
                         title = if (game.isTestRom) stringResource(R.string.test_rom_title) else game.title,
-                        subtitle = if (game.isTestRom) stringResource(R.string.test_rom_subtitle) else game.path.substringAfterLast('/'),
-                        iconRes = UiR.drawable.ic_play,
+                        subtitle = if (game.isTestRom) stringResource(R.string.test_rom_subtitle) else gameSubtitle(game),
+                        warning = game.game?.let { romsetWarning(it) },
                         onClick = { onPlay(game) },
                         modifier = (if (index == 0) Modifier.focusRequester(firstGameFocus) else Modifier)
                             .then(toDownload)
@@ -159,7 +164,7 @@ fun ConsoleScreen(
                     )
                 }
                 item(key = "pick") {
-                    GameRow(
+                    ActionRow(
                         title = stringResource(R.string.pick_file),
                         subtitle = stringResource(R.string.pick_file_subtitle),
                         iconRes = UiR.drawable.ic_nav_transfer,
@@ -169,6 +174,14 @@ fun ConsoleScreen(
                             .testTag("pick_file"),
                     )
                 }
+            }
+            if (scanning) {
+                Text(
+                    stringResource(R.string.library_scanning_short),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.testTag("console_scanning"),
+                )
             }
             Text(
                 stringResource(R.string.roms_hint, romsFolder),
@@ -248,11 +261,26 @@ fun coreErrorMessage(error: CoreError): Int = when (error) {
 }
 
 @Composable
-private fun GameRow(title: String, subtitle: String, iconRes: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun gameSubtitle(item: ConsoleGame): String {
+    val g = item.game ?: return item.fileName
+    return listOfNotNull(g.year, g.region, g.genre, g.developer).joinToString(" · ").ifBlank { item.fileName }
+}
+
+@Composable
+private fun romsetWarning(game: Game): String? = when (game.romsetStatus) {
+    RomsetStatus.INCOMPLETE -> pluralStringResource(R.plurals.romset_incomplete, game.missingFiles, game.missingFiles)
+    RomsetStatus.WRONG_VERSION -> stringResource(R.string.romset_wrong_version)
+    RomsetStatus.NEEDS_PARENT -> stringResource(R.string.romset_needs_parent)
+    RomsetStatus.UNKNOWN_SET -> stringResource(R.string.romset_unknown)
+    else -> null
+}
+
+@Composable
+private fun RowSurface(onClick: () -> Unit, modifier: Modifier, content: @Composable () -> Unit) {
     val shape = RoundedCornerShape(12.dp)
     Surface(
         onClick = onClick,
-        modifier = modifier.widthIn(min = 520.dp, max = 720.dp),
+        modifier = modifier.widthIn(min = 520.dp, max = 760.dp),
         shape = ClickableSurfaceDefaults.shape(shape),
         scale = ClickableSurfaceDefaults.scale(focusedScale = 1.03f),
         border = ClickableSurfaceDefaults.border(
@@ -263,7 +291,46 @@ private fun GameRow(title: String, subtitle: String, iconRes: Int, onClick: () -
             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             focusedContentColor = MaterialTheme.colorScheme.onSurface,
         ),
-    ) {
+    ) { content() }
+}
+
+@Composable
+private fun GameRow(
+    system: GameSystem,
+    item: ConsoleGame,
+    title: String,
+    subtitle: String,
+    warning: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    RowSurface(onClick, modifier) {
+        Row(
+            Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            GameCover(
+                system = system,
+                game = item.game,
+                title = title,
+                compact = true,
+                modifier = Modifier.width(56.dp).height(72.dp).clip(RoundedCornerShape(6.dp)),
+            )
+            Column {
+                Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 1)
+                Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
+                if (warning != null) {
+                    Text(warning, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error, maxLines = 2)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActionRow(title: String, subtitle: String, iconRes: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    RowSurface(onClick, modifier) {
         Row(
             Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,

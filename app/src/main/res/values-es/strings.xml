@@ -21,9 +21,6 @@
     <string name="favorites_title">Favoritos</string>
     <string name="favorites_body">Los juegos marcados con ＋ Favoritos aparecen aquí.</string>
 
-    <string name="transfer_title">Transferir juegos</string>
-    <string name="transfer_body">Envía juegos desde el móvil por Wi-Fi o cópialos desde una memoria USB.</string>
-
     <string name="settings_title">Ajustes</string>
     <string name="settings_body">Video, audio, controles, emulación, BIOS, biblioteca, núcleos y más.</string>
     <string name="settings_device_abi">ABI detectado: %1$s</string>
@@ -53,7 +50,6 @@
     <string name="pick_file">Elegir archivo…</string>
     <string name="pick_file_subtitle">Abrir una ROM desde una memoria USB o la TV</string>
     <string name="no_picker">Esta TV no tiene selector de archivos. Copia las ROMs a la carpeta indicada abajo (por USB o adb).</string>
-    <string name="roms_hint">Consejo: las ROMs copiadas a %1$s aparecen aquí.</string>
     <string name="import_ok">Juego añadido.</string>
     <string name="import_wrong_type">Este archivo no es un juego de esta consola.</string>
     <string name="import_failed">No se pudo copiar el archivo.</string>
@@ -66,4 +62,77 @@
     <string name="game_error_load_game">El núcleo no reconoció este archivo. Puede estar dañado o ser de otra consola.</string>
     <string name="game_error_gl">Esta TV no admite los gráficos necesarios (OpenGL ES 2.0).</string>
     <string name="game_error_generic">Ocurrió un error inesperado al iniciar el juego.</string>
+
+    <!-- Fase 3: biblioteca e pastas -->
+    <string name="transfer_title">Transferir juegos</string>
+    <string name="games_folder_title">Carpeta Jogos</string>
+    <string name="games_folder_ready">Lista en %1$s. Los juegos copiados allí aparecen solos.</string>
+    <string name="games_folder_layout">Usa las subcarpetas %1$s. La BIOS de Neo Geo (neogeo.zip) va en %2$s.</string>
+    <string name="games_folder_needs_access">Para que Retrô Play cree y lea la carpeta %1$s (donde pones los juegos por USB, gestor de archivos o la app Downloader), permite el acceso a los archivos.</string>
+    <string name="grant_all_files_access">Permitir acceso a los archivos</string>
+    <string name="all_files_access_adb">Esta TV no tiene la pantalla de este permiso. En un ordenador con depuración ADB activada, ejecuta: %1$s — o usa “Añadir carpeta o memoria USB” abajo.</string>
+    <string name="library_title">Biblioteca</string>
+    <string name="library_scanning">Revisando %1$d de %2$d: %3$s</string>
+    <string name="library_scanning_short">Buscando juegos nuevos…</string>
+    <plurals name="library_idle">
+        <item quantity="one">%1$d juego · última revisión: %2$s</item>
+        <item quantity="many">%1$d juegos · última revisión: %2$s</item>
+        <item quantity="other">%1$d juegos · última revisión: %2$s</item>
+    </plurals>
+    <string name="library_scan_failed">La última revisión falló. Inténtalo de nuevo.</string>
+    <string name="scan_now">Revisar ahora</string>
+    <string name="needs_system_title">Elige la consola (%1$d)</string>
+    <string name="needs_system_body">No se pudo saber de qué consola son estos archivos. Elige una vez y Retrô Play lo recuerda.</string>
+    <string name="choose_system_title">¿De qué consola es este juego?</string>
+    <string name="folders_title">Carpetas revisadas</string>
+    <string name="folders_body">Elige otras carpetas de la TV o una memoria USB. Los juegos se leen directamente desde allí.</string>
+    <string name="add_folder">Añadir carpeta o memoria USB…</string>
+    <string name="no_folder_picker">Esta TV no tiene selector de carpetas. Usa la carpeta Jogos (permite el acceso a los archivos).</string>
+    <string name="folder_app">Carpeta interna de la app</string>
+    <plurals name="folder_info_file">
+        <item quantity="one">%1$d juego · almacenamiento de la TV</item>
+        <item quantity="many">%1$d juegos · almacenamiento de la TV</item>
+        <item quantity="other">%1$d juegos · almacenamiento de la TV</item>
+    </plurals>
+    <plurals name="folder_info_document">
+        <item quantity="one">%1$d juego · elegida en el selector (puede ser USB)</item>
+        <item quantity="many">%1$d juegos · elegida en el selector (puede ser USB)</item>
+        <item quantity="other">%1$d juegos · elegida en el selector (puede ser USB)</item>
+    </plurals>
+    <string name="remove">Quitar</string>
+    <string name="phone_transfer_title">Desde el móvil (Wi-Fi)</string>
+    <string name="phone_transfer_soon">Próximamente: envía juegos desde el móvil escaneando un código QR en la TV.</string>
+    <string name="roms_hint">Consejo: pon los juegos en %1$s. Aparecen aquí después de la revisión.</string>
+    <plurals name="romset_incomplete">
+        <item quantity="one">Romset incompleto: falta %1$d archivo.</item>
+        <item quantity="many">Romset incompleto: faltan %1$d archivos.</item>
+        <item quantity="other">Romset incompleto: faltan %1$d archivos.</item>
+    </plurals>
+    <string name="romset_wrong_version">Romset de otra versión (no es la de FBNeo).</string>
+    <string name="romset_needs_parent">Necesita el romset principal en la misma carpeta.</string>
+    <string name="romset_unknown">Romset no reconocido por FBNeo.</string>
+    <string name="home_library_title">Tu biblioteca</string>
+    <plurals name="home_library_count">
+        <item quantity="one">%1$d juego encontrado. La pantalla de inicio completa llega en la próxima fase.</item>
+        <item quantity="many">%1$d juegos encontrados. La pantalla de inicio completa llega en la próxima fase.</item>
+        <item quantity="other">%1$d juegos encontrados. La pantalla de inicio completa llega en la próxima fase.</item>
+    </plurals>
+    <string name="copy_to_tv">Copiar a la TV</string>
+    <string name="copy_starting">Preparando la copia…</string>
+    <string name="copy_progress">Copiando %1$d de %2$d: %3$s</string>
+    <plurals name="copy_done">
+        <item quantity="one">%1$d juego copiado a la TV. Ya puedes retirar la memoria USB.</item>
+        <item quantity="many">%1$d juegos copiados a la TV. Ya puedes retirar la memoria USB.</item>
+        <item quantity="other">%1$d juegos copiados a la TV. Ya puedes retirar la memoria USB.</item>
+    </plurals>
+    <plurals name="copy_failed_space">
+        <item quantity="one">La copia se detuvo: no hay espacio en la TV (%1$d juego copiado).</item>
+        <item quantity="many">La copia se detuvo: no hay espacio en la TV (%1$d juegos copiados).</item>
+        <item quantity="other">La copia se detuvo: no hay espacio en la TV (%1$d juegos copiados).</item>
+    </plurals>
+    <plurals name="copy_failed">
+        <item quantity="one">La copia se detuvo por un error de lectura (%1$d juego copiado). ¿Se retiró la memoria USB?</item>
+        <item quantity="many">La copia se detuvo por un error de lectura (%1$d juegos copiados). ¿Se retiró la memoria USB?</item>
+        <item quantity="other">La copia se detuvo por un error de lectura (%1$d juegos copiados). ¿Se retiró la memoria USB?</item>
+    </plurals>
 </resources>

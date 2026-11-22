@@ -21,9 +21,6 @@
     <string name="favorites_title">Favorites</string>
     <string name="favorites_body">Games marked with ＋ Favorites show up here.</string>
 
-    <string name="transfer_title">Transfer games</string>
-    <string name="transfer_body">Send games from your phone over Wi-Fi or copy them from a USB drive.</string>
-
     <string name="settings_title">Settings</string>
     <string name="settings_body">Video, audio, controls, emulation, BIOS, library, cores and more.</string>
     <string name="settings_device_abi">Detected ABI: %1$s</string>
@@ -53,7 +50,6 @@
     <string name="pick_file">Choose file…</string>
     <string name="pick_file_subtitle">Open a ROM from a USB drive or the TV storage</string>
     <string name="no_picker">This TV has no file picker. Copy ROMs to the folder shown below (via USB or adb).</string>
-    <string name="roms_hint">Tip: ROMs copied to %1$s show up here.</string>
     <string name="import_ok">Game added.</string>
     <string name="import_wrong_type">This file is not a game for this console.</string>
     <string name="import_failed">Could not copy the file.</string>
@@ -66,4 +62,69 @@
     <string name="game_error_load_game">The core did not recognize this file. It may be corrupted or from another console.</string>
     <string name="game_error_gl">This TV does not support the required graphics (OpenGL ES 2.0).</string>
     <string name="game_error_generic">An unexpected error happened while starting the game.</string>
+
+    <!-- Fase 3: biblioteca e pastas -->
+    <string name="transfer_title">Transfer games</string>
+    <string name="games_folder_title">Games folder</string>
+    <string name="games_folder_ready">Ready at %1$s. Games copied there show up automatically.</string>
+    <string name="games_folder_layout">Use the subfolders %1$s. The Neo Geo BIOS (neogeo.zip) goes in %2$s.</string>
+    <string name="games_folder_needs_access">To let Retrô Play create and read the %1$s folder (where you put games via USB drive, file manager or the Downloader app), allow file access.</string>
+    <string name="grant_all_files_access">Allow file access</string>
+    <string name="all_files_access_adb">This TV has no screen for this permission. On a computer with ADB debugging enabled, run: %1$s — or use “Add folder or USB drive” below.</string>
+    <string name="library_title">Library</string>
+    <string name="library_scanning">Checking %1$d of %2$d: %3$s</string>
+    <string name="library_scanning_short">Looking for new games…</string>
+    <plurals name="library_idle">
+        <item quantity="one">%1$d game · last check: %2$s</item>
+        <item quantity="other">%1$d games · last check: %2$s</item>
+    </plurals>
+    <string name="library_scan_failed">The last check failed. Try again.</string>
+    <string name="scan_now">Check now</string>
+    <string name="needs_system_title">Choose the console (%1$d)</string>
+    <string name="needs_system_body">Could not tell which console these files are for. Choose once and Retrô Play remembers.</string>
+    <string name="choose_system_title">Which console is this game for?</string>
+    <string name="folders_title">Checked folders</string>
+    <string name="folders_body">Choose other TV folders or a USB drive. Games are read directly from there.</string>
+    <string name="add_folder">Add folder or USB drive…</string>
+    <string name="no_folder_picker">This TV has no folder picker. Use the Games folder (allow file access).</string>
+    <string name="folder_app">App internal folder</string>
+    <plurals name="folder_info_file">
+        <item quantity="one">%1$d game · TV storage</item>
+        <item quantity="other">%1$d games · TV storage</item>
+    </plurals>
+    <plurals name="folder_info_document">
+        <item quantity="one">%1$d game · chosen in the picker (may be a USB drive)</item>
+        <item quantity="other">%1$d games · chosen in the picker (may be a USB drive)</item>
+    </plurals>
+    <string name="remove">Remove</string>
+    <string name="phone_transfer_title">From your phone (Wi-Fi)</string>
+    <string name="phone_transfer_soon">Coming soon: send games from your phone by scanning a QR code on the TV.</string>
+    <string name="roms_hint">Tip: put the games in %1$s. They show up here after the check.</string>
+    <plurals name="romset_incomplete">
+        <item quantity="one">Incomplete romset: %1$d file missing.</item>
+        <item quantity="other">Incomplete romset: %1$d files missing.</item>
+    </plurals>
+    <string name="romset_wrong_version">Romset from another version (not FBNeo’s).</string>
+    <string name="romset_needs_parent">Needs the parent romset in the same folder.</string>
+    <string name="romset_unknown">Romset not recognized by FBNeo.</string>
+    <string name="home_library_title">Your library</string>
+    <plurals name="home_library_count">
+        <item quantity="one">%1$d game found. The full home screen arrives in the next phase.</item>
+        <item quantity="other">%1$d games found. The full home screen arrives in the next phase.</item>
+    </plurals>
+    <string name="copy_to_tv">Copy to TV</string>
+    <string name="copy_starting">Preparing the copy…</string>
+    <string name="copy_progress">Copying %1$d of %2$d: %3$s</string>
+    <plurals name="copy_done">
+        <item quantity="one">%1$d game copied to the TV. You can remove the USB drive now.</item>
+        <item quantity="other">%1$d games copied to the TV. You can remove the USB drive now.</item>
+    </plurals>
+    <plurals name="copy_failed_space">
+        <item quantity="one">Copy stopped: not enough space on the TV (%1$d game copied).</item>
+        <item quantity="other">Copy stopped: not enough space on the TV (%1$d games copied).</item>
+    </plurals>
+    <plurals name="copy_failed">
+        <item quantity="one">Copy stopped due to a read error (%1$d game copied). Was the USB drive removed?</item>
+        <item quantity="other">Copy stopped due to a read error (%1$d games copied). Was the USB drive removed?</item>
+    </plurals>
 </resources>

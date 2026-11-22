@@ -9,6 +9,7 @@ import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performKeyInput
@@ -39,6 +40,10 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
+import javax.inject.Inject
+import com.retroplay.fakes.FakeLibraryRepository
+import com.retroplay.domain.library.RomsetStatus
+import com.retroplay.domain.system.SystemRegistry
 
 @OptIn(ExperimentalTestApi::class)
 @HiltAndroidTest
@@ -60,11 +65,21 @@ class ConsoleScreenTest {
     @JvmField
     val repo: CoreRepository = fake
 
+    @Inject
+    lateinit var library: FakeLibraryRepository
+
     @Before
     fun setUp() = hiltRule.inject()
 
     private fun press(key: Key) {
         compose.onRoot().performKeyInput { pressKey(key) }
+        compose.mainClock.advanceTimeBy(300)
+        compose.waitForIdle()
+    }
+
+    /** A lista é carregada fora da thread principal: espera o item existir (tempo real). */
+    private fun waitFor(tag: String) {
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag(tag, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
         compose.mainClock.advanceTimeBy(300)
         compose.waitForIdle()
     }
@@ -77,6 +92,7 @@ class ConsoleScreenTest {
         node("system_snes").assertIsFocused()
         press(Key.DirectionCenter)
         node("screen_console_snes").assertExists()
+        waitFor("game_testrom")
         node("game_testrom").assertIsFocused()
     }
 
@@ -148,12 +164,49 @@ class ConsoleScreenTest {
     }
 
     @Test
+    fun jogos_da_biblioteca_aparecem_com_status_do_romset() {
+        library.games.value = listOf(
+            FakeLibraryRepository.game(1, SystemRegistry.Ids.SNES, "Super Mario World"),
+            FakeLibraryRepository.game(2, SystemRegistry.Ids.MEGA_DRIVE, "Sonic The Hedgehog", "sonic.md"),
+            FakeLibraryRepository.game(3, SystemRegistry.Ids.NEO_GEO, "Metal Slug", "mslug.zip", romsetStatus = RomsetStatus.INCOMPLETE, missing = 3),
+        )
+        fake.complete()
+        openSnesPage()
+        // ROM de teste + Super Mario World (o Sonic é de outro console).
+        press(Key.DirectionDown)
+        node("game_1").assertIsFocused()
+        compose.onNodeWithTag("game_1").assertTextContains("Super Mario World", substring = true)
+        compose.onNodeWithTag("game_1").assertTextContains("1991", substring = true)
+        node("game_2").assertDoesNotExist()
+        screenshot("14_console_biblioteca")
+        press(Key.DirectionCenter)
+        val intent = shadowOf(compose.activity).nextStartedActivity
+        assertEquals("/storage/emulated/0/Jogos/Super Mario World.sfc", intent.getStringExtra(GameLauncher.EXTRA_ROM_PATH))
+        assertEquals("Super Mario World.sfc", intent.getStringExtra(GameLauncher.EXTRA_FILE_NAME))
+    }
+
+    @Test
+    fun romset_incompleto_mostra_aviso() {
+        library.games.value = listOf(
+            FakeLibraryRepository.game(3, SystemRegistry.Ids.NEO_GEO, "Metal Slug", "mslug.zip", romsetStatus = RomsetStatus.INCOMPLETE, missing = 3),
+        )
+        press(Key.DirectionDown)
+        repeat(3) { press(Key.DirectionRight) }
+        node("system_neogeo").assertIsFocused()
+        press(Key.DirectionCenter)
+        waitFor("game_0")
+        node("game_0").assertIsFocused()
+        compose.onNodeWithTag("game_0").assertTextContains("faltam 3 arquivos", substring = true)
+    }
+
+    @Test
     fun outros_consoles_nao_mostram_a_rom_de_teste() {
         press(Key.DirectionDown)
         press(Key.DirectionRight)
         node("system_megadrive").assertIsFocused()
         press(Key.DirectionCenter)
         node("screen_console_megadrive").assertExists()
+        waitFor("pick_file")
         node("game_testrom").assertDoesNotExist()
         node("pick_file").assertIsFocused()
     }

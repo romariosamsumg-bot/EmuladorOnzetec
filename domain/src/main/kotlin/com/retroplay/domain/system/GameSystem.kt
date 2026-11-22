@@ -63,6 +63,11 @@ data class GameSystem(
     val iconKey: String,
     /** Nome do sistema no libretro-database / libretro-thumbnails. */
     val libretroDatabaseName: String,
+    /**
+     * Nomes de pasta que indicam este console (normalizados: minúsculas, só letras e números).
+     * Usados para desfazer ambiguidades (ex.: .zip numa pasta "SNES").
+     */
+    val folderAliases: Set<String> = emptySet(),
 ) {
     init {
         require(cores.isNotEmpty()) { "Sistema ${id.value} precisa de ao menos um núcleo" }

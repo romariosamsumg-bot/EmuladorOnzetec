@@ -22,7 +22,7 @@ baixados sob demanda.
 |---|---|---|
 | 1 | Esqueleto: Gradle, módulos, Hilt, tema, manifest de TV, banner, menu lateral, splash | ✅ |
 | 2 | Emulação mínima (LibretroDroid + download do snes9x2010) | ✅ (falta validar 60 fps na TV) |
-| 3 | Biblioteca (Room, USB/SAF, varredura, CRC + DAT, capas) | ⏳ |
+| 3 | Biblioteca (Room, pasta Jogos, USB/SAF, varredura, CRC + DAT, capas) | ✅ |
 | 4 | UI streaming (hero, fileiras, detalhes, busca, páginas de console) | ⏳ |
 | 5 | Transferência pelo celular (servidor local, QR code, PIN) | ⏳ |
 | 6 | Menu de jogo e saves | ⏳ |
@@ -33,6 +33,59 @@ baixados sob demanda.
 
 As instruções completas (importar jogos, BIOS do Neo Geo, instalar na TV, baixar o APK pelo
 GitHub) serão escritas nas fases 9 e 10.
+
+## Como colocar os jogos na TV
+
+### Pasta **Jogos** (recomendado)
+
+Na primeira vez, abra **Transferir jogos → Permitir acesso aos arquivos** e ative a permissão
+"Acesso a todos os arquivos" para o Retrô Play. O app cria esta estrutura no armazenamento da TV:
+
+```
+Jogos/
+├─ Super Nintendo/   (.sfc .smc .fig .swc .zip .7z)
+├─ Mega Drive/       (.md .gen .smd .bin .zip .7z)
+├─ Master System/    (.sms .zip .7z)
+├─ Neo Geo/          (romsets .zip/.7z do FBNeo, sem descompactar)
+├─ BIOS/             (neogeo.zip)
+└─ LEIA-ME.txt
+```
+
+Copie os jogos para a subpasta do console (pelo pendrive com um gerenciador de arquivos, pelo app
+**Downloader** ou pela transferência do celular da Fase 5). Ao abrir o Retrô Play, os jogos
+novos são encontrados sozinhos; também dá para tocar em **Verificar agora**.
+
+> Se a TV não tiver a tela dessa permissão, rode no computador (com depuração ADB ativada):
+> `adb shell appops set --uid com.retroplay.tv MANAGE_EXTERNAL_STORAGE allow`
+
+### Outras pastas e pendrive/HD USB
+
+Em **Transferir jogos → Adicionar pasta ou pendrive…**, escolha qualquer pasta pelo seletor do
+sistema (a permissão fica guardada). Os jogos podem ser **jogados direto do USB** ou, com
+**Copiar para a TV**, copiados para a pasta Jogos (o espaço livre é conferido arquivo a arquivo e
+o pendrive sai da biblioteca ao final, para não duplicar).
+
+### Como os jogos são identificados
+
+- O console vem da extensão e do conteúdo; o nome da subpasta ajuda em casos ambíguos.
+- O **CRC32** de cada ROM é comparado com os DATs **No-Intro** (libretro-database): o jogo ganha
+  nome oficial, ano, gênero, desenvolvedora, nº de jogadores e capa. Em `.zip`/`.7z` o CRC é lido
+  do índice do arquivo, **sem descompactar**. MD5 é usado só para desempatar.
+- **Neo Geo**: identificado pelo nome do romset (ex.: `kof98.zip` → "The King of Fighters '98 -
+  The Slugfest") e pelos CRCs dos arquivos internos, conforme o DAT do **FinalBurn Neo**. O app
+  **nunca descompacta nem altera** romsets. Avisos possíveis na página do console:
+  - *Romset incompleto* — faltam arquivos dentro do .zip;
+  - *Romset de outra versão* — arquivos com nome certo e conteúdo diferente (comum em romsets
+    de versões antigas do MAME); troque por um romset compatível com o FBNeo atual;
+  - *Precisa do romset principal* — é um clone; coloque o romset "pai" na mesma pasta;
+  - *Romset não reconhecido* — o nome do .zip não existe no FBNeo.
+- Se não der para saber o console (ex.: arquivo corrompido), ele aparece em **Escolha o
+  console**; a escolha é lembrada nas próximas verificações.
+- Capas vêm do projeto **libretro-thumbnails** (boxart, tela de título e snap). Sem capa, o app
+  gera um card com o nome do jogo e a cor do console. Cache em disco limitado a 200 MB.
+
+O banco de identificação (`data/src/main/assets/db/retroplay-dat.sqlite`) é gerado por
+`python3 tools/dat/build_database.py <saida.sqlite>` a partir dos DATs públicos.
 
 ## Testando a emulação (Fase 2)
 
@@ -45,9 +98,9 @@ GitHub) serão escritas nas fases 9 e 10.
    setas movem o quadrado e o OK equivale ao B.
 4. **Voltar** sai do jogo. O menu rápido chega na Fase 6.
 
-Para testar outros jogos SNES (ou Mega Drive / Master System), use **Escolher arquivo…** ou
-copie as ROMs para `Android/data/com.retroplay.tv/files/roms/<console>/` (`snes`, `megadrive`,
-`mastersystem`). Arquivos `.zip` são descompactados automaticamente para um cache temporário.
+Para testar outros jogos, coloque-os na pasta **Jogos** (veja acima) ou use **Escolher
+arquivo…** na página do console. `.zip`/`.7z` de consoles domésticos são extraídos para um
+cache temporário na hora de jogar.
 
 ### ROM de teste
 
@@ -68,8 +121,8 @@ app/          Activity, navegação (menu lateral), telas (feature/*), DI (Hilt)
 core/common/  Utilitários Android (detecção de ABI, dispatchers)
 core/ui/      Tema escuro/OLED, cores de destaque, ícones genéricos
 domain/       Kotlin puro: registro de consoles, detecção por extensão, modelos de núcleo
-data/         Download/instalação de núcleos (OkHttp + WorkManager), preparo de ROMs (.zip)
-tools/        Scripts: ícone/banner da TV, ROM de teste e mini frontend libretro para validá-la
+data/         Núcleos (OkHttp + WorkManager), biblioteca (Room), varredura, banco de DATs, preparo de ROMs
+tools/        Scripts: ícone/banner, ROM de teste + mini frontend libretro, gerador do banco de DATs
 ```
 
 Para **adicionar um console**: crie um `GameSystem` em
@@ -95,3 +148,5 @@ Screenshots das telas geradas pelos testes: `./gradlew :app:testDebugUnitTest -P
 ## Licença
 
 GPL-3.0 (ver [LICENSE](LICENSE)), por causa do LibretroDroid e dos núcleos libretro.
+Metadados de jogos: libretro-database (CC BY-SA 4.0) e DAT do FinalBurn Neo. Capas:
+libretro-thumbnails (baixadas sob demanda, não incluídas no app).

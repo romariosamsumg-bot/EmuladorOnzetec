@@ -13,12 +13,15 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -38,13 +41,15 @@ fun HomeEntry(
     onOpenConsole: (GameSystem) -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    HomeScreen(systems = viewModel.systems, onOpenTransfer = onOpenTransfer, onOpenConsole = onOpenConsole)
+    val count by viewModel.gameCount.collectAsStateWithLifecycle()
+    HomeScreen(systems = viewModel.systems, gameCount = count, onOpenTransfer = onOpenTransfer, onOpenConsole = onOpenConsole)
 }
 
 /** Fase 1: estado vazio da biblioteca. A home "streaming" completa chega na Fase 4. */
 @Composable
 fun HomeScreen(
     systems: List<GameSystem>,
+    gameCount: Int = 0,
     onOpenTransfer: () -> Unit,
     onOpenConsole: (GameSystem) -> Unit,
 ) {
@@ -54,9 +59,12 @@ fun HomeScreen(
     ) {
         Column(Modifier.padding(horizontal = 48.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(stringResource(R.string.app_name), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-            Text(stringResource(R.string.home_empty_title), style = MaterialTheme.typography.displaySmall)
             Text(
-                stringResource(R.string.home_empty_body),
+                stringResource(if (gameCount > 0) R.string.home_library_title else R.string.home_empty_title),
+                style = MaterialTheme.typography.displaySmall,
+            )
+            Text(
+                if (gameCount > 0) pluralStringResource(R.plurals.home_library_count, gameCount, gameCount) else stringResource(R.string.home_empty_body),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.widthIn(max = 640.dp),

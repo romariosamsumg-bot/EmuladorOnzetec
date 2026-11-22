@@ -30,8 +30,6 @@
     <string name="favorites_body">Os jogos marcados com ＋ Favoritos aparecem aqui.</string>
 
     <!-- Transferir -->
-    <string name="transfer_title">Transferir jogos</string>
-    <string name="transfer_body">Envie jogos do celular pela rede Wi-Fi ou copie de um pendrive.</string>
 
     <!-- Configurações -->
     <string name="settings_title">Configurações</string>
@@ -63,7 +61,6 @@
     <string name="pick_file">Escolher arquivo…</string>
     <string name="pick_file_subtitle">Abrir uma ROM de um pendrive ou da memória da TV</string>
     <string name="no_picker">Esta TV não tem seletor de arquivos. Copie as ROMs para a pasta indicada abaixo (por USB ou adb).</string>
-    <string name="roms_hint">Dica: ROMs copiadas para %1$s aparecem aqui.</string>
     <string name="import_ok">Jogo adicionado.</string>
     <string name="import_wrong_type">Este arquivo não é um jogo deste console.</string>
     <string name="import_failed">Não foi possível copiar o arquivo.</string>
@@ -76,4 +73,77 @@
     <string name="game_error_load_game">O núcleo não reconheceu este arquivo. Ele pode estar corrompido ou ser de outro console.</string>
     <string name="game_error_gl">Esta TV não suporta os gráficos necessários (OpenGL ES 2.0).</string>
     <string name="game_error_generic">Ocorreu um erro inesperado ao iniciar o jogo.</string>
+
+    <!-- Fase 3: biblioteca e pastas -->
+    <string name="transfer_title">Transferir jogos</string>
+    <string name="games_folder_title">Pasta Jogos</string>
+    <string name="games_folder_ready">Pronta em %1$s. Jogos copiados para lá aparecem sozinhos.</string>
+    <string name="games_folder_layout">Use as subpastas %1$s. A BIOS do Neo Geo (neogeo.zip) vai em %2$s.</string>
+    <string name="games_folder_needs_access">Para o Retrô Play criar e ler a pasta %1$s (onde você coloca os jogos pelo pendrive, gerenciador de arquivos ou app Downloader), permita o acesso aos arquivos.</string>
+    <string name="grant_all_files_access">Permitir acesso aos arquivos</string>
+    <string name="all_files_access_adb">Esta TV não tem a tela dessa permissão. No computador, com a depuração ADB ativada, rode: %1$s — ou use “Adicionar pasta ou pendrive” abaixo.</string>
+    <string name="library_title">Biblioteca</string>
+    <string name="library_scanning">Verificando %1$d de %2$d: %3$s</string>
+    <string name="library_scanning_short">Procurando jogos novos…</string>
+    <plurals name="library_idle">
+        <item quantity="one">%1$d jogo · última verificação: %2$s</item>
+        <item quantity="many">%1$d jogos · última verificação: %2$s</item>
+        <item quantity="other">%1$d jogos · última verificação: %2$s</item>
+    </plurals>
+    <string name="library_scan_failed">A última verificação falhou. Tente de novo.</string>
+    <string name="scan_now">Verificar agora</string>
+    <string name="needs_system_title">Escolha o console (%1$d)</string>
+    <string name="needs_system_body">Não deu para saber de qual console são estes arquivos. Escolha uma vez e o Retrô Play lembra.</string>
+    <string name="choose_system_title">De qual console é este jogo?</string>
+    <string name="folders_title">Pastas verificadas</string>
+    <string name="folders_body">Escolha outras pastas da TV ou um pendrive/HD USB. Os jogos são lidos direto de lá.</string>
+    <string name="add_folder">Adicionar pasta ou pendrive…</string>
+    <string name="no_folder_picker">Esta TV não tem seletor de pastas. Use a pasta Jogos (permita o acesso aos arquivos).</string>
+    <string name="folder_app">Pasta interna do app</string>
+    <plurals name="folder_info_file">
+        <item quantity="one">%1$d jogo · armazenamento da TV</item>
+        <item quantity="many">%1$d jogos · armazenamento da TV</item>
+        <item quantity="other">%1$d jogos · armazenamento da TV</item>
+    </plurals>
+    <plurals name="folder_info_document">
+        <item quantity="one">%1$d jogo · escolhida pelo seletor (pode ser pendrive)</item>
+        <item quantity="many">%1$d jogos · escolhida pelo seletor (pode ser pendrive)</item>
+        <item quantity="other">%1$d jogos · escolhida pelo seletor (pode ser pendrive)</item>
+    </plurals>
+    <string name="remove">Remover</string>
+    <string name="phone_transfer_title">Pelo celular (Wi-Fi)</string>
+    <string name="phone_transfer_soon">Em breve: enviar jogos do celular lendo um QR code na TV.</string>
+    <string name="roms_hint">Dica: coloque os jogos em %1$s. Eles aparecem aqui depois da verificação.</string>
+    <plurals name="romset_incomplete">
+        <item quantity="one">Romset incompleto: falta %1$d arquivo.</item>
+        <item quantity="many">Romset incompleto: faltam %1$d arquivos.</item>
+        <item quantity="other">Romset incompleto: faltam %1$d arquivos.</item>
+    </plurals>
+    <string name="romset_wrong_version">Romset de outra versão (não é a do FBNeo).</string>
+    <string name="romset_needs_parent">Precisa do romset principal na mesma pasta.</string>
+    <string name="romset_unknown">Romset não reconhecido pelo FBNeo.</string>
+    <string name="home_library_title">Sua biblioteca</string>
+    <plurals name="home_library_count">
+        <item quantity="one">%1$d jogo encontrado. A tela inicial completa chega na próxima fase.</item>
+        <item quantity="many">%1$d jogos encontrados. A tela inicial completa chega na próxima fase.</item>
+        <item quantity="other">%1$d jogos encontrados. A tela inicial completa chega na próxima fase.</item>
+    </plurals>
+    <string name="copy_to_tv">Copiar para a TV</string>
+    <string name="copy_starting">Preparando a cópia…</string>
+    <string name="copy_progress">Copiando %1$d de %2$d: %3$s</string>
+    <plurals name="copy_done">
+        <item quantity="one">%1$d jogo copiado para a TV. Você já pode remover o pendrive.</item>
+        <item quantity="many">%1$d jogos copiados para a TV. Você já pode remover o pendrive.</item>
+        <item quantity="other">%1$d jogos copiados para a TV. Você já pode remover o pendrive.</item>
+    </plurals>
+    <plurals name="copy_failed_space">
+        <item quantity="one">A cópia parou: sem espaço na TV (%1$d jogo copiado).</item>
+        <item quantity="many">A cópia parou: sem espaço na TV (%1$d jogos copiados).</item>
+        <item quantity="other">A cópia parou: sem espaço na TV (%1$d jogos copiados).</item>
+    </plurals>
+    <plurals name="copy_failed">
+        <item quantity="one">A cópia parou por um erro de leitura (%1$d jogo copiado). O pendrive foi removido?</item>
+        <item quantity="many">A cópia parou por um erro de leitura (%1$d jogos copiados). O pendrive foi removido?</item>
+        <item quantity="other">A cópia parou por um erro de leitura (%1$d jogos copiados). O pendrive foi removido?</item>
+    </plurals>
 </resources>

@@ -146,9 +146,13 @@ class DpadNavigationTest {
             .fetchSemanticsNodes()
         assertTrue("Nenhum nó focado em $screenTag", focused.isNotEmpty())
         node("${screenTag}_primary").let { primary ->
-            if (screenTag == "screen_home") node("home_transfer").assertIsFocused()
-            else if (screenTag == "screen_consoles") node("system_snes").assertIsFocused()
-            else primary.assertIsFocused()
+            when (screenTag) {
+                "screen_home" -> node("home_transfer").assertIsFocused()
+                "screen_consoles" -> node("system_snes").assertIsFocused()
+                // Sem permissão de arquivos (padrão do repositório falso): foco no botão de permitir.
+                "screen_transfer" -> node("grant_access").assertIsFocused()
+                else -> primary.assertIsFocused()
+            }
         }
     }
 

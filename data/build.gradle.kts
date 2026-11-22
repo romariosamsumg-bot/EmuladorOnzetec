@@ -5,6 +5,10 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 android {
     namespace = "com.retroplay.data"
     compileSdk {
@@ -31,6 +35,11 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+    implementation(libs.commons.compress)
+    implementation(libs.xz)
     implementation(libs.work.runtime.ktx)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

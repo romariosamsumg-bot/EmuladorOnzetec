@@ -46,7 +46,8 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun romPreparer(@ApplicationContext context: Context): RomPreparer = RomPreparer(context.cacheDir)
+    fun romPreparer(@ApplicationContext context: Context, files: com.retroplay.data.scan.FileAccess): RomPreparer =
+        RomPreparer(context.cacheDir, files)
 }
 
 /** Separado para que os testes possam trocar por um repositório falso. */

@@ -20,6 +20,7 @@ import com.retroplay.data.rom.RomPrepareException
 import com.retroplay.data.rom.RomPreparer
 import com.retroplay.domain.core.CoreRepository
 import com.retroplay.domain.system.GameSystem
+import com.retroplay.domain.system.IdentificationStrategy
 import com.retroplay.domain.system.SystemCatalog
 import com.retroplay.domain.system.SystemId
 import com.retroplay.feature.game.input.InputAction
@@ -65,15 +66,16 @@ class GameActivity : ComponentActivity() {
 
         val system = intent.getStringExtra(GameLauncher.EXTRA_SYSTEM)?.let { catalog.byId(SystemId(it)) }
         val core = system?.cores?.firstOrNull { it.id == intent.getStringExtra(GameLauncher.EXTRA_CORE) }
-        val romPath = intent.getStringExtra(GameLauncher.EXTRA_ROM_PATH)
-        if (system == null || core == null || romPath == null) {
+        val romUri = intent.getStringExtra(GameLauncher.EXTRA_ROM_PATH)
+        if (system == null || core == null || romUri == null) {
             showErrorAndExit(getString(R.string.game_error_generic))
             return
         }
-        lifecycleScope.launch { start(system, core.id, File(romPath)) }
+        val fileName = intent.getStringExtra(GameLauncher.EXTRA_FILE_NAME) ?: romUri.substringAfterLast('/')
+        lifecycleScope.launch { start(system, core.id, romUri, fileName) }
     }
 
-    private suspend fun start(system: GameSystem, coreId: String, rom: File) {
+    private suspend fun start(system: GameSystem, coreId: String, romUri: String, fileName: String) {
         val core = system.cores.first { it.id == coreId }
         val installed = coreRepository.installed(core)
         if (installed == null) {
@@ -81,7 +83,13 @@ class GameActivity : ComponentActivity() {
             return
         }
         val prepared = try {
-            withContext(Dispatchers.IO) { romPreparer.prepare(rom, system.extensions) }
+            withContext(Dispatchers.IO) {
+                romPreparer.prepare(
+                    romUri, fileName, system.extensions,
+                    // Romsets de arcade são lidos pelo núcleo como estão (nunca extraídos).
+                    extractArchives = system.identification == IdentificationStrategy.CONTENT_HASH,
+                )
+            }
         } catch (e: RomPrepareException) {
             showErrorAndExit(
                 getString(
@@ -97,7 +105,7 @@ class GameActivity : ComponentActivity() {
         }
         val savesDir = File(filesDir, "saves/${system.id.value}").apply { mkdirs() }
         val systemDir = File(filesDir, "system").apply { mkdirs() }
-        val sram = File(savesDir, rom.nameWithoutExtension + ".srm").also { sramFile = it }
+        val sram = File(savesDir, fileName.substringBeforeLast('.') + ".srm").also { sramFile = it }
         val sramBytes = withContext(Dispatchers.IO) { sram.takeIf { it.isFile }?.readBytes() }
 
         val data = GLRetroViewData(this).apply {

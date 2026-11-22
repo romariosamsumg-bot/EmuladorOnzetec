@@ -60,6 +60,7 @@ object SystemRegistry : SystemCatalog {
         accentColor = 0xFF7E6BD6,
         iconKey = "pad_16bit_rounded",
         libretroDatabaseName = "Nintendo - Super Nintendo Entertainment System",
+        folderAliases = setOf("snes", "sfc", "supernintendo", "superfamicom", "supernes", "supernintendoentertainmentsystem"),
     )
 
     val MEGA_DRIVE = GameSystem(
@@ -80,6 +81,7 @@ object SystemRegistry : SystemCatalog {
         accentColor = 0xFF2F6FDE,
         iconKey = "pad_16bit_crescent",
         libretroDatabaseName = "Sega - Mega Drive - Genesis",
+        folderAliases = setOf("megadrive", "genesis", "md", "segagenesis", "segamegadrive", "megadrivegenesis"),
     )
 
     val MASTER_SYSTEM = GameSystem(
@@ -99,6 +101,7 @@ object SystemRegistry : SystemCatalog {
         accentColor = 0xFFD9413B,
         iconKey = "pad_8bit",
         libretroDatabaseName = "Sega - Master System - Mark III",
+        folderAliases = setOf("mastersystem", "sms", "segamastersystem", "markiii", "mark3"),
     )
 
     val NEO_GEO = GameSystem(
@@ -124,6 +127,7 @@ object SystemRegistry : SystemCatalog {
         accentColor = 0xFFE2A93B,
         iconKey = "arcade_stick",
         libretroDatabaseName = "SNK - Neo Geo",
+        folderAliases = setOf("neogeo", "neo", "mvs", "aes", "fbneo", "arcade"),
     )
 
     override val all: List<GameSystem> = listOf(SNES, MEGA_DRIVE, MASTER_SYSTEM, NEO_GEO)

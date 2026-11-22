@@ -3,6 +3,7 @@ package com.retroplay.feature.console
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import com.retroplay.domain.library.LibraryRepository
 import com.retroplay.domain.system.GameSystem
 import com.retroplay.domain.system.SystemDetector
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -10,46 +11,33 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Um jogo disponível para abrir (Fase 2; a biblioteca Room substitui isto na Fase 3). */
-data class LocalGame(val title: String, val path: String, val isTestRom: Boolean = false)
-
 /**
- * Fontes provisórias de jogos:
- * - ROM de teste embutida (só SNES);
- * - arquivos em `Android/data/<pacote>/files/roms/<sistema>/` (copiados via adb, USB ou "Escolher arquivo").
+ * ROM de teste embutida e importação de um arquivo avulso (seletor do sistema) para a
+ * pasta privada do app — que é uma das pastas monitoradas pela biblioteca.
  */
 @Singleton
-class LocalRomSource @Inject constructor(@ApplicationContext private val context: Context) {
+class LocalRomSource @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val library: LibraryRepository,
+) {
 
-    fun romsDir(system: GameSystem): File =
-        File(context.getExternalFilesDir(null) ?: context.filesDir, "roms/${system.id.value}").apply { mkdirs() }
-
-    fun list(system: GameSystem): List<LocalGame> {
-        val files = romsDir(system).listFiles().orEmpty()
-            .filter { it.isFile && SystemDetector.extensionOf(it.name) in system.extensions }
-            .sortedBy { it.name.lowercase() }
-            .map { LocalGame(title = it.nameWithoutExtension, path = it.absolutePath) }
-        val test = if (system.id.value == "snes") listOf(testRom()) else emptyList()
-        return test + files
-    }
-
-    private fun testRom(): LocalGame {
+    fun testRom(): File {
         val out = File(context.filesDir, "testrom/$TEST_ROM")
         if (!out.isFile) {
             out.parentFile?.mkdirs()
             context.assets.open("testrom/$TEST_ROM").use { input -> out.outputStream().use { input.copyTo(it) } }
         }
-        return LocalGame(title = "", path = out.absolutePath, isTestRom = true)
+        return out
     }
 
-    /** Copia um arquivo escolhido pelo seletor do sistema para a pasta de ROMs do console. */
-    fun import(system: GameSystem, uri: Uri): ImportResult {
+    suspend fun import(system: GameSystem, uri: Uri): ImportResult {
         val name = displayName(uri) ?: return ImportResult.Failed
         if (SystemDetector.extensionOf(name) !in system.extensions) return ImportResult.WrongType
-        val safe = name.substringAfterLast('/').substringAfterLast('\\')
-        val dest = File(romsDir(system), safe)
+        val appDir = File(library.ensureDefaultFolders().appPath, system.id.value).apply { mkdirs() }
+        val dest = File(appDir, name.substringAfterLast('/').substringAfterLast('\\'))
         return runCatching {
             context.contentResolver.openInputStream(uri)!!.use { input -> dest.outputStream().use { input.copyTo(it) } }
+            library.scanNow()
             ImportResult.Ok
         }.getOrElse {
             dest.delete()
