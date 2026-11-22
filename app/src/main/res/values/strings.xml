@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Nome do app: troque aqui (único lugar). Para o banner da TV rode tools/generate_brand_assets.py -->
+    <string name="app_name" translatable="false">Retrô Play</string>
+
+    <!-- Menu lateral -->
+    <string name="nav_home">Início</string>
+    <string name="nav_search">Buscar</string>
+    <string name="nav_consoles">Consoles</string>
+    <string name="nav_favorites">Favoritos</string>
+    <string name="nav_transfer">Transferir jogos</string>
+    <string name="nav_settings">Configurações</string>
+
+    <!-- Início -->
+    <string name="home_empty_title">Sua biblioteca está vazia</string>
+    <string name="home_empty_body">Importe seus jogos pelo celular (Wi-Fi) ou por um pendrive. Use apenas cópias que você possui legalmente.</string>
+    <string name="home_supported_systems">Consoles suportados</string>
+
+    <!-- Buscar -->
+    <string name="search_title">Buscar</string>
+    <string name="search_body">Encontre jogos pelo nome. A busca chega na Fase 4.</string>
+
+    <!-- Consoles -->
+    <string name="consoles_title">Consoles</string>
+    <string name="consoles_body">Escolha um console para ver seus jogos.</string>
+    <string name="console_needs_bios">Requer BIOS</string>
+
+    <!-- Favoritos -->
+    <string name="favorites_title">Favoritos</string>
+    <string name="favorites_body">Os jogos marcados com ＋ Favoritos aparecem aqui.</string>
+
+    <!-- Transferir -->
+    <string name="transfer_title">Transferir jogos</string>
+    <string name="transfer_body">Envie jogos do celular pela rede Wi-Fi ou copie de um pendrive.</string>
+
+    <!-- Configurações -->
+    <string name="settings_title">Configurações</string>
+    <string name="settings_body">Vídeo, áudio, controles, emulação, BIOS, biblioteca, núcleos e mais.</string>
+    <string name="settings_device_abi">ABI detectado: %1$s</string>
+    <string name="abi_unknown">desconhecido</string>
+
+    <string name="coming_soon">Em breve</string>
+</resources>

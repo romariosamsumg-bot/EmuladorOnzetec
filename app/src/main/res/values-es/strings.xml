@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_home">Inicio</string>
+    <string name="nav_search">Buscar</string>
+    <string name="nav_consoles">Consolas</string>
+    <string name="nav_favorites">Favoritos</string>
+    <string name="nav_transfer">Transferir juegos</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <string name="home_empty_title">Tu biblioteca está vacía</string>
+    <string name="home_empty_body">Importa tus juegos desde el móvil (Wi-Fi) o desde una memoria USB. Usa solo copias que poseas legalmente.</string>
+    <string name="home_supported_systems">Consolas compatibles</string>
+
+    <string name="search_title">Buscar</string>
+    <string name="search_body">Encuentra juegos por nombre. La búsqueda llega en la Fase 4.</string>
+
+    <string name="consoles_title">Consolas</string>
+    <string name="consoles_body">Elige una consola para ver sus juegos.</string>
+    <string name="console_needs_bios">Requiere BIOS</string>
+
+    <string name="favorites_title">Favoritos</string>
+    <string name="favorites_body">Los juegos marcados con ＋ Favoritos aparecen aquí.</string>
+
+    <string name="transfer_title">Transferir juegos</string>
+    <string name="transfer_body">Envía juegos desde el móvil por Wi-Fi o cópialos desde una memoria USB.</string>
+
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_body">Video, audio, controles, emulación, BIOS, biblioteca, núcleos y más.</string>
+    <string name="settings_device_abi">ABI detectado: %1$s</string>
+    <string name="abi_unknown">desconocido</string>
+
+    <string name="coming_soon">Próximamente</string>
+</resources>
