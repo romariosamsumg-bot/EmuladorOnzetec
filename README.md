@@ -29,10 +29,9 @@ baixados sob demanda.
 | 7 | Configurações completas (12 categorias, global → console → jogo) | ✅ |
 | 8 | Mega Drive, Master System e Neo Geo (opções por console, BIOS, romsets, núcleos) | ✅ |
 | 9 | Polimento (perfis, backup, pasta da rede SMB, Baseline Profile, memória) | ✅ |
-| 10 | Release assinado + GitHub Actions | ⏳ |
+| 10 | Release assinado + GitHub Actions | ✅ |
 
-O download do APK pronto pelo GitHub (Releases) chega na Fase 10; até lá, compile o APK
-(veja [Como compilar](#como-compilar-linha-de-comando)).
+O APK pronto sai pelo GitHub (veja [Gerar o APK pelo GitHub](#gerar-o-apk-pelo-github-sem-instalar-nada)).
 
 ## Como instalar na TV (Google TV / Android TV)
 
@@ -45,7 +44,10 @@ Testado para a TCL P7K (Google TV, Android 11+); vale para outras TVs e boxes An
    (Downloader ou o gerenciador de arquivos).
 3. Escolha **um** jeito de levar o APK até a TV:
    - **Downloader** (o mais fácil): instale o app *Downloader* pela Play Store da TV, digite o
-     endereço do APK (link do GitHub Releases) e confirme a instalação.
+     endereço do APK e confirme a instalação. O endereço da versão mais recente é sempre:
+     `https://github.com/romariosamsumg-bot/EmuladorOnzetec/releases/latest/download/RetroPlay.apk`
+     (se o repositório tiver outro nome, troque o trecho `usuário/repositório`). Dica: encurte o
+     link num encurtador de URL para digitar menos com o controle remoto.
    - **Pendrive**: copie o `.apk` para um pendrive, ligue na TV e abra-o com um gerenciador de
      arquivos (ex.: *File Commander* ou *X-plore*).
    - **ADB pelo computador**: em Configurações → Sistema → Opções do desenvolvedor, ligue a
@@ -61,6 +63,71 @@ Testado para a TCL P7K (Google TV, Android 11+); vale para outras TVs e boxes An
    joga cada console (precisa de internet só nessa hora).
 
 Para atualizar, instale o APK novo por cima (os jogos, saves e configurações ficam).
+
+## Gerar o APK pelo GitHub (sem instalar nada)
+
+O repositório tem um robô (GitHub Actions, arquivo `.github/workflows/build-apk.yml`) que roda os
+testes e gera o APK sozinho. Você só precisa fazer a parte da **chave de assinatura** uma vez.
+
+### 1. Criar a chave de assinatura (uma vez só)
+
+A chave "assina" o app: as próximas versões só instalam por cima se forem assinadas com a mesma
+chave. **Guarde o arquivo e as senhas num lugar seguro** (ex.: pendrive + gerenciador de senhas).
+Se perder a chave, para atualizar será preciso desinstalar o app — faça um backup dos saves antes
+(Configurações → Armazenamento → Fazer backup).
+
+- **Com o Android Studio**: menu *Build → Generate Signed App Bundle or APK → APK → Create new…*,
+  escolha onde salvar `retroplay.jks`, crie uma senha, use o alias `retroplay` e preencha o nome.
+- **Pelo terminal** (precisa do Java instalado):
+  ```bash
+  keytool -genkeypair -v -keystore retroplay.jks -alias retroplay -keyalg RSA -keysize 2048 -validity 10000
+  ```
+  Ele pergunta a senha e alguns dados (nome; o resto pode deixar em branco).
+
+**Nunca** coloque o `retroplay.jks` dentro do repositório (o `.gitignore` já bloqueia `*.jks`,
+`*.keystore` e `keystore.properties`).
+
+### 2. Transformar a chave em texto (base64)
+
+O GitHub guarda segredos como texto. Na pasta onde está o `retroplay.jks`:
+
+- **Windows (PowerShell)**: `[Convert]::ToBase64String([IO.File]::ReadAllBytes("$PWD\retroplay.jks")) | Set-Clipboard`
+- **macOS**: `base64 -i retroplay.jks | pbcopy`
+- **Linux**: `base64 -w0 retroplay.jks` (copie o texto que aparecer)
+
+### 3. Cadastrar os 4 segredos no GitHub
+
+No repositório: **Settings → Secrets and variables → Actions → New repository secret**. Crie:
+
+| Nome | Valor |
+|---|---|
+| `KEYSTORE_BASE64` | o texto copiado no passo 2 |
+| `KEYSTORE_PASSWORD` | a senha do arquivo `.jks` |
+| `KEY_ALIAS` | `retroplay` (ou o alias que você escolheu) |
+| `KEY_PASSWORD` | a senha da chave (no keytool, normalmente a mesma do arquivo) |
+
+Sem esses segredos o robô ainda funciona, mas gera um **APK de debug** (`RetroPlay-debug.apk`):
+instala normalmente, só que como um app separado ("Retrô Play (teste)") e não serve para
+atualizar a versão assinada.
+
+### 4. Gerar uma versão
+
+- **Pelo site**: aba **Actions → Gerar APK → Run workflow**, digite a versão (ex.: `1.0.0`) e
+  confirme. Em ~15 minutos aparece em **Releases** a versão com o arquivo `RetroPlay.apk`.
+- **Ou por tag**: crie uma Release em **Releases → Draft a new release** com a tag `v1.0.0` e
+  publique; o robô anexa o APK a ela. (Pelo terminal: `git tag v1.0.0 && git push origin v1.0.0`.)
+- A cada envio para o branch `main` (e em pull requests) o robô também testa e gera o APK, que
+  fica em **Actions → (a execução) → Artifacts** (vem dentro de um `.zip`).
+
+Se algo falhar, a execução mostra em vermelho o passo com problema e guarda os relatórios dos
+testes em *Artifacts*. "A chave não abre" significa senha ou alias errados nos segredos.
+
+### 5. Baixar na TV
+
+No app *Downloader* da TV, use o endereço
+`https://github.com/romariosamsumg-bot/EmuladorOnzetec/releases/latest/download/RetroPlay.apk`
+(ele aponta sempre para a versão mais recente) e siga [Como instalar na TV](#como-instalar-na-tv-google-tv--android-tv).
+Para atualizar, repita: o app novo instala por cima, mantendo jogos, saves e configurações.
 
 ## Como colocar os jogos na TV
 
@@ -304,6 +371,20 @@ regere o banner com `python3 tools/generate_brand_assets.py "Novo Nome"`.
 ## Como compilar (linha de comando)
 
 Requisitos: JDK 17+ e Android SDK (plataforma `android-37.2`).
+
+Para um APK release **assinado** no seu computador, crie `keystore.properties` na raiz (o git o
+ignora):
+
+```properties
+storeFile=/caminho/para/retroplay.jks
+storePassword=sua-senha
+keyAlias=retroplay
+keyPassword=sua-senha
+```
+
+e rode `./gradlew :app:assembleRelease` (saída em `app/build/outputs/apk/release/app-release.apk`).
+Sem esse arquivo, sai `app-release-unsigned.apk`. A versão vem de `RETROPLAY_VERSION_NAME` e
+`RETROPLAY_VERSION_CODE` (o GitHub Actions preenche pela tag e pelo número da execução).
 
 ```bash
 echo "sdk.dir=/caminho/para/android-sdk" > local.properties

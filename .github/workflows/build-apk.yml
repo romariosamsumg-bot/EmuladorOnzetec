@@ -1,0 +1,147 @@
+# Gera o APK do Retrô Play.
+#
+# - Em todo push e pull request: roda os testes e o lint e gera o APK (baixe em "Artifacts").
+# - Com os 4 segredos de assinatura cadastrados (KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS,
+#   KEY_PASSWORD), o APK é o release assinado; sem eles, é um APK de debug (também instala na TV).
+# - Ao criar uma tag "v1.2.3" (ou rodar manualmente informando a versão), publica uma Release com
+#   o APK. O link fixo para a TV fica: .../releases/latest/download/RetroPlay.apk
+# Passo a passo para leigos no README ("Gerar o APK pelo GitHub").
+name: Gerar APK
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      versao:
+        description: 'Versão para publicar como Release (ex.: 1.0.0). Deixe vazio para só gerar o APK.'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar o JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Instalar a plataforma Android 37.2
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-37.2" "build-tools;37.0.0" > /dev/null
+
+      - name: Preparar o Gradle (com cache)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Definir a versão
+        id: versao
+        env:
+          VERSAO_MANUAL: ${{ inputs.versao }}
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" && "$GITHUB_REF_NAME" == v* ]]; then
+            NOME="${GITHUB_REF_NAME#v}"; RELEASE=true
+          elif [[ -n "$VERSAO_MANUAL" ]]; then
+            NOME="${VERSAO_MANUAL#v}"; RELEASE=true
+          else
+            NOME="1.0.0-build.${GITHUB_RUN_NUMBER}"; RELEASE=false
+          fi
+          if ! [[ "$NOME" =~ ^[0-9A-Za-z.+-]+$ ]]; then echo "::error::Versão inválida: $NOME"; exit 1; fi
+          echo "RETROPLAY_VERSION_NAME=$NOME" >> "$GITHUB_ENV"
+          echo "RETROPLAY_VERSION_CODE=$((GITHUB_RUN_NUMBER + 100))" >> "$GITHUB_ENV"
+          echo "nome=$NOME" >> "$GITHUB_OUTPUT"
+          echo "release=$RELEASE" >> "$GITHUB_OUTPUT"
+
+      - name: Testes e lint
+        run: ./gradlew test lint --stacktrace
+
+      - name: Preparar a chave de assinatura
+        id: chave
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [[ -n "$KEYSTORE_BASE64" && -n "$KEYSTORE_PASSWORD" && -n "$KEY_ALIAS" && -n "$KEY_PASSWORD" ]]; then
+            # Tolera quebras de linha e espaços colados junto com o texto em base64.
+            printf '%s' "$KEYSTORE_BASE64" | tr -d '\r\n\t ' | base64 --decode > "$RUNNER_TEMP/retroplay.jks"
+            if ! keytool -list -keystore "$RUNNER_TEMP/retroplay.jks" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" > /dev/null 2>&1; then
+              echo "::error::A chave (KEYSTORE_BASE64) não abre com KEYSTORE_PASSWORD/KEY_ALIAS. Confira os segredos."
+              exit 1
+            fi
+            echo "assinado=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Segredos de assinatura não cadastrados: será gerado um APK de debug."
+            echo "assinado=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Gerar o APK release assinado
+        if: steps.chave.outputs.assinado == 'true'
+        env:
+          RETROPLAY_KEYSTORE_FILE: ${{ runner.temp }}/retroplay.jks
+          RETROPLAY_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          RETROPLAY_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          RETROPLAY_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          ./gradlew :app:assembleRelease --stacktrace
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --print-certs app/build/outputs/apk/release/app-release.apk
+          cp app/build/outputs/apk/release/app-release.apk RetroPlay.apk
+
+      - name: Gerar o APK de debug (sem chave)
+        if: steps.chave.outputs.assinado != 'true'
+        run: |
+          ./gradlew :app:assembleDebug --stacktrace
+          cp app/build/outputs/apk/debug/app-debug.apk RetroPlay-debug.apk
+
+      - name: Apagar a chave do servidor
+        if: always()
+        run: rm -f "$RUNNER_TEMP/retroplay.jks"
+
+      - name: Guardar o APK (Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: RetroPlay-${{ steps.versao.outputs.nome }}
+          path: RetroPlay*.apk
+          if-no-files-found: error
+
+      - name: Guardar os relatórios dos testes se falharem
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorios-${{ github.run_number }}
+          path: |
+            **/build/reports/tests/
+            **/build/reports/lint-results-*.html
+          if-no-files-found: ignore
+
+      - name: Publicar a Release
+        if: steps.versao.outputs.release == 'true' && github.event_name != 'pull_request'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.versao.outputs.nome }}
+          name: Retrô Play ${{ steps.versao.outputs.nome }}
+          target_commitish: ${{ github.sha }}
+          # Sem assinatura, a Release fica como "pré-lançamento" (o link "latest" não aponta para ela).
+          prerelease: ${{ steps.chave.outputs.assinado != 'true' }}
+          files: RetroPlay*.apk
+          body: |
+            APK para Android TV / Google TV (ARM 32 e 64 bits).
+
+            **Instalar na TV:** no app *Downloader*, digite o endereço deste arquivo
+            (`RetroPlay.apk`) ou copie-o para um pendrive. Passo a passo no README.
+
+            O Retrô Play não inclui jogos nem BIOS. Use apenas cópias que você possui.

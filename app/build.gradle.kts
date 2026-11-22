@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -6,6 +8,38 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.baselineprofile)
 }
+
+/**
+ * Assinatura do release. A chave NUNCA vai para o repositório. Fontes, em ordem:
+ * 1. variáveis de ambiente (usadas no GitHub Actions): RETROPLAY_KEYSTORE_FILE,
+ *    RETROPLAY_KEYSTORE_PASSWORD, RETROPLAY_KEY_ALIAS, RETROPLAY_KEY_PASSWORD;
+ * 2. arquivo keystore.properties na raiz (ignorado pelo git), com storeFile, storePassword,
+ *    keyAlias e keyPassword.
+ * Sem nenhuma das duas, o release sai sem assinatura (app-release-unsigned.apk).
+ */
+data class ReleaseSigning(val storeFile: File, val storePassword: String, val keyAlias: String, val keyPassword: String)
+
+fun releaseSigning(): ReleaseSigning? {
+    fun env(name: String) = providers.environmentVariable(name).orNull?.takeIf { it.isNotBlank() }
+    env("RETROPLAY_KEYSTORE_FILE")?.let { path ->
+        return ReleaseSigning(file(path), env("RETROPLAY_KEYSTORE_PASSWORD") ?: return null, env("RETROPLAY_KEY_ALIAS") ?: return null, env("RETROPLAY_KEY_PASSWORD") ?: return null)
+    }
+    val propsFile = rootProject.file("keystore.properties")
+    if (!propsFile.isFile) return null
+    val p = Properties().apply { propsFile.inputStream().use(::load) }
+    return ReleaseSigning(
+        rootProject.file(p.getProperty("storeFile") ?: return null),
+        p.getProperty("storePassword") ?: return null,
+        p.getProperty("keyAlias") ?: return null,
+        p.getProperty("keyPassword") ?: return null,
+    )
+}
+
+val signing = releaseSigning()
+
+// Versão: o CI informa (tag v1.2.3 → "1.2.3"; número da execução → versionCode).
+val appVersionName = providers.environmentVariable("RETROPLAY_VERSION_NAME").orNull?.takeIf { it.isNotBlank() } ?: "1.0.0"
+val appVersionCode = providers.environmentVariable("RETROPLAY_VERSION_CODE").orNull?.toIntOrNull() ?: 1
 
 android {
     namespace = "com.retroplay"
@@ -19,8 +53,8 @@ android {
         applicationId = "com.retroplay.tv"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -34,6 +68,17 @@ android {
         language { enableSplit = false }
     }
 
+    signingConfigs {
+        if (signing != null) {
+            create("release") {
+                storeFile = signing.storeFile
+                storePassword = signing.storePassword
+                keyAlias = signing.keyAlias
+                keyPassword = signing.keyPassword
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -41,6 +86,7 @@ android {
             ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86_64") }
         }
         release {
+            if (signing != null) signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a") }
