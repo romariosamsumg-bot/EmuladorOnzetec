@@ -99,7 +99,7 @@
         <item quantity="other">Incomplete romset: %1$d files missing.</item>
     </plurals>
     <string name="romset_wrong_version">Romset from another version (not FBNeo’s).</string>
-    <string name="romset_needs_parent">Needs the parent romset in the same folder.</string>
+    <string name="romset_needs_parent">Needs the main (parent) romset in the library.</string>
     <string name="romset_unknown">Romset not recognized by FBNeo.</string>
     <string name="copy_to_tv">Copy to TV</string>
     <string name="copy_starting">Preparing the copy…</string>

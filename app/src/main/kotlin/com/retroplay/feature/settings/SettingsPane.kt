@@ -32,6 +32,7 @@ import com.retroplay.diagnostics.ErrorLog
 import com.retroplay.domain.core.CoreInstallState
 import com.retroplay.domain.library.Game
 import com.retroplay.domain.settings.AppSettings
+import com.retroplay.domain.settings.ConsoleSettings
 import com.retroplay.domain.settings.HomeRowGroups
 import com.retroplay.domain.settings.Scope
 import com.retroplay.domain.settings.ScopeRef
@@ -115,6 +116,11 @@ class SettingsPane(
         choice(AppSettings.HOTKEY_MODIFIER, R.string.set_modifier, R.string.set_modifier_desc)
         scopeNote()
         noteRes(R.string.hotkeys_list, "hotkeys")
+        when (system) {
+            com.retroplay.domain.system.SystemRegistry.Ids.MASTER_SYSTEM -> noteRes(R.string.sms_pause_note, "sms_pause")
+            com.retroplay.domain.system.SystemRegistry.Ids.NEO_GEO -> noteRes(R.string.neogeo_coin_note, "neo_coin")
+            else -> Unit
+        }
         if (inGlobal) noteRes(R.string.multiplayer_note, "multiplayer")
     }
 
@@ -134,8 +140,34 @@ class SettingsPane(
         val systems = if (inGlobal) vm.catalog.all else listOfNotNull(currentSystem)
         systems.filter { it.cores.size > 1 }.forEach { sys -> item(key = "core_${sys.id.value}") { CoreChoiceRow(sys) } }
         coreOptionCores().forEach { core -> item(key = "coreopt_${core.id}") { CoreOptionsRow(core) } }
+        consoleOptions()
         scopeNote()
         noteRes(R.string.emulation_note, "emulation")
+    }
+
+    /** Opções próprias do console (modo do Neo Geo, 3/6 botões, região, FM, lentidão). */
+    private fun LazyListScope.consoleOptions() {
+        item(key = "console_h") { Header(stringResource(R.string.console_options)) }
+        val sys = system
+        if (sys == null) {
+            noteRes(R.string.console_options_global_note, "console_global")
+            return
+        }
+        ConsoleSettings.forSystem(sys).forEach { def ->
+            when (def) {
+                ConsoleSettings.NEOGEO_MODE -> item(key = def.key) {
+                    val uni by vm.unibios.collectAsStateWithLifecycle()
+                    val missing = stringResource(R.string.neogeo_mode_unibios_missing)
+                    ChoiceRow(ConsoleSettings.NEOGEO_MODE, R.string.set_neogeo_mode, stringResource(R.string.set_neogeo_mode_desc), if (uni == false) mapOf("unibios" to missing) else emptyMap())
+                }
+                ConsoleSettings.NEOGEO_FREEPLAY -> bool(ConsoleSettings.NEOGEO_FREEPLAY, R.string.set_neogeo_freeplay, R.string.set_neogeo_freeplay_desc)
+                ConsoleSettings.MD_PAD -> choice(ConsoleSettings.MD_PAD, R.string.set_md_pad, R.string.set_md_pad_desc)
+                ConsoleSettings.MD_REGION -> choice(ConsoleSettings.MD_REGION, R.string.set_md_region, R.string.set_md_region_desc)
+                ConsoleSettings.SMS_FM -> bool(ConsoleSettings.SMS_FM, R.string.set_sms_fm, R.string.set_sms_fm_desc)
+                ConsoleSettings.SNES_REDUCE_SLOWDOWN -> bool(ConsoleSettings.SNES_REDUCE_SLOWDOWN, R.string.set_snes_slowdown, R.string.set_snes_slowdown_desc)
+                else -> Unit
+            }
+        }
     }
 
     private fun LazyListScope.bios() {
@@ -390,8 +422,8 @@ class SettingsPane(
     }
 
     @Composable
-    private fun ChoiceRow(def: SettingDef.Choice, titleRes: Int, desc: String) {
-        val labels = optionLabels(def)
+    private fun ChoiceRow(def: SettingDef.Choice, titleRes: Int, desc: String, labelOverrides: Map<String, String> = emptyMap()) {
+        val labels = optionLabels(def) + labelOverrides
         val resolved = snap.resolve(def, system, gameKey)
         val title = stringResource(titleRes)
         val inheritedLabel = inherited(def)?.let { labels[it] ?: it }
@@ -605,7 +637,10 @@ class SettingsPane(
         val states by vm.coreStates.collectAsStateWithLifecycle()
         val updates by vm.updates.collectAsStateWithLifecycle()
         val state = states[core.id]
-        val usedBy = vm.catalog.all.filter { sys -> sys.cores.any { it.id == core.id } }.joinToString(", ") { it.shortName }
+        val users = vm.catalog.all.filter { sys -> sys.cores.any { it.id == core.id } }
+        val usedBy = users.joinToString(", ") { it.shortName }
+        // Consoles em que este núcleo está escolhido (padrão ou escolha do usuário).
+        val chosenFor = users.filter { sys -> (sys.cores.firstOrNull { it.id == snap.value(AppSettings.CORE, sys.id) } ?: sys.defaultCore).id == core.id }
         val context = LocalContext.current
         val value = when (state) {
             is CoreInstallState.Installed -> if (updates[core.id] == true) stringResource(R.string.core_update_available)
@@ -615,7 +650,12 @@ class SettingsPane(
             is CoreInstallState.Failed -> stringResource(R.string.core_failed)
             CoreInstallState.NotInstalled, null -> stringResource(R.string.core_not_installed)
         }
-        SettingRow(core.displayName, stringResource(R.string.core_used_by, usedBy), value, "core_${core.id}") {
+        val desc = when {
+            chosenFor.isEmpty() -> stringResource(R.string.core_used_by, usedBy)
+            users.size > 1 && chosenFor.size > 1 -> stringResource(R.string.core_shared, chosenFor.joinToString(", ") { it.shortName })
+            else -> stringResource(R.string.core_in_use_by, chosenFor.joinToString(", ") { it.shortName })
+        }
+        SettingRow(core.displayName, desc, value, "core_${core.id}") {
             openDialog { CoreActionsDialog(core, state is CoreInstallState.Installed) }
         }
     }
@@ -753,6 +793,9 @@ fun optionLabels(def: SettingDef.Choice): Map<String, String> {
         AppSettings.ACCENT -> { v -> mapOf("VIOLETA" to R.string.accent_VIOLETA, "CIANO" to R.string.accent_CIANO, "AMBAR" to R.string.accent_AMBAR, "VERDE" to R.string.accent_VERDE, "CORAL" to R.string.accent_CORAL)[v] }
         AppSettings.ANIMATIONS -> { v -> mapOf("COMPLETAS" to R.string.anim_COMPLETAS, "REDUZIDAS" to R.string.anim_REDUZIDAS, "DESLIGADAS" to R.string.anim_DESLIGADAS)[v] }
         AppSettings.LANGUAGE -> { v -> if (v == "system") R.string.lang_system else null }
+        ConsoleSettings.NEOGEO_MODE -> { v -> mapOf("mvs" to R.string.neogeo_mode_mvs, "aes" to R.string.neogeo_mode_aes, "unibios" to R.string.neogeo_mode_unibios)[v] }
+        ConsoleSettings.MD_PAD -> { v -> if (v == "3") R.string.md_pad_3 else R.string.md_pad_6 }
+        ConsoleSettings.MD_REGION -> { v -> mapOf("auto" to R.string.region_auto, "ntsc-u" to R.string.region_ntsc_u, "ntsc-j" to R.string.region_ntsc_j, "pal" to R.string.region_pal)[v] }
         else -> { _ -> null }
     }
     return def.options.associateWith { v ->

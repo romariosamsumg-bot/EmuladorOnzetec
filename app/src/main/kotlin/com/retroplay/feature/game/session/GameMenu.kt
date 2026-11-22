@@ -321,7 +321,9 @@ object CoreAspect {
 
     fun forCore(coreId: String): Option? = when (coreId) {
         "snes9x2010" -> Option("snes9x_2010_aspect", "4:3", "uncorrected")
+        "snes9x" -> Option("snes9x_aspect", "4:3", "uncorrected")
         "genesis_plus_gx" -> Option("genesis_plus_gx_aspect_ratio", "4:3", "Uncorrected")
+        "picodrive" -> Option("picodrive_aspect", "4/3", "PAR")
         else -> null
     }
 }

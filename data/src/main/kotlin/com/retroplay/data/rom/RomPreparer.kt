@@ -9,6 +9,9 @@ import java.io.InputStream
 import java.util.zip.ZipException
 import java.util.zip.ZipFile
 
+/** Arquivo que precisa ficar na mesma pasta do jogo (ex.: romset "pai" de um clone de Neo Geo). */
+data class RomCompanion(val uri: String, val fileName: String)
+
 /** Erros ao preparar um arquivo de jogo para o núcleo. */
 class RomPrepareException(val reason: Reason, message: String, cause: Throwable? = null) : Exception(message, cause) {
     enum class Reason { NOT_FOUND, CORRUPTED, NO_ROM_INSIDE, NO_SPACE }
@@ -110,6 +113,68 @@ class RomPreparer(
     /** Só um jogo roda por vez: limpa extrações anteriores (menos o próprio arquivo de origem). */
     private fun clean(dir: File, keep: File) {
         dir.listFiles()?.filter { it.canonicalPath != keep.canonicalPath }?.forEach { it.delete() }
+    }
+
+    /**
+     * Romset de arcade: o FBNeo procura os romsets "pai" na mesma pasta do jogo. Se o jogo e
+     * os companheiros já estão juntos numa pasta comum, nada muda. Senão, monta uma pasta no
+     * cache com links simbólicos (arquivos comuns, sem cópia) ou cópias (pendrive/SAF).
+     * Nunca extrai nem altera os .zip.
+     */
+    fun prepareArcade(uri: String, fileName: String, companions: List<RomCompanion> = emptyList()): File {
+        val all = listOf(RomCompanion(uri, fileName)) + companions
+        if (all.none { FileAccess.isDocument(it.uri) }) {
+            val main = File(uri)
+            if (!main.isFile) throw RomPrepareException(RomPrepareException.Reason.NOT_FOUND, "Arquivo não encontrado: $fileName")
+            if (companions.all { File(it.uri).parentFile?.canonicalPath == main.parentFile?.canonicalPath }) return main
+        }
+        val outDir = File(cacheDir, "rom-run").apply { mkdirs() }
+        outDir.listFiles()?.forEach { it.delete() }
+        all.forEach { stage(it.uri, File(outDir, safeName(it.fileName))) }
+        return File(outDir, safeName(fileName))
+    }
+
+    /**
+     * Deixa a BIOS onde o FBNeo procura: <system>/fbneo/neogeo.zip (o romset pode estar em
+     * outra pasta, ou ter sido copiado do pendrive).
+     */
+    fun stageBios(uri: String, systemDir: File, fileName: String = "neogeo.zip"): File {
+        val dest = File(systemDir, "fbneo/" + safeName(fileName))
+        dest.parentFile?.mkdirs()
+        val src = File(uri)
+        val upToDate = !FileAccess.isDocument(uri) && java.nio.file.Files.isSymbolicLink(dest.toPath()) &&
+            runCatching { java.nio.file.Files.readSymbolicLink(dest.toPath()).toFile().canonicalPath == src.canonicalPath }.getOrDefault(false)
+        if (!upToDate) {
+            java.nio.file.Files.deleteIfExists(dest.toPath())
+            stage(uri, dest)
+        }
+        return dest
+    }
+
+    /** Tamanho descompactado dos romsets (o FBNeo carrega tudo na RAM). */
+    fun uncompressedBytes(files: List<File>): Long = files.sumOf { f ->
+        runCatching {
+            when (f.extension.lowercase()) {
+                "zip" -> ZipFile(f).use { z -> z.entries().asSequence().sumOf { maxOf(it.size, 0L) } }
+                "7z" -> @Suppress("DEPRECATION") SevenZFile(f).use { z -> z.entries.sumOf { maxOf(it.size, 0L) } }
+                else -> f.length()
+            }
+        }.getOrDefault(f.length())
+    }
+
+    /** Arquivo comum: link simbólico (sem gastar espaço); pendrive/SAF ou falha do link: cópia. */
+    private fun stage(uri: String, dest: File) {
+        if (!FileAccess.isDocument(uri)) {
+            val src = File(uri)
+            if (!src.isFile) throw RomPrepareException(RomPrepareException.Reason.NOT_FOUND, "Arquivo não encontrado: ${src.name}")
+            val linked = runCatching { java.nio.file.Files.createSymbolicLink(dest.toPath(), src.toPath()) }.isSuccess
+            if (!linked) {
+                checkSpace(dest.parentFile!!, src.length() / 2)
+                copy(src.inputStream(), dest)
+            }
+        } else {
+            copy(open(uri), dest)
+        }
     }
 
     /** Só o nome do arquivo: evita "zip slip" (../../). */

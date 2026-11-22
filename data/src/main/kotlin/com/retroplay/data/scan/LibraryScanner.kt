@@ -48,13 +48,14 @@ class LibraryScanner(
         var updated = 0
         var removed = 0
         onProgress(0, total, null)
+        // Romsets "pai" de clones de arcade podem estar em qualquer pasta da biblioteca: ao abrir
+        // o jogo, o app monta os arquivos lado a lado para o núcleo.
+        val allNames = listing.values.filterNotNull().flatten().map { it.name.substringBeforeLast('.').lowercase() }.toSet()
 
         for ((folder, found) in listing) {
             if (found == null) continue // pasta inacessível (pendrive removido?): mantém os jogos
             val existing = db.games().byFolder(folder.id).associateBy { it.uri }
             val existingBios = db.bios().byFolder(folder.id).associateBy { it.uri }
-            val siblings = found.groupBy { it.parents }
-                .mapValues { (_, list) -> list.map { it.name.substringBeforeLast('.').lowercase() }.toSet() }
             val batch = ArrayList<GameEntity>(BATCH)
             val toDelete = ArrayList<Long>()
 
@@ -62,12 +63,13 @@ class LibraryScanner(
                 yield()
                 processed++
                 val old = existing[file.uri]
-                if (old != null && old.sizeBytes == file.size && old.lastModified == file.lastModified) {
+                // Clones à espera do pai são reavaliados (o pai pode ter chegado depois).
+                if (old != null && old.sizeBytes == file.size && old.lastModified == file.lastModified && old.romsetStatus != RomsetStatus.NEEDS_PARENT.name) {
                     if (processed % 25 == 0) onProgress(processed, total, file.name)
                     continue
                 }
                 onProgress(processed, total, file.name)
-                val target = FileScanTarget(file, files, siblings[file.parents].orEmpty())
+                val target = FileScanTarget(file, files, allNames)
                 val outcome = try {
                     identifier.identify(target, old?.userSystem?.let(::SystemId))
                 } catch (e: Exception) {

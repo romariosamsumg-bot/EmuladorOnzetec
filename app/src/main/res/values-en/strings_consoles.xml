@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="neogeo_bios_missing">The Neo Geo BIOS (neogeo.zip) is missing. Put the file in the Jogos/BIOS folder or import it in Settings → BIOS. The app does not include BIOS files.</string>
+    <string name="neogeo_parent_missing">This game is an alternate version and needs the main romset %1$s. Copy it to the TV, in the same folder or another library folder.</string>
+    <string name="neogeo_load_failed">FBNeo could not open this romset. It is incomplete or from another version (for example, an old MAME set). Use a romset compatible with FBNeo.</string>
+    <string name="neogeo_low_memory">Little free memory for this game: it may close by itself. Close other apps if that happens.</string>
+    <string name="neogeo_bios_incomplete">The Neo Geo BIOS is incomplete. If the game does not start, replace neogeo.zip.</string>
+
+    <string name="console_options">Console options</string>
+    <string name="console_options_global_note">Choose a console above to see its options: MVS/AES mode and free play (Neo Geo), 3 or 6 buttons and region (Mega Drive), FM sound (Master System) and slowdown (Super Nintendo).</string>
+    <string name="set_neogeo_mode">Neo Geo mode</string>
+    <string name="set_neogeo_mode_desc">MVS is the arcade; AES is the home console.</string>
+    <string name="neogeo_mode_mvs">MVS (arcade)</string>
+    <string name="neogeo_mode_aes">AES (console)</string>
+    <string name="neogeo_mode_unibios">UniBIOS</string>
+    <string name="neogeo_mode_unibios_missing">UniBIOS (not in your neogeo.zip)</string>
+    <string name="set_neogeo_freeplay">Free play</string>
+    <string name="set_neogeo_freeplay_desc">Play without inserting coins (MVS mode).</string>
+    <string name="set_md_pad">Mega Drive controller</string>
+    <string name="set_md_pad_desc">6 buttons for fighting games; 3 buttons for old games that reject 6.</string>
+    <string name="md_pad_3">3 buttons</string>
+    <string name="md_pad_6">6 buttons</string>
+    <string name="set_md_region">Mega Drive region</string>
+    <string name="set_md_region_desc">Automatic from the game, or force USA, Japan or Europe (50 Hz).</string>
+    <string name="region_auto">Automatic</string>
+    <string name="region_ntsc_u">USA (NTSC-U)</string>
+    <string name="region_ntsc_j">Japan (NTSC-J)</string>
+    <string name="region_pal">Europe (PAL)</string>
+    <string name="set_sms_fm">FM sound (YM2413)</string>
+    <string name="set_sms_fm_desc">FM soundtrack in games that have it, like Japanese ones.</string>
+    <string name="set_snes_slowdown">Reduce slowdown</string>
+    <string name="set_snes_slowdown_desc">Speeds up the CPU and SuperFX chip. May glitch some games.</string>
+    <string name="sms_pause_note">The Master System Pause button is on the controller\'s Start.</string>
+    <string name="neogeo_coin_note">Coin is on Select; there is also "Insert coin" in the game menu.</string>
+    <string name="core_shared">Shared by %1$s</string>
+    <string name="core_in_use_by">Chosen for: %1$s</string>
+</resources>

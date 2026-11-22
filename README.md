@@ -27,7 +27,7 @@ baixados sob demanda.
 | 5 | Transferência pelo celular (servidor local, QR code, PIN) | ✅ |
 | 6 | Menu de jogo e saves | ✅ |
 | 7 | Configurações completas (12 categorias, global → console → jogo) | ✅ |
-| 8 | Mega Drive, Master System e Neo Geo | ⏳ |
+| 8 | Mega Drive, Master System e Neo Geo (opções por console, BIOS, romsets, núcleos) | ✅ |
 | 9 | Polimento (perfis, backup, SMB, baseline profile) | ⏳ |
 | 10 | Release assinado + GitHub Actions | ⏳ |
 
@@ -95,12 +95,39 @@ o pendrive sai da biblioteca ao final, para não duplicar).
   - *Romset incompleto* — faltam arquivos dentro do .zip;
   - *Romset de outra versão* — arquivos com nome certo e conteúdo diferente (comum em romsets
     de versões antigas do MAME); troque por um romset compatível com o FBNeo atual;
-  - *Precisa do romset principal* — é um clone; coloque o romset "pai" na mesma pasta;
+  - *Precisa do romset principal* — é um clone; coloque o romset "pai" em qualquer pasta da
+    biblioteca (ao abrir o jogo, o app junta os dois para o núcleo, sem copiar nada);
   - *Romset não reconhecido* — o nome do .zip não existe no FBNeo.
 - Se não der para saber o console (ex.: arquivo corrompido), ele aparece em **Escolha o
   console**; a escolha é lembrada nas próximas verificações.
 - Capas vêm do projeto **libretro-thumbnails** (boxart, tela de título e snap). Sem capa, o app
   gera um card com o nome do jogo e a cor do console. Cache em disco limitado a 200 MB.
+
+### Neo Geo: BIOS e romsets
+
+1. Coloque a **`neogeo.zip`** (a BIOS, que você precisa ter) em `Jogos/BIOS` — ou importe em
+   **Configurações → BIOS**. A tela mostra se ela foi encontrada, se está completa e se traz a
+   **UniBIOS**. O app a deixa onde o FinalBurn Neo procura, mesmo que os jogos estejam em outra
+   pasta ou num pendrive.
+2. Coloque os romsets (`.zip`, como estão, sem descompactar) em `Jogos/Neo Geo`.
+3. Se um jogo não abrir, a mensagem diz o motivo: BIOS faltando, romset principal faltando, ou
+   romset incompleto/de outra versão. Nesse último caso, troque o romset por um compatível com
+   o FBNeo atual (romsets de MAME antigos costumam falhar).
+4. Romsets grandes ocupam muita RAM; se a TV tiver pouca memória livre, o app avisa antes.
+
+### Opções de cada console (Configurações → Emulação → escolha o console no topo)
+
+| Console | Opções |
+|---|---|
+| Neo Geo | Modo **MVS** (fliperama), **AES** (console) ou **UniBIOS**; **Free play**. Ficha no Select e "Inserir ficha" no menu do jogo; botões A, B, C, D + Ficha + Start. |
+| Mega Drive | Controle de **3 ou 6 botões**; região Automática / EUA / Japão / Europa. |
+| Master System | Som **FM (YM2413)** ligado/desligado; o Pause do console fica no Start. |
+| Super Nintendo | Região automática; **Reduzir lentidão** (overclock da CPU e do SuperFX). |
+
+Valem para o console inteiro ou só para um jogo (Detalhes → Opções → Configurações deste jogo),
+nos dois núcleos de cada console (ex.: Genesis Plus GX ou PicoDrive). Mega Drive e Master System
+usam o mesmo núcleo baixado, mas cada um tem suas próprias configurações. As chaves de cada núcleo
+foram conferidas nos núcleos reais com `python3 tools/cores/list_core_options.py <núcleo.so>`.
 
 O banco de identificação (`data/src/main/assets/db/retroplay-dat.sqlite`) é gerado por
 `python3 tools/dat/build_database.py <saida.sqlite>` a partir dos DATs públicos.

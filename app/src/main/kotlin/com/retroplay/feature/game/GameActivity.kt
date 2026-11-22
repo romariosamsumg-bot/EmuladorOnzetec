@@ -47,6 +47,8 @@ import com.retroplay.domain.core.CoreRepository
 import com.retroplay.domain.library.LibraryRepository
 import com.retroplay.data.settings.CoreOptionsCache
 import com.retroplay.domain.settings.AppSettings
+import com.retroplay.domain.settings.ConsoleCoreOptions
+import android.app.ActivityManager
 import com.retroplay.domain.settings.CoreOption
 import com.retroplay.domain.settings.GameKey
 import com.retroplay.domain.settings.ScopeRef
@@ -108,6 +110,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     @Inject lateinit var saves: SaveStateStore
     @Inject lateinit var settings: SettingsRepository
     @Inject lateinit var coreOptionsCache: CoreOptionsCache
+    @Inject lateinit var dat: com.retroplay.domain.library.DatLookup
 
     /** Escopo que sobrevive ao finish(): grava estatísticas e saves mesmo ao sair do jogo. */
     private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -122,6 +125,8 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     private var gameId: Long = -1
     private var sessionStart = 0L
     private var exiting = false
+    private var isArcade = false
+    private var padType: com.retroplay.domain.settings.PadType? = null
 
     // Entrada (reconfigurada pelas Configurações em start()).
     private var router = InputRouter()
@@ -197,13 +202,33 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             showErrorAndExit(getString(R.string.game_error_core_missing, core.displayName))
             return
         }
+        val systemDir = File(filesDir, "system").apply { mkdirs() }
+        isArcade = system.identification == IdentificationStrategy.ARCADE_ROMSET
+        val warnings = mutableListOf<ArcadeWarning>()
         val prepared = try {
-            withContext(Dispatchers.IO) {
-                romPreparer.prepare(
-                    romUri, fileName, system.extensions,
-                    // Romsets de arcade são lidos pelo núcleo como estão (nunca extraídos).
-                    extractArchives = system.identification == IdentificationStrategy.CONTENT_HASH,
-                )
+            if (isArcade) {
+                // Neo Geo: BIOS e romset "pai" precisam estar onde o FBNeo procura.
+                val check = withContext(Dispatchers.IO) {
+                    ArcadeLaunch.check(system, fileName, dat, library.observeGames(system.id).first(), library.observeBios().first())
+                }
+                when (check) {
+                    ArcadeCheck.BiosMissing -> { showErrorAndExit(getString(R.string.neogeo_bios_missing)); return }
+                    is ArcadeCheck.ParentMissing -> { showErrorAndExit(getString(R.string.neogeo_parent_missing, check.parent + ".zip")); return }
+                    is ArcadeCheck.Ready -> withContext(Dispatchers.IO) {
+                        warnings += check.warnings
+                        check.bios?.let { romPreparer.stageBios(it.uri, systemDir) }
+                        val rom = romPreparer.prepareArcade(romUri, fileName, check.companions)
+                        // Os companheiros ficam sempre ao lado do romset (mesma pasta ou pasta montada no cache).
+                        val needed = romPreparer.uncompressedBytes(listOf(rom) + check.companions.map { File(rom.parentFile, it.fileName) })
+                        val mem = ActivityManager.MemoryInfo().also { getSystemService(ActivityManager::class.java)?.getMemoryInfo(it) }
+                        if (ArcadeLaunch.isLowMemory(needed, mem.availMem)) warnings += ArcadeWarning.LOW_MEMORY
+                        rom
+                    }
+                }
+            } else {
+                withContext(Dispatchers.IO) {
+                    romPreparer.prepare(romUri, fileName, system.extensions, extractArchives = true)
+                }
             }
         } catch (e: RomPrepareException) {
             showErrorAndExit(
@@ -218,8 +243,10 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             )
             return
         }
+        warnings.forEach { w ->
+            flash(getString(if (w == ArcadeWarning.LOW_MEMORY) R.string.neogeo_low_memory else R.string.neogeo_bios_incomplete))
+        }
         val savesDir = File(filesDir, "saves/${system.id.value}").apply { mkdirs() }
-        val systemDir = File(filesDir, "system").apply { mkdirs() }
         val sram = File(savesDir, fileName.substringBeforeLast('.') + ".srm").also { sramFile = it }
         val sramBytes = withContext(Dispatchers.IO) { sram.takeIf { it.isFile }?.readBytes() }
         val snap = settings.current()
@@ -251,6 +278,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             view.getGLRetroEvents().filterIsInstance<GLRetroView.GLRetroEvents.FrameRendered>().first()
             gameRunning = true
             sessionStart = SystemClock.elapsedRealtime()
+            padType?.let { applyPadType(view, it) }
             view.audioEnabled = audioOn
             // Guarda a lista de opções do núcleo para a tela de Configurações.
             ioScope.launch { runCatching { coreOptionsCache.save(coreId, currentCoreOptions()) } }
@@ -311,10 +339,15 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         slotCount = snap.value(AppSettings.SLOTS).toInt()
     }
 
-    /** Opções do núcleo personalizadas (global < console < jogo) + proporção escolhida. */
+    /**
+     * Variáveis do núcleo: opções do console (modo do Neo Geo, região, FM...), depois as opções
+     * de núcleo editadas à mão (global < console < jogo), que prevalecem, e a proporção.
+     */
     private fun coreVariables(snap: SettingsSnapshot): Array<Variable> {
         val prefix = AppSettings.coreOptionPrefix(coreId)
-        val merged = LinkedHashMap<String, String>()
+        val setup = ConsoleCoreOptions.setup(system.id, coreId, snap, gameKey, if (isArcade) ArcadeLaunch.romsetName(fileName) else null)
+        padType = setup.padType
+        val merged = LinkedHashMap<String, String>(setup.variables)
         listOf(ScopeRef.Global, ScopeRef.system(system.id), ScopeRef.game(gameKey)).forEach { scope ->
             snap.keysIn(scope, prefix).forEach { (k, v) -> merged[k.removePrefix(prefix)] = v }
         }
@@ -322,6 +355,16 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             if (aspect == AspectChoice.PIXEL_PERFECT) merged[opt.key] = opt.pixelPerfect
         }
         return merged.map { (k, v) -> Variable(k, v) }.toTypedArray()
+    }
+
+    /** Mega Drive no genesis_plus_gx: controle de 3 ou 6 botões nas portas 1 e 2. */
+    private fun applyPadType(view: GLRetroView, type: com.retroplay.domain.settings.PadType) {
+        val wanted = ConsoleCoreOptions.padDescription(type)
+        val controllers = runCatching { view.getControllers() }.getOrNull().orEmpty()
+        for (port in 0 until minOf(2, maxOf(controllers.size, 2))) {
+            val id = controllers.getOrNull(port)?.firstOrNull { it.description == wanted }?.id ?: ConsoleCoreOptions.padFallbackId(type)
+            runCatching { view.setControllerType(port, id) }
+        }
     }
 
     private fun currentCoreOptions(): List<CoreOption> =
@@ -363,7 +406,8 @@ class GameActivity : ComponentActivity(), GameMenuActions {
 
     private fun errorMessage(code: Int): Int = when (code) {
         GLRetroView.ERROR_LOAD_LIBRARY -> R.string.game_error_load_library
-        GLRetroView.ERROR_LOAD_GAME -> R.string.game_error_load_game
+        // Neo Geo: quase sempre romset incompleto ou de outra versão (não é a do FBNeo).
+        GLRetroView.ERROR_LOAD_GAME -> if (isArcade) R.string.neogeo_load_failed else R.string.game_error_load_game
         GLRetroView.ERROR_GL_NOT_COMPATIBLE -> R.string.game_error_gl
         else -> R.string.game_error_generic
     }

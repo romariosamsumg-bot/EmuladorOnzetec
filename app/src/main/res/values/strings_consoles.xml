@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Neo Geo ao abrir o jogo -->
+    <string name="neogeo_bios_missing">Falta a BIOS do Neo Geo (neogeo.zip). Coloque o arquivo na pasta Jogos/BIOS ou importe em Configurações → BIOS. O app não inclui BIOS.</string>
+    <string name="neogeo_parent_missing">Este jogo é uma versão alternativa e precisa do romset principal %1$s. Copie-o para a TV, na mesma pasta ou em outra pasta da biblioteca.</string>
+    <string name="neogeo_load_failed">O FBNeo não conseguiu abrir este romset. Ele está incompleto ou é de outra versão (por exemplo, de um MAME antigo). Use um romset compatível com o FBNeo.</string>
+    <string name="neogeo_low_memory">Pouca memória livre para este jogo: ele pode fechar sozinho. Feche outros apps se acontecer.</string>
+    <string name="neogeo_bios_incomplete">A BIOS do Neo Geo está incompleta. Se o jogo não abrir, troque a neogeo.zip.</string>
+
+    <!-- Opções do console (Configurações → Emulação) -->
+    <string name="console_options">Opções do console</string>
+    <string name="console_options_global_note">Escolha um console acima para ver as opções dele: modo MVS/AES e free play (Neo Geo), 3 ou 6 botões e região (Mega Drive), som FM (Master System) e lentidão (Super Nintendo).</string>
+    <string name="set_neogeo_mode">Modo do Neo Geo</string>
+    <string name="set_neogeo_mode_desc">MVS é o fliperama; AES é o console de casa.</string>
+    <string name="neogeo_mode_mvs">MVS (fliperama)</string>
+    <string name="neogeo_mode_aes">AES (console)</string>
+    <string name="neogeo_mode_unibios">UniBIOS</string>
+    <string name="neogeo_mode_unibios_missing">UniBIOS (não está na sua neogeo.zip)</string>
+    <string name="set_neogeo_freeplay">Free play</string>
+    <string name="set_neogeo_freeplay_desc">Joga sem inserir fichas (no modo MVS).</string>
+    <string name="set_md_pad">Controle do Mega Drive</string>
+    <string name="set_md_pad_desc">6 botões para jogos de luta; 3 botões para jogos antigos que não aceitam 6.</string>
+    <string name="md_pad_3">3 botões</string>
+    <string name="md_pad_6">6 botões</string>
+    <string name="set_md_region">Região do Mega Drive</string>
+    <string name="set_md_region_desc">Automática pelo jogo, ou force EUA, Japão ou Europa (50 Hz).</string>
+    <string name="region_auto">Automática</string>
+    <string name="region_ntsc_u">EUA (NTSC-U)</string>
+    <string name="region_ntsc_j">Japão (NTSC-J)</string>
+    <string name="region_pal">Europa (PAL)</string>
+    <string name="set_sms_fm">Som FM (YM2413)</string>
+    <string name="set_sms_fm_desc">Trilha FM nos jogos que têm, como os japoneses.</string>
+    <string name="set_snes_slowdown">Reduzir lentidão</string>
+    <string name="set_snes_slowdown_desc">Acelera a CPU e o chip SuperFX. Pode causar falhas em alguns jogos.</string>
+    <string name="sms_pause_note">O botão Pause do Master System fica no Start do controle.</string>
+    <string name="neogeo_coin_note">Ficha (Coin) fica no Select; também há "Inserir ficha" no menu do jogo.</string>
+    <string name="core_shared">Compartilhado por %1$s</string>
+    <string name="core_in_use_by">Escolhido para: %1$s</string>
+</resources>

@@ -71,6 +71,7 @@ import com.retroplay.ui.components.requestFocusWhenReady
 fun ConsoleEntry(onOpenGame: (Game) -> Unit, viewModel: ConsoleViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val coreState by viewModel.coreState.collectAsStateWithLifecycle()
+    val selectedCore by viewModel.selectedCore.collectAsStateWithLifecycle()
     val games by viewModel.games.collectAsStateWithLifecycle()
     val filter by viewModel.filter.collectAsStateWithLifecycle()
     val scan by viewModel.scan.collectAsStateWithLifecycle()
@@ -82,7 +83,7 @@ fun ConsoleEntry(onOpenGame: (Game) -> Unit, viewModel: ConsoleViewModel = hiltV
     }
     ConsoleScreen(
         system = viewModel.system,
-        coreName = viewModel.core.displayName,
+        coreName = selectedCore.displayName,
         coreState = coreState,
         games = games,
         filter = filter,

@@ -225,6 +225,45 @@ class SettingsScreenTest {
         node("cat_VIDEO").assertExists()
     }
 
+    @Test
+    fun modo_aes_e_free_play_so_no_neo_geo() {
+        openSettings()
+        press(Key.DirectionDown, 3)
+        node("cat_EMULATION").assertIsFocused()
+        press(Key.DirectionRight)
+        node("scope_global").assertIsFocused()
+        press(Key.DirectionRight, 4)
+        node("scope_neogeo").assertIsFocused()
+        press(Key.DirectionCenter)
+        // Desce até as opções do console.
+        repeat(20) {
+            if (compose.onAllNodes(hasTestTag("set_console.neogeo_mode") and androidx.compose.ui.test.isFocused()).fetchSemanticsNodes().isNotEmpty()) return@repeat
+            press(Key.DirectionDown)
+        }
+        node("set_console.neogeo_mode").assertIsFocused()
+        merged("set_console.neogeo_mode").assertTextContains("MVS (fliperama)")
+        press(Key.DirectionCenter)
+        waitFor("choice_dialog")
+        press(Key.DirectionDown, 2)
+        node("choice_aes").assertIsFocused()
+        press(Key.DirectionCenter)
+        waitSetting { runBlocking { settings.current() }.get(com.retroplay.domain.settings.ConsoleSettings.NEOGEO_MODE, ScopeRef.system(SystemRegistry.Ids.NEO_GEO)) == "aes" }
+        press(Key.DirectionDown)
+        node("set_console.neogeo_freeplay").assertIsFocused()
+        press(Key.DirectionCenter)
+        waitFor("choice_dialog")
+        press(Key.DirectionDown)
+        node("choice_true").assertIsFocused()
+        press(Key.DirectionCenter)
+        waitSetting { runBlocking { settings.current() }.value(com.retroplay.domain.settings.ConsoleSettings.NEOGEO_FREEPLAY, SystemRegistry.Ids.NEO_GEO) }
+        compose.waitUntil(5_000) {
+            compose.onAllNodes(hasTestTag("set_console.neogeo_mode") and hasText("AES (console)", substring = true)).fetchSemanticsNodes().isNotEmpty()
+        }
+        screenshot("05_neogeo_options")
+        // O Mega Drive não foi afetado.
+        assertEquals(false, runBlocking { settings.current() }.value(com.retroplay.domain.settings.ConsoleSettings.NEOGEO_FREEPLAY, SystemRegistry.Ids.MEGA_DRIVE))
+    }
+
     private fun screenshot(name: String) {
         if (System.getProperty("retroplay.screenshots") != "true") return
         val dir = File("build/screenshots/settings").apply { mkdirs() }

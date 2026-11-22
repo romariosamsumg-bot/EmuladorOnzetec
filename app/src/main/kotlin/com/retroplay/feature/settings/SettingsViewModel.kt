@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import coil3.SingletonImageLoader
 import com.retroplay.R
 import com.retroplay.data.library.GamesFolderManager
+import com.retroplay.data.rom.BiosInspector
 import com.retroplay.data.settings.CoreOptionsCache
 import com.retroplay.data.settings.StorageReport
 import com.retroplay.data.settings.StorageUsage
@@ -99,6 +100,17 @@ class SettingsViewModel @Inject constructor(
     val folderCount: StateFlow<Int> = MutableStateFlow(0).also { flow ->
         viewModelScope.launch { library.observeFolders().collect { flow.value = it.size } }
     }
+
+    /** A neogeo.zip tem UniBIOS? (null = sem BIOS ou ainda verificando). */
+    val unibios: StateFlow<Boolean?> = bios.map { list ->
+        val uri = list.firstOrNull { it.setName == "neogeo" }?.uri ?: return@map null
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val input = if (uri.startsWith("content://")) context.contentResolver.openInputStream(android.net.Uri.parse(uri))!! else File(uri).inputStream()
+                BiosInspector.hasUniBios(input)
+            }.getOrNull()
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private val _storage = MutableStateFlow<StorageReport?>(null)
     val storage: StateFlow<StorageReport?> = _storage.asStateFlow()
