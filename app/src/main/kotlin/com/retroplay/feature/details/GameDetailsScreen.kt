@@ -43,11 +43,11 @@ import com.retroplay.feature.settings.PinDialog
 import com.retroplay.feature.settings.TextInputDialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.tv.material3.Button
+import com.retroplay.ui.tv.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.OutlinedButton
+import com.retroplay.ui.tv.OutlinedButton
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import com.retroplay.R

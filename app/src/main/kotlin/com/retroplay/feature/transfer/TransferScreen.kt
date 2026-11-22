@@ -47,10 +47,10 @@ import androidx.lifecycle.compose.LifecycleStartEffect
 import com.retroplay.domain.transfer.IncomingFile
 import com.retroplay.domain.transfer.PhoneTransferState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.tv.material3.Button
+import com.retroplay.ui.tv.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.OutlinedButton
+import com.retroplay.ui.tv.OutlinedButton
 import androidx.tv.material3.Text
 import com.retroplay.R
 import com.retroplay.data.library.GamesFolderManager

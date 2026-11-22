@@ -29,6 +29,8 @@ import com.retroplay.domain.settings.SettingsRepository
 import com.retroplay.domain.settings.SettingsSnapshot
 import com.retroplay.feature.cores.CoreAutoUpdater
 import com.retroplay.ui.shell.RetroPlayShell
+import com.retroplay.ui.components.TvCanvas
+import com.retroplay.ui.components.applyPhoneWindow
 import com.retroplay.domain.profile.ProfileRepository
 import com.retroplay.feature.profiles.ProfilePickerScreen
 import androidx.compose.runtime.Composable
@@ -88,6 +90,7 @@ class MainActivity : ComponentActivity() {
         // Mantida até as configurações carregarem, para o tema/cor escolhidos aparecerem já no 1º quadro.
         installSplashScreen().setKeepOnScreenCondition { !settingsReady }
         super.onCreate(savedInstanceState)
+        applyPhoneWindow()
         setContent {
             val snap by settings.snapshots.collectAsStateWithLifecycle(SettingsSnapshot())
             RetroPlayTheme(prefs = uiPrefs(snap)) {
@@ -97,7 +100,7 @@ class MainActivity : ComponentActivity() {
                     shape = RectangleShape,
                     colors = SurfaceDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
                 ) {
-                    ProfileGate(snap) { RetroPlayShell() }
+                    TvCanvas { ProfileGate(snap) { RetroPlayShell() } }
                 }
             }
         }

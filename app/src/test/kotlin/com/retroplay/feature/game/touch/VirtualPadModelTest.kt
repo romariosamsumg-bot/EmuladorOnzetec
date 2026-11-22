@@ -1,0 +1,91 @@
+package com.retroplay.feature.game.touch
+
+import androidx.compose.ui.unit.dp
+import com.retroplay.domain.system.RetroPadButton
+import com.retroplay.domain.system.SystemRegistry
+import com.retroplay.ui.components.tvCanvasScale
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import kotlin.math.hypot
+
+class VirtualPadModelTest {
+
+    // Tela de referência: celular 20:9 deitado, escalado para 540 dp de altura.
+    private val w = 1200f
+    private val h = 540f
+
+    private fun model(system: com.retroplay.domain.system.GameSystem, six: Boolean = true) =
+        VirtualPadModel(VirtualPadSpecs.forSystem(system, six), w, h)
+
+    @Test
+    fun todos_os_consoles_cabem_na_tela_sem_botoes_sobrepostos() {
+        SystemRegistry.all.forEach { sys ->
+            listOf(true, false).forEach { six ->
+                val m = model(sys, six)
+                m.elements.forEach { e ->
+                    assertTrue("${sys.shortName} ${e.id} fora da tela", e.x - e.width / 2 >= 0 && e.x + e.width / 2 <= w && e.y - e.height / 2 >= 0 && e.y + e.height / 2 <= h)
+                }
+                val circles = m.elements.filter { it.shape == PadShape.CIRCLE && it.id != "dpad" && it.id != "menu" }
+                for (i in circles.indices) for (j in i + 1 until circles.size) {
+                    val a = circles[i]; val b = circles[j]
+                    assertTrue("${sys.shortName}: ${a.id} encosta em ${b.id}", hypot(a.x - b.x, a.y - b.y) >= a.width / 2 + b.width / 2)
+                }
+                // Cada botão do console (menos o direcional) está na tela, exceto o Mode no modo 3 botões.
+                val onScreen = m.elements.mapNotNull { it.button }.toSet()
+                val expected = sys.controllerLayout.buttons.map { it.retroPad }.toSet() - VirtualPadSpecs.DIRECTIONS
+                val missing = expected - onScreen
+                assertTrue("${sys.shortName} sem $missing", missing.isEmpty() || (sys.id == SystemRegistry.Ids.MEGA_DRIVE && !six))
+            }
+        }
+    }
+
+    @Test
+    fun tocar_no_centro_de_cada_botao_aperta_ele() {
+        SystemRegistry.all.forEach { sys ->
+            val m = model(sys)
+            m.elements.filter { it.button != null }.forEach { e ->
+                assertEquals("${sys.shortName} ${e.id}", setOf(e.button), m.stateFor(listOf(e.x to e.y)).buttons)
+            }
+        }
+    }
+
+    @Test
+    fun varios_dedos_e_direcional() {
+        val m = model(SystemRegistry.SNES)
+        val a = m.elements.first { it.button == RetroPadButton.A }
+        val b = m.elements.first { it.button == RetroPadButton.B }
+        val d = m.dpad
+        val s = m.stateFor(listOf(a.x to a.y, b.x to b.y, (d.x + 60) to (d.y - 60)))
+        assertEquals(setOf(RetroPadButton.A, RetroPadButton.B), s.buttons)
+        assertEquals(1 to -1, s.dx to s.dy) // diagonal cima-direita
+        assertEquals(0 to 0, m.stateFor(listOf(d.x to d.y)).let { it.dx to it.dy }) // zona morta
+        assertEquals(-1 to 0, m.stateFor(listOf((d.x - 80) to (d.y + 10))).let { it.dx to it.dy })
+        assertEquals(0 to 1, m.stateFor(listOf(d.x to (d.y + 70))).let { it.dx to it.dy })
+        // Fora de qualquer botão: nada. Menu no topo.
+        assertEquals(PadState(), m.stateFor(listOf(w / 2 to h / 2)))
+        val menu = m.elements.first { it.id == "menu" }
+        assertTrue(m.stateFor(listOf(menu.x to menu.y)).menu)
+        assertFalse(m.stateFor(emptyList()).menu)
+    }
+
+    @Test
+    fun neo_geo_tem_ficha_em_destaque_e_mega_drive_3_ou_6_botoes() {
+        val neo = model(SystemRegistry.NEO_GEO)
+        val coin = neo.elements.first { it.button == RetroPadButton.SELECT }
+        assertEquals("Ficha", coin.label)
+        assertTrue(coin.highlighted)
+        assertEquals(listOf("A", "B", "C", "D"), neo.elements.filter { it.shape == PadShape.CIRCLE && it.button != null }.map { it.label }.sorted())
+        assertEquals(6, model(SystemRegistry.MEGA_DRIVE, six = true).elements.count { it.shape == PadShape.CIRCLE && it.button != null })
+        assertEquals(3, model(SystemRegistry.MEGA_DRIVE, six = false).elements.count { it.shape == PadShape.CIRCLE && it.button != null })
+        assertEquals("Pause", model(SystemRegistry.MASTER_SYSTEM).elements.first { it.button == RetroPadButton.START }.label)
+    }
+
+    @Test
+    fun escala_da_interface_no_celular() {
+        assertEquals(1f, tvCanvasScale(540.dp))
+        assertEquals(1f, tvCanvasScale(720.dp)) // tablet/TV grande: não aumenta
+        assertEquals(393f / 540f, tvCanvasScale(393.dp), 0.001f)
+    }
+}

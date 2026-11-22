@@ -54,7 +54,7 @@
 
     <!-- Controles -->
     <string name="controls_connected">Controles conectados</string>
-    <string name="controls_none">Nenhum controle conectado. O controle remoto da TV também funciona.</string>
+    <string name="controls_none">Nenhum controle conectado. No celular, use o controle na tela; na TV, o controle remoto também joga.</string>
     <string name="gamepad_desc">Perfil %1$s · %2$s</string>
     <string name="port_auto">Porta automática</string>
     <string name="port_n">Jogador %1$d</string>
@@ -347,4 +347,14 @@
     <string name="smb_failed">Não foi possível acessar a pasta da rede.</string>
     <string name="smb_note">A senha fica só nesta TV, fora do backup. Os jogos são copiados para a TV na hora de jogar.</string>
     <string name="key_shift">Maiúsc.</string>
+    <!-- Controle na tela (celular) -->
+    <string name="set_touch_pad">Controle na tela</string>
+    <string name="set_touch_pad_desc">No celular: botões na tela durante o jogo.</string>
+    <string name="touch_auto">Automático (some com controle físico)</string>
+    <string name="touch_always">Sempre</string>
+    <string name="touch_never">Nunca</string>
+    <string name="set_touch_opacity">Visibilidade do controle na tela</string>
+    <string name="set_touch_opacity_desc">Mais baixo deixa o jogo mais visível atrás dos botões.</string>
+    <string name="set_touch_haptics">Vibrar ao tocar</string>
+    <string name="set_touch_haptics_desc">Pequena vibração em cada botão do controle na tela.</string>
 </resources>

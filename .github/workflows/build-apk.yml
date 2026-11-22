@@ -61,7 +61,8 @@ jobs:
           fi
           if ! [[ "$NOME" =~ ^[0-9A-Za-z.+-]+$ ]]; then echo "::error::Versão inválida: $NOME"; exit 1; fi
           echo "RETROPLAY_VERSION_NAME=$NOME" >> "$GITHUB_ENV"
-          echo "RETROPLAY_VERSION_CODE=$((GITHUB_RUN_NUMBER + 100))" >> "$GITHUB_ENV"
+          # A partir de 1000: fica acima das versões geradas à mão (1.0.0 = 100, 1.1.0 = 110).
+          echo "RETROPLAY_VERSION_CODE=$((GITHUB_RUN_NUMBER + 1000))" >> "$GITHUB_ENV"
           echo "nome=$NOME" >> "$GITHUB_OUTPUT"
           echo "release=$RELEASE" >> "$GITHUB_OUTPUT"
 

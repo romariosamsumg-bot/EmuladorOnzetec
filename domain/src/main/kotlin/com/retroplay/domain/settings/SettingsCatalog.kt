@@ -31,6 +31,11 @@ object AppSettings {
     val NINTENDO_LAYOUT = Bool("controls.nintendo_layout", false)
     val HOTKEYS = Bool("controls.hotkeys", true)
     val HOTKEY_MODIFIER = Choice("controls.hotkey_modifier", "select", listOf("select", "l3"))
+    /** Controle na tela (celular): automático (some com controle físico), sempre ou nunca. */
+    val TOUCH_PAD = Choice("controls.touch_pad", "auto", listOf("auto", "always", "never"))
+    val TOUCH_PAD_OPACITY = Choice("controls.touch_opacity", "60", listOf("30", "45", "60", "80", "100"))
+    val TOUCH_HAPTICS = Bool("controls.touch_haptics", true)
+
     /** Portas dos controles: "descritor=porta;..." */
     val PORTS = Text("controls.ports", "")
 

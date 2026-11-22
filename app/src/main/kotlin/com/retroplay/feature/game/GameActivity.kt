@@ -47,6 +47,12 @@ import com.retroplay.domain.core.CoreRepository
 import com.retroplay.domain.library.LibraryRepository
 import com.retroplay.data.settings.CoreOptionsCache
 import com.retroplay.domain.settings.AppSettings
+import com.retroplay.core.common.DeviceKind
+import com.retroplay.ui.components.TvCanvas
+import com.retroplay.ui.components.applyPhoneWindow
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.runtime.mutableFloatStateOf
 import com.retroplay.domain.profile.Profile
 import com.retroplay.domain.settings.ConsoleCoreOptions
 import android.app.ActivityManager
@@ -130,6 +136,14 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     private var sessionStart = 0L
     private var exiting = false
     private var isArcade = false
+
+    // ---- controle na tela (celular)
+    private var padSpec by mutableStateOf<com.retroplay.feature.game.touch.VirtualPadSpec?>(null)
+    private var padVisible by mutableStateOf(false)
+    private var padMode = "auto"
+    private var padOpacity by mutableFloatStateOf(0.6f)
+    private var padHaptics = true
+    private var padState = com.retroplay.feature.game.touch.PadState()
     private var padType: com.retroplay.domain.settings.PadType? = null
 
     // Entrada (reconfigurada pelas Configurações em start()).
@@ -181,6 +195,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         container = FrameLayout(this).apply { setBackgroundColor(android.graphics.Color.BLACK) }
         setContentView(container)
         hideSystemBars()
+        applyPhoneWindow()
 
         val sys = intent.getStringExtra(GameLauncher.EXTRA_SYSTEM)?.let { catalog.byId(SystemId(it)) }
         val core = sys?.cores?.firstOrNull { it.id == intent.getStringExtra(GameLauncher.EXTRA_CORE) }
@@ -344,6 +359,53 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         rewind = RewindBuffer(snap.value(AppSettings.REWIND_MB).toLong() * 1024 * 1024)
         autoSave = snap.value(AppSettings.AUTO_SAVE, sys, gameKey)
         slotCount = snap.value(AppSettings.SLOTS).toInt()
+        padMode = snap.value(AppSettings.TOUCH_PAD)
+        padOpacity = snap.value(AppSettings.TOUCH_PAD_OPACITY).toInt() / 100f
+        padHaptics = snap.value(AppSettings.TOUCH_HAPTICS)
+        val sixButtons = snap.value(com.retroplay.domain.settings.ConsoleSettings.MD_PAD, sys, gameKey) == "6"
+        padSpec = com.retroplay.feature.game.touch.VirtualPadSpecs.forSystem(system, sixButtons)
+        padVisible = when (padMode) {
+            "always" -> true
+            "never" -> false
+            else -> !DeviceKind.isTv(this) && DeviceKind.hasTouchscreen(this) && !DeviceKind.hasGamepad()
+        }
+    }
+
+    /** Estado novo do controle na tela: aperta/solta só o que mudou e vibra ao apertar. */
+    private fun onPadState(next: com.retroplay.feature.game.touch.PadState) {
+        val view = retroView ?: return
+        val prev = padState
+        padState = next
+        var pressedNew = false
+        (next.buttons - prev.buttons).forEach { view.sendKeyEvent(KeyEvent.ACTION_DOWN, RetroPadKeys.keyCodeFor(it), 0); pressedNew = true }
+        (prev.buttons - next.buttons).forEach { view.sendKeyEvent(KeyEvent.ACTION_UP, RetroPadKeys.keyCodeFor(it), 0) }
+        if (next.dx != prev.dx || next.dy != prev.dy) {
+            view.sendMotionEvent(GLRetroView.MOTION_SOURCE_DPAD, next.dx.toFloat(), next.dy.toFloat(), 0)
+            if (next.dx != 0 || next.dy != 0) pressedNew = true
+        }
+        if (pressedNew && padHaptics) container.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+        if (next.menu && !prev.menu) {
+            releasePad()
+            openMenu()
+        }
+    }
+
+    /** Solta tudo (ao abrir o menu, esconder o controle ou sair). */
+    private fun releasePad() {
+        val view = retroView
+        if (view != null) {
+            padState.buttons.forEach { view.sendKeyEvent(KeyEvent.ACTION_UP, RetroPadKeys.keyCodeFor(it), 0) }
+            if (padState.dx != 0 || padState.dy != 0) view.sendMotionEvent(GLRetroView.MOTION_SOURCE_DPAD, 0f, 0f, 0)
+        }
+        padState = com.retroplay.feature.game.touch.PadState()
+    }
+
+    /** Modo automático: controle físico em uso esconde o da tela. */
+    private fun onPhysicalInput() {
+        if (padMode == "auto" && padVisible) {
+            releasePad()
+            padVisible = false
+        }
     }
 
     /**
@@ -392,12 +454,23 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     private fun overlay() = ComposeView(this).apply {
         setContent {
             RetroPlayTheme {
+                TvCanvas {
                 Box(Modifier.fillMaxSize()) {
+                    val spec = padSpec
+                    if (spec != null && menu == null) {
+                        if (padVisible) {
+                            com.retroplay.feature.game.touch.VirtualPadOverlay(spec, padOpacity, androidx.tv.material3.MaterialTheme.colorScheme.primary, ::onPadState)
+                        } else if (padMode == "auto" && DeviceKind.hasTouchscreen(this@GameActivity)) {
+                            // Tocou na tela com o controle escondido: ele volta.
+                            Box(Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures(onPress = { padVisible = true }) })
+                        }
+                    }
                     if (showFps && menu == null) {
                         Text("$fps FPS", color = Color.Yellow, modifier = Modifier.align(Alignment.TopEnd).padding(16.dp))
                     }
                     toast?.let { Text(it, color = Color.White, modifier = Modifier.align(Alignment.BottomCenter).padding(32.dp)) }
                     menu?.let { GameMenu(it, this@GameActivity) }
+                }
                 }
             }
         }
@@ -424,6 +497,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     private fun openMenu() {
         val view = retroView ?: return
         if (menu != null || !gameRunning) return
+        releasePad()
         stopRewind()
         // Captura a tela do jogo antes de pausar (vira a miniatura dos saves).
         captureThumbnail { lastThumbnail = it }
@@ -649,6 +723,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         val view = retroView ?: return super.dispatchKeyEvent(event)
         val fromGamepad = event.isFromSource(InputDevice.SOURCE_GAMEPAD) || event.isFromSource(InputDevice.SOURCE_JOYSTICK)
+        if (fromGamepad) onPhysicalInput()
         if (menu != null) return super.dispatchKeyEvent(translateForMenu(event))
         if (fromGamepad && hotkeysEnabled && event.repeatCount == 0) {
             val hotkey = hotkeys.onKey(event.keyCode, event.action == KeyEvent.ACTION_DOWN)
@@ -721,6 +796,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
         val view = retroView
         if (view != null && event.isFromSource(InputDevice.SOURCE_JOYSTICK) && event.action == MotionEvent.ACTION_MOVE) {
+            onPhysicalInput()
             val x = event.getAxisValue(MotionEvent.AXIS_X)
             val y = event.getAxisValue(MotionEvent.AXIS_Y)
             val dx = StickToDpad.combine(event.getAxisValue(MotionEvent.AXIS_HAT_X), x, deadzone, analogToDpad)

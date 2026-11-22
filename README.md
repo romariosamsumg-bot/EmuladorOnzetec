@@ -1,8 +1,8 @@
 # Retrô Play
 
-Frontend de emuladores de consoles clássicos para **Android TV / Google TV**, com interface
-"estilo streaming", navegação 100% por controle remoto ou gamepad e núcleos **libretro**
-baixados sob demanda.
+Frontend de emuladores de consoles clássicos para **Android TV / Google TV** e **celular**, com
+interface "estilo streaming", navegação por controle remoto, gamepad ou toque e núcleos
+**libretro** baixados sob demanda. O mesmo APK serve para a TV e para o celular.
 
 > **Aviso legal:** o Retrô Play **não inclui jogos nem BIOS**. Use apenas cópias de jogos e
 > BIOS que você possui legalmente.
@@ -63,6 +63,22 @@ Testado para a TCL P7K (Google TV, Android 11+); vale para outras TVs e boxes An
    joga cada console (precisa de internet só nessa hora).
 
 Para atualizar, instale o APK novo por cima (os jogos, saves e configurações ficam).
+
+## No celular (Android 8 ou mais novo)
+
+1. Baixe o `RetroPlay.apk` no celular e abra-o. O Android pede para **permitir instalar apps
+   desta fonte** (do navegador ou do gerenciador de arquivos): permita e instale.
+2. O app abre sempre **deitado** e em tela cheia, com a mesma interface da TV; tudo funciona
+   **por toque** (e também com controle Bluetooth).
+3. Durante o jogo aparece o **controle na tela**: direcional à esquerda, botões do console à
+   direita (SNES com X/A/B/Y, L e R; Mega Drive com 3 ou 6 botões; Master System com 1, 2 e
+   Pause; Neo Geo com A, B, C, D e **Ficha**), Select/Start embaixo e **☰** no topo para o menu.
+   Vale usar vários dedos e deslizar de um botão para outro. Ele **some sozinho** quando você usa
+   um controle físico e volta ao tocar na tela.
+4. Ajustes em **Configurações → Controles**: controle na tela (automático, sempre ou nunca),
+   visibilidade dos botões e vibração.
+5. Para colocar jogos: copie para a pasta **Jogos** do armazenamento do celular (o app pede a
+   permissão de arquivos na primeira vez) ou use **Transferir jogos → Adicionar pasta**.
 
 ## Gerar o APK pelo GitHub (sem instalar nada)
 

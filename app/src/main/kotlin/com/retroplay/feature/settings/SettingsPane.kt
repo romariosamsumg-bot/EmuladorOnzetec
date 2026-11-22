@@ -108,6 +108,9 @@ class SettingsPane(
         }
         item(key = "remap") { RemapRow() }
         item(key = "turbo") { TurboRow() }
+        choice(AppSettings.TOUCH_PAD, R.string.set_touch_pad, R.string.set_touch_pad_desc)
+        choice(AppSettings.TOUCH_PAD_OPACITY, R.string.set_touch_opacity, R.string.set_touch_opacity_desc)
+        bool(AppSettings.TOUCH_HAPTICS, R.string.set_touch_haptics, R.string.set_touch_haptics_desc)
         bool(AppSettings.REMOTE_AS_GAMEPAD, R.string.set_remote, R.string.set_remote_desc)
         bool(AppSettings.ANALOG_TO_DPAD, R.string.set_analog, R.string.set_analog_desc)
         choice(AppSettings.DEADZONE, R.string.set_deadzone, R.string.set_deadzone_desc)
@@ -875,6 +878,7 @@ fun optionLabels(def: SettingDef.Choice): Map<String, String> {
         AppSettings.LANGUAGE -> { v -> if (v == "system") R.string.lang_system else null }
         ConsoleSettings.NEOGEO_MODE -> { v -> mapOf("mvs" to R.string.neogeo_mode_mvs, "aes" to R.string.neogeo_mode_aes, "unibios" to R.string.neogeo_mode_unibios)[v] }
         ConsoleSettings.MD_PAD -> { v -> if (v == "3") R.string.md_pad_3 else R.string.md_pad_6 }
+        AppSettings.TOUCH_PAD -> { v -> mapOf("auto" to R.string.touch_auto, "always" to R.string.touch_always, "never" to R.string.touch_never)[v] }
         ConsoleSettings.MD_REGION -> { v -> mapOf("auto" to R.string.region_auto, "ntsc-u" to R.string.region_ntsc_u, "ntsc-j" to R.string.region_ntsc_j, "pal" to R.string.region_pal)[v] }
         else -> { _ -> null }
     }
@@ -882,7 +886,7 @@ fun optionLabels(def: SettingDef.Choice): Map<String, String> {
         res(v)?.let { stringResource(it) } ?: when (def) {
             AppSettings.FF_SPEED -> "${v}x"
             AppSettings.REWIND_MB -> "$v MB"
-            AppSettings.DEADZONE -> "$v%"
+            AppSettings.DEADZONE, AppSettings.TOUCH_PAD_OPACITY -> "$v%"
             AppSettings.LANGUAGE -> LANGUAGE_NAMES[v] ?: v
             else -> v
         }

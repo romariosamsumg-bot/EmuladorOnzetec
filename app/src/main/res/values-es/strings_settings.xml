@@ -49,7 +49,7 @@
     <string name="audio_note">El volumen, la frecuencia de muestreo y la sincronización dinámica dependen del sistema y del motor de emulación.</string>
 
     <string name="controls_connected">Controles conectados</string>
-    <string name="controls_none">No hay controles conectados. El control remoto de la TV también funciona.</string>
+    <string name="controls_none">No hay mandos conectados. En el móvil, usa el mando en pantalla; en la TV, el control remoto también sirve.</string>
     <string name="gamepad_desc">Perfil %1$s · %2$s</string>
     <string name="port_auto">Puerto automático</string>
     <string name="port_n">Jugador %1$d</string>
@@ -328,4 +328,13 @@
     <string name="smb_failed">No se pudo acceder a la carpeta de red.</string>
     <string name="smb_note">La contraseña se queda solo en esta TV, fuera de la copia. Los juegos se copian a la TV al jugar.</string>
     <string name="key_shift">Mayús.</string>
+    <string name="set_touch_pad">Mando en pantalla</string>
+    <string name="set_touch_pad_desc">En el móvil: botones en la pantalla durante el juego.</string>
+    <string name="touch_auto">Automático (se oculta con un mando físico)</string>
+    <string name="touch_always">Siempre</string>
+    <string name="touch_never">Nunca</string>
+    <string name="set_touch_opacity">Visibilidad del mando en pantalla</string>
+    <string name="set_touch_opacity_desc">Más bajo deja el juego más visible detrás de los botones.</string>
+    <string name="set_touch_haptics">Vibrar al tocar</string>
+    <string name="set_touch_haptics_desc">Vibración corta en cada botón del mando en pantalla.</string>
 </resources>

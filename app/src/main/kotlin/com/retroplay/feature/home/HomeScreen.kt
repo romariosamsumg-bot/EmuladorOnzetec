@@ -42,11 +42,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.tv.material3.Button
+import com.retroplay.ui.tv.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.OutlinedButton
+import com.retroplay.ui.tv.OutlinedButton
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import com.retroplay.R
@@ -349,7 +349,7 @@ private fun EmptyHome(
 private fun ContinueCard(system: GameSystem, game: Game, thumbnail: String?, onClick: () -> Unit, cardModifier: Modifier, tag: String) {
     val shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
     Column(Modifier.width(240.dp)) {
-        androidx.tv.material3.Card(
+        com.retroplay.ui.tv.Card(
             onClick = onClick,
             modifier = cardModifier.fillMaxWidth().aspectRatio(4f / 3f).testTag(tag),
             shape = androidx.tv.material3.CardDefaults.shape(shape),

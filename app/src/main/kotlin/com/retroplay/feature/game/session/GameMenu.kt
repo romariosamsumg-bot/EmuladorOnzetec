@@ -42,7 +42,7 @@ import androidx.tv.material3.LocalContentColor
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.Surface
+import com.retroplay.ui.tv.Surface
 import androidx.tv.material3.Text
 import com.retroplay.R
 import com.retroplay.domain.saves.SaveSlot

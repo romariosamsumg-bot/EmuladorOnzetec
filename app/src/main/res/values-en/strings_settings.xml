@@ -49,7 +49,7 @@
     <string name="audio_note">Volume, sample rate and dynamic rate control are handled by the system and the emulation engine.</string>
 
     <string name="controls_connected">Connected controllers</string>
-    <string name="controls_none">No controller connected. The TV remote also works.</string>
+    <string name="controls_none">No controller connected. On phones, use the on-screen controller; on TVs, the remote also plays.</string>
     <string name="gamepad_desc">%1$s profile · %2$s</string>
     <string name="port_auto">Automatic port</string>
     <string name="port_n">Player %1$d</string>
@@ -328,4 +328,13 @@
     <string name="smb_failed">Could not access the network folder.</string>
     <string name="smb_note">The password stays only on this TV, outside the backup. Games are copied to the TV when you play.</string>
     <string name="key_shift">Shift</string>
+    <string name="set_touch_pad">On-screen controller</string>
+    <string name="set_touch_pad_desc">On phones: buttons on the screen while playing.</string>
+    <string name="touch_auto">Automatic (hides with a physical controller)</string>
+    <string name="touch_always">Always</string>
+    <string name="touch_never">Never</string>
+    <string name="set_touch_opacity">On-screen controller visibility</string>
+    <string name="set_touch_opacity_desc">Lower keeps the game more visible behind the buttons.</string>
+    <string name="set_touch_haptics">Vibrate on touch</string>
+    <string name="set_touch_haptics_desc">Short vibration on each on-screen button.</string>
 </resources>
