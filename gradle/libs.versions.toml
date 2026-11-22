@@ -27,6 +27,8 @@ okhttp = "5.5.1"
 hiltWork = "1.4.0"
 commonsCompress = "1.28.0"
 xz = "1.12"
+nanohttpd = "2.3.1"
+zxing = "3.5.4"
 profileinstaller = "1.4.1"
 
 junit = "4.13.2"
@@ -77,6 +79,8 @@ hilt-work-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hi
 work-testing = { module = "androidx.work:work-testing", version.ref = "work" }
 commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commonsCompress" }
 xz = { module = "org.tukaani:xz", version.ref = "xz" }
+nanohttpd = { module = "org.nanohttpd:nanohttpd", version.ref = "nanohttpd" }
+zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 libretrodroid = { module = "com.github.Swordfish90:LibretroDroid", version.ref = "libretrodroid" }
 
 junit = { module = "junit:junit", version.ref = "junit" }

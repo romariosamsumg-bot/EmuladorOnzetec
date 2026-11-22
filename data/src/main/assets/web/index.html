@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Retrô Play — Enviar jogos</title>
+<style>
+  :root { --bg:#0b0b10; --card:#17171f; --line:#2c2c38; --text:#f2f2f7; --muted:#a9a9b8; --accent:#8b6cff; --ok:#5bd68a; --err:#ff6b6b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:640px; margin:0 auto; padding:20px 16px calc(32px + env(safe-area-inset-bottom)); }
+  h1 { font-size:24px; margin:4px 0 2px; }
+  .sub { color:var(--muted); margin:0 0 20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:16px; }
+  label { display:block; font-weight:600; margin-bottom:8px; }
+  input, select, button { font:inherit; color:inherit; }
+  .pin { width:100%; font-size:32px; letter-spacing:12px; text-align:center; padding:12px; border-radius:12px; border:1px solid var(--line); background:#0f0f15; }
+  select { width:100%; padding:12px; border-radius:12px; border:1px solid var(--line); background:#0f0f15; margin-bottom:14px; }
+  .btn { display:block; width:100%; padding:14px; border:0; border-radius:12px; background:var(--accent); color:#12082e; font-weight:700; cursor:pointer; margin-top:12px; }
+  .btn:disabled { opacity:.5; }
+  .drop { border:2px dashed var(--line); border-radius:16px; padding:28px 16px; text-align:center; color:var(--muted); transition:border-color .15s, background .15s; }
+  .drop.over { border-color:var(--accent); background:#1d1830; color:var(--text); }
+  .drop strong { color:var(--text); display:block; margin-bottom:6px; }
+  ul { list-style:none; padding:0; margin:0; }
+  li { padding:12px 0; border-top:1px solid var(--line); }
+  li:first-child { border-top:0; }
+  .row { display:flex; justify-content:space-between; gap:12px; }
+  .name { overflow-wrap:anywhere; }
+  .status { color:var(--muted); font-size:14px; white-space:nowrap; }
+  .status.ok { color:var(--ok); } .status.err { color:var(--err); white-space:normal; text-align:right; }
+  .bar { height:6px; background:#0f0f15; border-radius:3px; overflow:hidden; margin-top:8px; }
+  .bar > div { height:100%; width:0; background:var(--accent); transition:width .15s; }
+  .msg { color:var(--err); min-height:1.4em; margin:8px 0 0; }
+  .hidden { display:none; }
+  .legal { color:var(--muted); font-size:13px; text-align:center; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Retrô Play</h1>
+  <p class="sub" id="t-sub"></p>
+
+  <section class="card" id="pin-card">
+    <label for="pin" id="t-pin"></label>
+    <input id="pin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="one-time-code">
+    <p class="msg" id="pin-msg" role="alert"></p>
+    <button class="btn" id="pin-btn"></button>
+  </section>
+
+  <section class="card hidden" id="send-card">
+    <label for="system" id="t-console"></label>
+    <select id="system"></select>
+    <div class="drop" id="drop">
+      <strong id="t-drop"></strong><span id="t-types"></span>
+    </div>
+    <input id="files" type="file" multiple class="hidden">
+    <button class="btn" id="pick"></button>
+    <p class="msg" id="send-msg" role="alert"></p>
+  </section>
+
+  <section class="card hidden" id="list-card">
+    <ul id="list" aria-live="polite"></ul>
+  </section>
+  <p class="legal" id="t-legal"></p>
+</main>
+<script>
+"use strict";
+const T = {
+  pt: { sub:"Envie jogos do celular para a TV pela rede Wi-Fi.", pin:"Digite o PIN que aparece na TV", enter:"Continuar",
+        badPin:"PIN incorreto. Confira na tela da TV.", locked:"Muitas tentativas. Aguarde 1 minuto.", net:"Não foi possível falar com a TV. Ela está na mesma rede Wi-Fi e com a tela “Transferir jogos” aberta?",
+        console:"Console", auto:"Detectar automaticamente", drop:"Arraste os arquivos para cá", types:"ou toque em “Escolher arquivos”. Aceita: ", pick:"Escolher arquivos",
+        waiting:"Na fila", sending:"Enviando", ok:"Enviado", bios:"BIOS recebida", to:"→ ",
+        tooBig:"Arquivo grande demais.", noSpace:"Sem espaço na TV.", notGame:"Não parece um jogo destes consoles.", interrupted:"Envio interrompido. Tente de novo.", error:"Erro no envio.",
+        free:"Espaço livre na TV: ", legal:"Use apenas cópias de jogos que você possui legalmente." },
+  en: { sub:"Send games from your phone to the TV over Wi-Fi.", pin:"Enter the PIN shown on the TV", enter:"Continue",
+        badPin:"Wrong PIN. Check the TV screen.", locked:"Too many attempts. Wait 1 minute.", net:"Could not reach the TV. Is it on the same Wi-Fi with the “Transfer games” screen open?",
+        console:"Console", auto:"Detect automatically", drop:"Drag files here", types:"or tap “Choose files”. Accepted: ", pick:"Choose files",
+        waiting:"Queued", sending:"Sending", ok:"Sent", bios:"BIOS received", to:"→ ",
+        tooBig:"File too large.", noSpace:"Not enough space on the TV.", notGame:"Does not look like a game for these consoles.", interrupted:"Upload interrupted. Try again.", error:"Upload error.",
+        free:"Free space on the TV: ", legal:"Only use copies of games you legally own." },
+  es: { sub:"Envía juegos del móvil a la TV por Wi-Fi.", pin:"Escribe el PIN que aparece en la TV", enter:"Continuar",
+        badPin:"PIN incorrecto. Revisa la pantalla de la TV.", locked:"Demasiados intentos. Espera 1 minuto.", net:"No se pudo conectar con la TV. ¿Está en la misma red Wi-Fi con la pantalla “Transferir juegos” abierta?",
+        console:"Consola", auto:"Detectar automáticamente", drop:"Arrastra los archivos aquí", types:"o toca “Elegir archivos”. Acepta: ", pick:"Elegir archivos",
+        waiting:"En cola", sending:"Enviando", ok:"Enviado", bios:"BIOS recibida", to:"→ ",
+        tooBig:"Archivo demasiado grande.", noSpace:"No hay espacio en la TV.", notGame:"No parece un juego de estas consolas.", interrupted:"Envío interrumpido. Inténtalo de nuevo.", error:"Error en el envío.",
+        free:"Espacio libre en la TV: ", legal:"Usa solo copias de juegos que poseas legalmente." },
+};
+const lang = (navigator.language || "pt").slice(0, 2);
+const t = T[lang] || T.pt;
+document.documentElement.lang = lang === "en" ? "en" : lang === "es" ? "es" : "pt-BR";
+const $ = (id) => document.getElementById(id);
+for (const [id, key] of [["t-sub","sub"],["t-pin","pin"],["pin-btn","enter"],["t-console","console"],["t-drop","drop"],["pick","pick"],["t-legal","legal"]]) $(id).textContent = t[key];
+
+let pin = new URLSearchParams(location.search).get("pin") || "";
+let consoles = [], extensions = [], queue = [], busy = false;
+const errorText = { bad_pin:t.badPin, locked:t.locked, too_big:t.tooBig, no_space:t.noSpace, not_a_game:t.notGame, interrupted:t.interrupted };
+
+function size(b) { const u=["B","KB","MB","GB"]; let i=0; while (b>=1024 && i<3) { b/=1024; i++; } return b.toFixed(i?1:0)+" "+u[i]; }
+
+async function login() {
+  $("pin-msg").textContent = "";
+  try {
+    const r = await fetch("/api/info", { headers: { "X-Pin": pin } });
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({}));
+      $("pin-msg").textContent = errorText[e.error] || t.badPin;
+      $("pin-card").classList.remove("hidden");
+      return;
+    }
+    const info = await r.json();
+    consoles = info.consoles;
+    extensions = [...new Set(consoles.flatMap(c => c.extensions))];
+    $("system").innerHTML = `<option value="auto">${t.auto}</option>` +
+      consoles.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+    $("t-types").textContent = t.types + extensions.map(e => "." + e).join(" ") + ". " + t.free + size(info.freeBytes);
+    $("files").accept = extensions.map(e => "." + e).join(",");
+    $("pin-card").classList.add("hidden");
+    $("send-card").classList.remove("hidden");
+  } catch (e) {
+    $("pin-msg").textContent = t.net;
+    $("pin-card").classList.remove("hidden");
+  }
+}
+
+function add(files) {
+  const system = $("system").value;
+  for (const f of files) {
+    const li = document.createElement("li");
+    li.innerHTML = `<div class="row"><span class="name"></span><span class="status">${t.waiting}</span></div><div class="bar"><div></div></div>`;
+    li.querySelector(".name").textContent = f.name + " (" + size(f.size) + ")";
+    $("list").prepend(li);
+    queue.push({ file: f, system, li });
+  }
+  $("list-card").classList.remove("hidden");
+  next();
+}
+
+function next() {
+  if (busy || !queue.length) return;
+  busy = true;
+  const item = queue.shift();
+  const status = item.li.querySelector(".status"), bar = item.li.querySelector(".bar > div");
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", "/api/upload?name=" + encodeURIComponent(item.file.name) + "&system=" + item.system);
+  xhr.setRequestHeader("X-Pin", pin);
+  xhr.setRequestHeader("Content-Type", "application/octet-stream");
+  xhr.upload.onprogress = (e) => {
+    if (!e.lengthComputable) return;
+    const p = Math.round(e.loaded * 100 / e.total);
+    bar.style.width = p + "%";
+    status.textContent = t.sending + " " + p + "%";
+  };
+  const done = (ok, text) => {
+    status.textContent = text;
+    status.className = "status " + (ok ? "ok" : "err");
+    if (ok) bar.style.width = "100%";
+    busy = false;
+    next();
+  };
+  xhr.onload = () => {
+    let r = {};
+    try { r = JSON.parse(xhr.responseText); } catch (e) {}
+    if (xhr.status === 200 && r.ok) {
+      const c = consoles.find(c => c.id === r.system);
+      done(true, r.bios ? t.bios : t.ok + (c ? " " + t.to + c.name : ""));
+    } else {
+      if (r.error === "bad_pin" || r.error === "locked") { $("send-card").classList.add("hidden"); $("pin-card").classList.remove("hidden"); $("pin-msg").textContent = errorText[r.error]; }
+      done(false, errorText[r.error] || t.error);
+    }
+  };
+  xhr.onerror = () => done(false, t.net);
+  xhr.send(item.file);
+}
+
+$("pin").value = pin;
+$("pin").addEventListener("input", (e) => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 4); });
+$("pin-btn").addEventListener("click", () => { pin = $("pin").value; login(); });
+$("pin").addEventListener("keydown", (e) => { if (e.key === "Enter") $("pin-btn").click(); });
+$("pick").addEventListener("click", () => $("files").click());
+$("files").addEventListener("change", (e) => { add(e.target.files); e.target.value = ""; });
+const drop = $("drop");
+drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("over"); add(e.dataTransfer.files); });
+if (pin.length === 4) login();
+</script>
+</body>
+</html>

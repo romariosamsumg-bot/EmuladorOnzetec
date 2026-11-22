@@ -24,7 +24,7 @@ baixados sob demanda.
 | 2 | Emulação mínima (LibretroDroid + download do snes9x2010) | ✅ (falta validar 60 fps na TV) |
 | 3 | Biblioteca (Room, pasta Jogos, USB/SAF, varredura, CRC + DAT, capas) | ✅ |
 | 4 | UI streaming (hero, fileiras, detalhes, busca, páginas de console) | ✅ |
-| 5 | Transferência pelo celular (servidor local, QR code, PIN) | ⏳ |
+| 5 | Transferência pelo celular (servidor local, QR code, PIN) | ✅ |
 | 6 | Menu de jogo e saves | ⏳ |
 | 7 | Configurações completas | ⏳ |
 | 8 | Mega Drive, Master System e Neo Geo | ⏳ |
@@ -57,6 +57,24 @@ novos são encontrados sozinhos; também dá para tocar em **Verificar agora**.
 
 > Se a TV não tiver a tela dessa permissão, rode no computador (com depuração ADB ativada):
 > `adb shell appops set --uid com.retroplay.tv MANAGE_EXTERNAL_STORAGE allow`
+
+### Pelo celular (Wi-Fi)
+
+Com a TV e o celular na **mesma rede Wi-Fi**, abra **Transferir jogos** (ou a tela inicial, se a
+biblioteca estiver vazia). A TV mostra um **QR code**, o endereço (ex.: `http://192.168.0.15:8080`)
+e um **PIN de 4 dígitos**.
+
+1. Aponte a câmera do celular para o QR code (o PIN já vai junto) — ou digite o endereço no
+   navegador e informe o PIN.
+2. Toque em **Escolher arquivos** (ou arraste os arquivos, no computador). Dá para mandar vários
+   de uma vez; cada um tem barra de progresso.
+3. O Retrô Play identifica o console de cada arquivo e o coloca na subpasta certa
+   (`Jogos/Super Nintendo`, `Jogos/BIOS` para a `neogeo.zip`…). Se preferir, escolha o console
+   antes de enviar. Os jogos aparecem na biblioteca segundos depois.
+
+Segurança: o servidor só fica ligado enquanto essa tela está aberta, exige o PIN em cada envio,
+bloqueia por 1 minuto após 5 PINs errados, aceita só arquivos de jogos (até 2 GB cada) e confere
+o espaço livre antes de receber. Os arquivos vão direto para o disco, sem ocupar a memória da TV.
 
 ### Outras pastas e pendrive/HD USB
 
@@ -151,6 +169,7 @@ Requisitos: JDK 17+ e Android SDK (plataforma `android-37.2`).
 echo "sdk.dir=/caminho/para/android-sdk" > local.properties
 ./gradlew test               # testes unitários + testes de navegação por D-pad (Robolectric)
 ./gradlew :data:testDebugUnitTest -Pretroplay.network=true --tests '*BuildbotLiveTest*'  # baixa núcleos reais
+./gradlew :data:testDebugUnitTest -Pretroplay.e2e=true --tests '*PhoneTransferE2ETest*'   # página do celular no Chromium (Node + Playwright)
 ./gradlew assembleDebug      # app/build/outputs/apk/debug/app-debug.apk
 ```
 

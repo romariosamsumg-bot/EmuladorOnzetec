@@ -67,7 +67,7 @@ class LibraryScanner(
                     continue
                 }
                 onProgress(processed, total, file.name)
-                val target = Target(file, files, siblings[file.parents].orEmpty())
+                val target = FileScanTarget(file, files, siblings[file.parents].orEmpty())
                 val outcome = try {
                     identifier.identify(target, old?.userSystem?.let(::SystemId))
                 } catch (e: Exception) {
@@ -163,26 +163,26 @@ class LibraryScanner(
         )
     }
 
-    /** Adapta um [FoundFile] ao [ScanTarget] do domínio (leitura sob demanda). */
-    private class Target(
-        private val file: FoundFile,
-        private val access: FileAccess,
-        override val siblingNames: Set<String>,
-    ) : ScanTarget {
-        override val fileName get() = file.name
-        override val size get() = file.size
-        override val parentNames get() = file.parents
-        override fun archiveEntries(): List<ArchiveEntry> = access.openChannel(file.uri).use {
-            ArchiveReader.entries(it, SystemDetector.extensionOf(file.name).orEmpty())
-        }
-        override fun crc32(skipBytes: Long) = ArchiveReader.crc32(access.openStream(file.uri), skipBytes)
-        override fun md5(skipBytes: Long) = ArchiveReader.md5(access.openStream(file.uri), skipBytes)
-        override fun archiveEntryCrc(entryName: String): Long? =
-            if (SystemDetector.extensionOf(file.name) == "7z") access.openChannel(file.uri).use { ArchiveReader.sevenZipEntryCrc(it, entryName) }
-            else null
-    }
-
     private companion object {
         const val BATCH = 50
     }
+}
+
+/** Adapta um [FoundFile] ao [ScanTarget] do domínio (leitura sob demanda). */
+class FileScanTarget(
+    private val file: FoundFile,
+    private val access: FileAccess,
+    override val siblingNames: Set<String> = emptySet(),
+) : ScanTarget {
+    override val fileName get() = file.name
+    override val size get() = file.size
+    override val parentNames get() = file.parents
+    override fun archiveEntries(): List<ArchiveEntry> = access.openChannel(file.uri).use {
+        ArchiveReader.entries(it, SystemDetector.extensionOf(file.name).orEmpty())
+    }
+    override fun crc32(skipBytes: Long) = ArchiveReader.crc32(access.openStream(file.uri), skipBytes)
+    override fun md5(skipBytes: Long) = ArchiveReader.md5(access.openStream(file.uri), skipBytes)
+    override fun archiveEntryCrc(entryName: String): Long? =
+        if (SystemDetector.extensionOf(file.name) == "7z") access.openChannel(file.uri).use { ArchiveReader.sevenZipEntryCrc(it, entryName) }
+        else null
 }

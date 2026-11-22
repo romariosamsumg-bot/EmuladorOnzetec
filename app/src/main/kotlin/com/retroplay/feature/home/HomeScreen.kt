@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -59,6 +60,10 @@ import com.retroplay.domain.system.GameSystem
 import com.retroplay.domain.system.SystemCatalog
 import com.retroplay.domain.system.SystemRegistry
 import com.retroplay.feature.play.LaunchGamesEffect
+import com.retroplay.feature.transfer.PhoneTransferPanel
+import com.retroplay.domain.transfer.IncomingFile
+import com.retroplay.domain.transfer.PhoneTransferState
+import androidx.lifecycle.compose.LifecycleStartEffect
 import com.retroplay.ui.components.FocusMemory
 import com.retroplay.ui.components.GameCard
 import com.retroplay.ui.components.RestoreOrInitialFocus
@@ -77,7 +82,14 @@ fun HomeEntry(
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchGamesEffect(viewModel.launcher)
     if (state.loaded && state.rows.isEmpty()) {
-        EmptyHome(viewModel.systems, onOpenTransfer, onOpenConsole)
+        val phoneState by viewModel.phone.state.collectAsStateWithLifecycle()
+        val incoming by viewModel.phone.incoming.collectAsStateWithLifecycle()
+        // Biblioteca vazia também é tela de importação: o QR code do celular fica ativo aqui.
+        LifecycleStartEffect(viewModel.phone) {
+            viewModel.phone.acquire()
+            onStopOrDispose { viewModel.phone.release() }
+        }
+        EmptyHome(viewModel.systems, phoneState, incoming, onOpenTransfer, onOpenConsole)
     } else {
         HomeScreen(
             state = state,
@@ -262,46 +274,65 @@ fun genreName(genre: String): String {
     return res?.let { stringResource(it) } ?: genre
 }
 
-/** Biblioteca vazia: passo a passo para importar jogos. */
+/** Biblioteca vazia: passo a passo para importar jogos + QR code para enviar pelo celular. */
 @Composable
-private fun EmptyHome(systems: List<GameSystem>, onOpenTransfer: () -> Unit, onOpenConsole: (GameSystem) -> Unit) {
+private fun EmptyHome(
+    systems: List<GameSystem>,
+    phoneState: PhoneTransferState,
+    incoming: List<IncomingFile>,
+    onOpenTransfer: () -> Unit,
+    onOpenConsole: (GameSystem) -> Unit,
+) {
     val focus = remember { FocusRequester() }
     val memory = rememberFocusMemory()
     RestoreOrInitialFocus(memory, focus)
-    Column(Modifier.fillMaxSize().padding(top = 48.dp).testTag("screen_home")) {
-        Column(Modifier.padding(horizontal = 48.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-            Text(stringResource(R.string.home_empty_title), style = MaterialTheme.typography.displaySmall)
-            listOf(R.string.home_step_1, R.string.home_step_2, R.string.home_step_3).forEachIndexed { i, step ->
-                Text(
-                    "${i + 1}. " + stringResource(step),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.widthIn(max = 760.dp),
-                )
-            }
-            Text(stringResource(R.string.legal_notice_short), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.height(4.dp))
-            Button(
-                onClick = onOpenTransfer,
-                modifier = Modifier.focusRequester(focus).rememberFocus(memory, "transfer").testTag("home_transfer"),
-                colors = ButtonDefaults.colors(),
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(painterResource(UiR.drawable.ic_nav_transfer), contentDescription = null, modifier = Modifier.size(20.dp))
-                    Text(stringResource(R.string.nav_transfer))
+    // Lista rolável: a TV tem só ~540 dp de altura; o foco rola até a fileira de consoles.
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().testTag("screen_home"),
+        contentPadding = PaddingValues(top = 40.dp, bottom = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item(key = "intro") {
+            Row(Modifier.padding(horizontal = 48.dp), horizontalArrangement = Arrangement.spacedBy(40.dp)) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(stringResource(R.string.app_name), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.home_empty_title), style = MaterialTheme.typography.displaySmall)
+                    listOf(R.string.home_step_1, R.string.home_step_2, R.string.home_step_3).forEachIndexed { i, step ->
+                        Text(
+                            "${i + 1}. " + stringResource(step),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Text(stringResource(R.string.legal_notice_short), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Button(
+                        onClick = onOpenTransfer,
+                        modifier = Modifier.focusRequester(focus).rememberFocus(memory, "transfer").testTag("home_transfer"),
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Icon(painterResource(UiR.drawable.ic_nav_transfer), contentDescription = null, modifier = Modifier.size(20.dp))
+                            Text(stringResource(R.string.nav_transfer))
+                        }
+                    }
+                }
+                Column(Modifier.width(420.dp).testTag("home_phone"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(stringResource(R.string.home_phone_title), style = MaterialTheme.typography.titleLarge)
+                    PhoneTransferPanel(phoneState, incoming, compact = true)
                 }
             }
         }
-        Spacer(Modifier.height(32.dp))
-        Text(stringResource(R.string.home_supported_systems), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(horizontal = 48.dp))
-        LazyRow(
-            modifier = Modifier.focusRestorer().testTag("home_systems_row"),
-            contentPadding = PaddingValues(horizontal = 48.dp, vertical = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-        ) {
-            items(systems, key = { it.id.value }) { system ->
-                SystemCard(system = system, onClick = { onOpenConsole(system) }, modifier = Modifier.rememberFocus(memory, "sys_${system.id.value}"))
+        item(key = "systems") {
+            Column {
+                Text(stringResource(R.string.home_supported_systems), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 48.dp, top = 12.dp))
+                LazyRow(
+                    modifier = Modifier.focusRestorer().testTag("home_systems_row"),
+                    contentPadding = PaddingValues(horizontal = 48.dp, vertical = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                ) {
+                    items(systems, key = { it.id.value }) { system ->
+                        SystemCard(system = system, onClick = { onOpenConsole(system) }, modifier = Modifier.rememberFocus(memory, "sys_${system.id.value}"))
+                    }
+                }
             }
         }
     }

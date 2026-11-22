@@ -8,7 +8,9 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.onLast
@@ -101,6 +103,7 @@ class TransferScreenTest {
         openTransfer()
         node("scan_now").assertIsFocused()
         compose.onNode(hasText("/storage/emulated/0/Jogos", substring = true)).assertExists()
+        compose.onNodeWithTag("screen_transfer").performScrollToNode(hasTestTag("scan_status"))
         node("scan_status").assertTextContains("Verificando 12 de 340: kof98.zip")
         screenshot("21_transfer_pronta")
         val before = library.scanRequests

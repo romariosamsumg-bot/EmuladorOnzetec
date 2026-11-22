@@ -13,6 +13,7 @@ import com.retroplay.domain.library.GameFolder
 import com.retroplay.domain.library.GameSource
 import com.retroplay.domain.library.LibraryRepository
 import com.retroplay.domain.library.ScanState
+import com.retroplay.domain.transfer.PhoneTransfer
 import com.retroplay.domain.system.SystemId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -28,6 +29,7 @@ import javax.inject.Inject
 class TransferViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val library: LibraryRepository,
+    val phone: PhoneTransfer,
 ) : ViewModel() {
 
     private val _defaults = MutableStateFlow<DefaultFolders?>(null)

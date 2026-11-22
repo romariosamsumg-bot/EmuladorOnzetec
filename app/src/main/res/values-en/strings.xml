@@ -95,7 +95,6 @@
     </plurals>
     <string name="remove">Remove</string>
     <string name="phone_transfer_title">From your phone (Wi-Fi)</string>
-    <string name="phone_transfer_soon">Coming soon: send games from your phone by scanning a QR code on the TV.</string>
     <string name="roms_hint">Tip: put the games in %1$s. They show up here after the check.</string>
     <plurals name="romset_incomplete">
         <item quantity="one">Incomplete romset: %1$d file missing.</item>
@@ -143,7 +142,6 @@
     <string name="genre_strategy">Strategy</string>
     <string name="genre_simulation">Simulation</string>
     <string name="home_step_1">Open “Transfer games” and allow file access: Retrô Play creates the Jogos folder on the TV.</string>
-    <string name="home_step_2">Copy your games to the console subfolder (Jogos/Super Nintendo, Jogos/Mega Drive…) using a USB drive, a file manager or the Downloader app.</string>
     <string name="home_step_3">Come back here: games show up automatically, with name, cover and info.</string>
     <string name="legal_notice_short">Retrô Play includes no games or BIOS. Only use copies you legally own.</string>
     <string name="details_played">Played %1$s · total time: %2$s</string>
@@ -187,4 +185,24 @@
         <item quantity="many">%1$d players</item>
         <item quantity="other">%1$d players</item>
     </plurals>
+
+    <!-- Fase 5: transferência pelo celular -->
+    <string name="phone_step_wifi">1. Connect your phone to the same Wi-Fi as the TV.</string>
+    <string name="phone_step_qr">2. Point your phone camera at the QR code</string>
+    <string name="phone_step_url">   or open in the browser: %1$s</string>
+    <string name="phone_pin">PIN:</string>
+    <string name="phone_only_while_open">Sending only works while this screen is open. Games go straight to the console folder.</string>
+    <string name="phone_no_network">The TV is not connected to a network. Connect it to Wi-Fi or cable to send games from your phone.</string>
+    <string name="phone_port_busy">Could not start phone transfer (ports in use). Close and reopen this screen.</string>
+    <string name="phone_starting">Preparing phone transfer…</string>
+    <string name="phone_receiving">Receiving %1$s… %2$d%%</string>
+    <string name="phone_received">✓ %1$s → %2$s</string>
+    <string name="phone_received_bios">✓ %1$s → BIOS</string>
+    <string name="phone_received_unknown">✓ %1$s (choose the console in Transfer games)</string>
+    <string name="phone_failed_not_game">✗ %1$s does not look like a game for these consoles.</string>
+    <string name="phone_failed_too_big">✗ %1$s is too large.</string>
+    <string name="phone_failed_interrupted">✗ Sending %1$s was interrupted.</string>
+    <string name="home_phone_title">Or send from your phone</string>
+    <string name="home_step_2">Copy your games to the console subfolder (Jogos/Super Nintendo, Jogos/Mega Drive…) using a USB drive, a file manager or the Downloader app — or send them from your phone with the QR code beside.</string>
+    <string name="phone_compact_hint">Scan with your phone camera (same Wi-Fi) or open:</string>
 </resources>

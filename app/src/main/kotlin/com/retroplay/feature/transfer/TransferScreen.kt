@@ -43,6 +43,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.LifecycleStartEffect
+import com.retroplay.domain.transfer.IncomingFile
+import com.retroplay.domain.transfer.PhoneTransferState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
@@ -71,6 +74,13 @@ fun TransferScreen(viewModel: TransferViewModel = hiltViewModel()) {
     val needsSystem by viewModel.needsSystem.collectAsStateWithLifecycle()
     val count by viewModel.count.collectAsStateWithLifecycle()
     val copy by viewModel.copy.collectAsStateWithLifecycle()
+    val phoneState by viewModel.phone.state.collectAsStateWithLifecycle()
+    val incoming by viewModel.phone.incoming.collectAsStateWithLifecycle()
+    // Servidor de transferência ativo só enquanto esta tela está visível.
+    LifecycleStartEffect(viewModel.phone) {
+        viewModel.phone.acquire()
+        onStopOrDispose { viewModel.phone.release() }
+    }
     var showAdbHelp by remember { mutableStateOf(false) }
     var choosing by remember { mutableStateOf<Game?>(null) }
 
@@ -91,6 +101,8 @@ fun TransferScreen(viewModel: TransferViewModel = hiltViewModel()) {
         count = count,
         needsSystem = needsSystem,
         copy = copy,
+        phoneState = phoneState,
+        incoming = incoming,
         showAdbHelp = showAdbHelp,
         onGrantAccess = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -140,6 +152,8 @@ fun TransferContent(
     count: Int,
     needsSystem: List<Game>,
     copy: CopyState,
+    phoneState: PhoneTransferState = PhoneTransferState.Stopped,
+    incoming: List<IncomingFile> = emptyList(),
     showAdbHelp: Boolean,
     onGrantAccess: () -> Unit,
     onAddFolder: () -> Unit,
@@ -156,6 +170,13 @@ fun TransferContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item { Text(stringResource(R.string.transfer_title), style = MaterialTheme.typography.displaySmall) }
+
+        // ---------------------------------------------------------- celular (principal)
+        item {
+            Section(stringResource(R.string.phone_transfer_title)) {
+                PhoneTransferPanel(phoneState, incoming)
+            }
+        }
 
         // ---------------------------------------------------------- pasta Jogos
         item {
@@ -264,12 +285,6 @@ fun TransferContent(
         }
         items(folders, key = { "f${it.id}" }) { folder -> FolderRow(folder, onRemoveFolder, onCopyFolder) }
 
-        // ---------------------------------------------------------- celular
-        item {
-            Section(stringResource(R.string.phone_transfer_title)) {
-                Text(stringResource(R.string.phone_transfer_soon), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
     }
 }
 

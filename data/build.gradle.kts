@@ -40,6 +40,7 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.commons.compress)
     implementation(libs.xz)
+    implementation(libs.nanohttpd)
     implementation(libs.work.runtime.ktx)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
@@ -56,4 +57,5 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     systemProperty("retroplay.network", providers.gradleProperty("retroplay.network").getOrElse("false"))
+    systemProperty("retroplay.e2e", providers.gradleProperty("retroplay.e2e").getOrElse("false"))
 }

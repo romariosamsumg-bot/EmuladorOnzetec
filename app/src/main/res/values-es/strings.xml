@@ -98,7 +98,6 @@
     </plurals>
     <string name="remove">Quitar</string>
     <string name="phone_transfer_title">Desde el móvil (Wi-Fi)</string>
-    <string name="phone_transfer_soon">Próximamente: envía juegos desde el móvil escaneando un código QR en la TV.</string>
     <string name="roms_hint">Consejo: pon los juegos en %1$s. Aparecen aquí después de la revisión.</string>
     <plurals name="romset_incomplete">
         <item quantity="one">Romset incompleto: falta %1$d archivo.</item>
@@ -150,7 +149,6 @@
     <string name="genre_strategy">Estrategia</string>
     <string name="genre_simulation">Simulación</string>
     <string name="home_step_1">Abre “Transferir juegos” y permite el acceso a los archivos: Retrô Play crea la carpeta Jogos en la TV.</string>
-    <string name="home_step_2">Copia tus juegos a la subcarpeta de la consola (Jogos/Super Nintendo, Jogos/Mega Drive…) con una memoria USB, un gestor de archivos o la app Downloader.</string>
     <string name="home_step_3">Vuelve aquí: los juegos aparecen solos, con nombre, portada e información.</string>
     <string name="legal_notice_short">Retrô Play no incluye juegos ni BIOS. Usa solo copias que poseas legalmente.</string>
     <string name="details_played">Jugado %1$s · tiempo total: %2$s</string>
@@ -194,4 +192,24 @@
         <item quantity="many">%1$d jugadores</item>
         <item quantity="other">%1$d jugadores</item>
     </plurals>
+
+    <!-- Fase 5: transferência pelo celular -->
+    <string name="phone_step_wifi">1. Conecta el móvil a la misma red Wi-Fi que la TV.</string>
+    <string name="phone_step_qr">2. Apunta la cámara del móvil al código QR</string>
+    <string name="phone_step_url">   o abre en el navegador: %1$s</string>
+    <string name="phone_pin">PIN:</string>
+    <string name="phone_only_while_open">El envío solo funciona con esta pantalla abierta. Los juegos van directo a la carpeta de la consola.</string>
+    <string name="phone_no_network">La TV no está conectada a una red. Conéctala por Wi-Fi o cable para enviar juegos desde el móvil.</string>
+    <string name="phone_port_busy">No se pudo iniciar el envío desde el móvil (puertos ocupados). Cierra y abre esta pantalla de nuevo.</string>
+    <string name="phone_starting">Preparando el envío desde el móvil…</string>
+    <string name="phone_receiving">Recibiendo %1$s… %2$d%%</string>
+    <string name="phone_received">✓ %1$s → %2$s</string>
+    <string name="phone_received_bios">✓ %1$s → BIOS</string>
+    <string name="phone_received_unknown">✓ %1$s (elige la consola en Transferir juegos)</string>
+    <string name="phone_failed_not_game">✗ %1$s no parece un juego de estas consolas.</string>
+    <string name="phone_failed_too_big">✗ %1$s es demasiado grande.</string>
+    <string name="phone_failed_interrupted">✗ El envío de %1$s se interrumpió.</string>
+    <string name="home_phone_title">O envía desde el móvil</string>
+    <string name="home_step_2">Copia tus juegos a la subcarpeta de la consola (Jogos/Super Nintendo, Jogos/Mega Drive…) con una memoria USB, un gestor de archivos o la app Downloader — o envíalos desde el móvil con el código QR al lado.</string>
+    <string name="phone_compact_hint">Escanea con la cámara del móvil (misma Wi-Fi) o abre:</string>
 </resources>

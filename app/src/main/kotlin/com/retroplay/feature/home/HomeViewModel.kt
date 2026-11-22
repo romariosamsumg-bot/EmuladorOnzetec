@@ -9,6 +9,7 @@ import com.retroplay.domain.library.LibraryRepository
 import com.retroplay.domain.system.GameSystem
 import com.retroplay.domain.system.SystemCatalog
 import com.retroplay.feature.play.PlayLauncher
+import com.retroplay.domain.transfer.PhoneTransfer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,6 +27,7 @@ class HomeViewModel @Inject constructor(
     private val catalog: SystemCatalog,
     private val library: LibraryRepository,
     launcherFactory: PlayLauncher.Factory,
+    val phone: PhoneTransfer,
 ) : ViewModel() {
 
     val systems: List<GameSystem> = catalog.all
