@@ -34,6 +34,8 @@ fun PlaceholderScreen(
     @DrawableRes iconRes: Int,
     testTag: String,
     extraInfo: String? = null,
+    actionLabel: String? = null,
+    onAction: () -> Unit = {},
 ) {
     val focus = rememberInitialFocus()
     val shape = RoundedCornerShape(12.dp)
@@ -52,7 +54,7 @@ fun PlaceholderScreen(
             Text(extraInfo, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Surface(
-            onClick = {},
+            onClick = onAction,
             modifier = Modifier.focusRequester(focus).testTag("${testTag}_primary"),
             shape = ClickableSurfaceDefaults.shape(shape),
             scale = ClickableSurfaceDefaults.scale(focusedScale = 1.05f),
@@ -70,7 +72,7 @@ fun PlaceholderScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Icon(painterResource(iconRes), contentDescription = null, modifier = Modifier.size(24.dp))
-                Text(stringResource(R.string.coming_soon), style = MaterialTheme.typography.titleMedium)
+                Text(actionLabel ?: stringResource(R.string.coming_soon), style = MaterialTheme.typography.titleMedium)
             }
         }
     }

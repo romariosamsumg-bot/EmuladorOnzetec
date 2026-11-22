@@ -16,18 +16,14 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.retroplay.MainActivity
-import com.retroplay.data.di.CoreRepositoryModule
 import com.retroplay.domain.core.CoreError
 import com.retroplay.domain.core.CoreInstallState
-import com.retroplay.domain.core.CoreRepository
 import com.retroplay.fakes.FakeCoreRepository
 import com.retroplay.feature.game.GameActivity
 import com.retroplay.feature.game.GameLauncher
-import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
-import dagger.hilt.android.testing.UninstallModules
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -47,7 +43,6 @@ import com.retroplay.domain.system.SystemRegistry
 
 @OptIn(ExperimentalTestApi::class)
 @HiltAndroidTest
-@UninstallModules(CoreRepositoryModule::class)
 @RunWith(AndroidJUnit4::class)
 @Config(application = HiltTestApplication::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -59,11 +54,8 @@ class ConsoleScreenTest {
     @get:Rule(order = 1)
     val compose = createAndroidComposeRule<MainActivity>()
 
-    private val fake = FakeCoreRepository()
-
-    @BindValue
-    @JvmField
-    val repo: CoreRepository = fake
+    @Inject
+    lateinit var fake: FakeCoreRepository
 
     @Inject
     lateinit var library: FakeLibraryRepository
@@ -84,12 +76,32 @@ class ConsoleScreenTest {
         compose.waitForIdle()
     }
 
+    /** Espera uma condição processando a fila da thread principal (coroutines, Room, IO). */
+    private fun eventually(condition: () -> Boolean) {
+        repeat(200) {
+            shadowOf(android.os.Looper.getMainLooper()).idle()
+            compose.waitForIdle()
+            if (condition()) return
+            Thread.sleep(20)
+        }
+        throw AssertionError("condição não satisfeita")
+    }
+
     private fun node(tag: String): SemanticsNodeInteraction = compose.onNodeWithTag(tag, useUnmergedTree = true)
 
-    /** Início → ↓ (card SNES) → OK: abre a página do console só com o D-pad. */
-    private fun openSnesPage() {
+    /** Menu → Consoles → card SNES → OK: abre a página do console só com o D-pad. */
+    private fun openConsoles() {
+        press(Key.DirectionLeft)
         press(Key.DirectionDown)
+        press(Key.DirectionDown)
+        node("nav_consoles").assertIsFocused()
+        press(Key.DirectionCenter)
+        waitFor("system_snes")
         node("system_snes").assertIsFocused()
+    }
+
+    private fun openSnesPage() {
+        openConsoles()
         press(Key.DirectionCenter)
         node("screen_console_snes").assertExists()
         waitFor("game_testrom")
@@ -103,6 +115,8 @@ class ConsoleScreenTest {
         screenshot("10_console_sem_nucleo")
 
         press(Key.DirectionCenter)
+        eventually { fake.installRequests.isNotEmpty() }
+        compose.waitForIdle()
         assertEquals(listOf("snes9x2010"), fake.installRequests)
         node("core_status").assertTextContains("Baixando", substring = true)
         fake.state.value = CoreInstallState.Downloading(800_000, 1_600_000)
@@ -113,6 +127,7 @@ class ConsoleScreenTest {
         fake.complete()
         compose.waitForIdle()
         node("core_status").assertTextContains("Pronto", substring = true)
+        eventually { shadowOf(compose.activity).peekNextStartedActivity() != null }
         val intent = shadowOf(compose.activity).nextStartedActivity
         assertNotNull("o jogo deveria abrir ao terminar o download", intent)
         assertEquals(GameActivity::class.java.name, intent.component!!.className)
@@ -128,6 +143,7 @@ class ConsoleScreenTest {
         fake.complete()
         openSnesPage()
         press(Key.DirectionCenter)
+        eventually { shadowOf(compose.activity).peekNextStartedActivity() != null }
         assertTrue(fake.installRequests.isEmpty())
         assertEquals(GameActivity::class.java.name, shadowOf(compose.activity).nextStartedActivity.component!!.className)
     }
@@ -135,12 +151,9 @@ class ConsoleScreenTest {
     @Test
     fun botao_baixar_nucleo_e_alcancavel_pelo_dpad() {
         openSnesPage()
-        press(Key.DirectionLeft)
+        // ↑ passa pelos filtros e chega ao botão do cabeçalho.
+        repeat(3) { if (runCatching { node("core_download").assertIsFocused() }.isFailure) press(Key.DirectionUp) }
         node("core_download").assertIsFocused()
-        // → volta para a lista de jogos.
-        press(Key.DirectionRight)
-        node("game_testrom").assertIsFocused()
-        press(Key.DirectionLeft)
         press(Key.DirectionCenter)
         assertEquals(listOf("snes9x2010"), fake.installRequests)
     }
@@ -155,60 +168,85 @@ class ConsoleScreenTest {
     }
 
     @Test
-    fun voltar_na_pagina_do_console_retorna_ao_inicio() {
+    fun voltar_na_pagina_do_console_retorna_a_lista_de_consoles() {
         openSnesPage()
         compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
         compose.mainClock.advanceTimeBy(500)
         compose.waitForIdle()
-        node("screen_home").assertExists()
+        node("screen_consoles").assertExists()
+        // Foco volta ao card do SNES.
+        waitFor("system_snes")
     }
 
     @Test
-    fun jogos_da_biblioteca_aparecem_com_status_do_romset() {
+    fun jogo_da_biblioteca_abre_detalhes_e_joga() {
         library.games.value = listOf(
             FakeLibraryRepository.game(1, SystemRegistry.Ids.SNES, "Super Mario World"),
             FakeLibraryRepository.game(2, SystemRegistry.Ids.MEGA_DRIVE, "Sonic The Hedgehog", "sonic.md"),
-            FakeLibraryRepository.game(3, SystemRegistry.Ids.NEO_GEO, "Metal Slug", "mslug.zip", romsetStatus = RomsetStatus.INCOMPLETE, missing = 3),
         )
         fake.complete()
         openSnesPage()
-        // ROM de teste + Super Mario World (o Sonic é de outro console).
-        press(Key.DirectionDown)
+        press(Key.DirectionRight)
         node("game_1").assertIsFocused()
-        compose.onNodeWithTag("game_1").assertTextContains("Super Mario World", substring = true)
-        compose.onNodeWithTag("game_1").assertTextContains("1991", substring = true)
-        node("game_2").assertDoesNotExist()
-        screenshot("14_console_biblioteca")
+        node("game_2").assertDoesNotExist() // é de outro console
+        // O nome aparece abaixo do card depois de 600 ms de foco.
+        compose.mainClock.advanceTimeBy(700)
+        compose.waitForIdle()
+        node("game_1_title").assertExists()
+        screenshot("14_console_grade")
         press(Key.DirectionCenter)
+        waitFor("details_play")
+        node("details_play").assertIsFocused()
+        press(Key.DirectionCenter)
+        eventually { shadowOf(compose.activity).peekNextStartedActivity() != null }
         val intent = shadowOf(compose.activity).nextStartedActivity
         assertEquals("/storage/emulated/0/Jogos/Super Mario World.sfc", intent.getStringExtra(GameLauncher.EXTRA_ROM_PATH))
-        assertEquals("Super Mario World.sfc", intent.getStringExtra(GameLauncher.EXTRA_FILE_NAME))
+        assertEquals(1L, intent.getLongExtra(GameLauncher.EXTRA_GAME_ID, -1))
     }
 
     @Test
-    fun romset_incompleto_mostra_aviso() {
+    fun filtro_favoritos_e_romset_incompleto() {
         library.games.value = listOf(
             FakeLibraryRepository.game(3, SystemRegistry.Ids.NEO_GEO, "Metal Slug", "mslug.zip", romsetStatus = RomsetStatus.INCOMPLETE, missing = 3),
+            FakeLibraryRepository.game(4, SystemRegistry.Ids.NEO_GEO, "Garou", "garou.zip", favorite = true),
         )
+        openConsoles()
+        // Neo Geo fica na 2ª linha da grade de consoles, abaixo do SNES.
         press(Key.DirectionDown)
-        repeat(3) { press(Key.DirectionRight) }
         node("system_neogeo").assertIsFocused()
         press(Key.DirectionCenter)
-        waitFor("game_0")
-        node("game_0").assertIsFocused()
-        compose.onNodeWithTag("game_0").assertTextContains("faltam 3 arquivos", substring = true)
+        waitFor("game_4")
+        // A–Z: Garou primeiro.
+        node("game_4").assertIsFocused()
+        press(Key.DirectionRight)
+        node("game_3").assertIsFocused()
+        press(Key.DirectionCenter)
+        waitFor("details_romset")
+        compose.onNodeWithTag("details_romset").assertTextContains("faltam 3 arquivos", substring = true)
+        compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        waitFor("game_3")
+        // Voltou para o mesmo card.
+        node("game_3").assertIsFocused()
+        press(Key.DirectionUp)
+        repeat(4) { if (runCatching { node("filter_FAVORITES").assertIsFocused() }.isFailure) press(Key.DirectionRight) }
+        node("filter_FAVORITES").assertIsFocused()
+        press(Key.DirectionCenter)
+        compose.waitForIdle()
+        node("game_3").assertDoesNotExist()
+        node("game_4").assertExists()
     }
 
     @Test
     fun outros_consoles_nao_mostram_a_rom_de_teste() {
-        press(Key.DirectionDown)
+        openConsoles()
         press(Key.DirectionRight)
         node("system_megadrive").assertIsFocused()
         press(Key.DirectionCenter)
         node("screen_console_megadrive").assertExists()
-        waitFor("pick_file")
+        waitFor("console_empty")
         node("game_testrom").assertDoesNotExist()
-        node("pick_file").assertIsFocused()
+        // Sem jogos: o foco vai para os filtros (nunca fica perdido).
+        node("filter_AZ").assertIsFocused()
     }
 
     private fun screenshot(name: String) {

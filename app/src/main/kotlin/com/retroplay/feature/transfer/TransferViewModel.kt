@@ -66,8 +66,13 @@ class TransferViewModel @Inject constructor(
     /** Pasta escolhida pelo seletor do sistema (pode ser um pendrive). */
     fun addTree(uri: Uri) {
         viewModelScope.launch {
+            // Leitura + escrita (escrita permite "Apagar" jogos do pendrive); cai para só leitura se negado.
             runCatching {
-                context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                context.contentResolver.takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                )
+            }.onFailure {
+                runCatching { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
             }
             library.addFolder(uri.toString(), GameSource.DOCUMENT, treeName(uri))
             library.scanNow()
@@ -78,7 +83,11 @@ class TransferViewModel @Inject constructor(
         viewModelScope.launch {
             if (folder.source == GameSource.DOCUMENT) {
                 runCatching {
-                    context.contentResolver.releasePersistableUriPermission(Uri.parse(folder.uri), Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    val uri = Uri.parse(folder.uri)
+                    val flags = context.contentResolver.persistedUriPermissions.firstOrNull { it.uri == uri }
+                        ?.let { (if (it.isReadPermission) Intent.FLAG_GRANT_READ_URI_PERMISSION else 0) or (if (it.isWritePermission) Intent.FLAG_GRANT_WRITE_URI_PERMISSION else 0) }
+                        ?: Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    context.contentResolver.releasePersistableUriPermission(uri, flags)
                 }
             }
             library.removeFolder(folder.id)

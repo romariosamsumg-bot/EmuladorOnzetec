@@ -10,6 +10,8 @@ import com.retroplay.data.scan.LibraryScanWorker
 import com.retroplay.domain.library.CopyState
 import com.retroplay.domain.library.CoverType
 import com.retroplay.domain.library.DefaultFolders
+import com.retroplay.domain.library.DeleteResult
+import com.retroplay.data.scan.FileAccess
 import com.retroplay.domain.library.Game
 import com.retroplay.domain.library.GameFolder
 import com.retroplay.domain.library.GameSource
@@ -29,6 +31,7 @@ class RoomLibraryRepository(
     private val db: LibraryDatabase,
     private val workManager: WorkManager,
     private val gamesFolder: GamesFolderManager,
+    private val files: FileAccess,
     private val clock: () -> Long = System::currentTimeMillis,
 ) : LibraryRepository {
 
@@ -57,6 +60,28 @@ class RoomLibraryRepository(
         }.distinctUntilChanged()
 
     override suspend fun game(id: Long): Game? = db.games().byId(id)?.let(::toGame)
+    override fun observeGame(id: Long): Flow<Game?> = db.games().observeById(id).map { it?.let(::toGame) }
+
+    override suspend fun setFavorite(id: Long, favorite: Boolean) = db.games().setFavorite(id, favorite)
+    override suspend fun setCover(id: Long, cover: CoverType?) = db.games().setCover(id, cover?.name)
+    override suspend fun recordPlayStarted(id: Long, atMillis: Long) = db.games().recordPlayStarted(id, atMillis)
+    override suspend fun addPlayTime(id: Long, millis: Long) {
+        if (millis > 0) db.games().addPlayTime(id, millis)
+    }
+
+    override suspend fun deleteGame(id: Long): DeleteResult = withContext(Dispatchers.IO) {
+        val game = db.games().byId(id) ?: return@withContext DeleteResult.NOT_FOUND
+        val ok = try {
+            files.delete(game.uri)
+        } catch (e: SecurityException) {
+            return@withContext DeleteResult.NO_PERMISSION
+        } catch (e: Exception) {
+            false
+        }
+        if (!ok) return@withContext DeleteResult.NO_PERMISSION
+        db.games().delete(listOf(id))
+        DeleteResult.DELETED
+    }
 
     override suspend fun addFolder(uri: String, source: GameSource, displayName: String, isDefault: Boolean): GameFolder {
         val existing = db.folders().byUri(uri)

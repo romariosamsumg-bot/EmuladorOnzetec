@@ -8,18 +8,15 @@
     <string name="nav_settings">Ajustes</string>
 
     <string name="home_empty_title">Tu biblioteca está vacía</string>
-    <string name="home_empty_body">Importa tus juegos desde el móvil (Wi-Fi) o desde una memoria USB. Usa solo copias que poseas legalmente.</string>
     <string name="home_supported_systems">Consolas compatibles</string>
 
     <string name="search_title">Buscar</string>
-    <string name="search_body">Encuentra juegos por nombre. La búsqueda llega en la Fase 4.</string>
 
     <string name="consoles_title">Consolas</string>
     <string name="consoles_body">Elige una consola para ver sus juegos.</string>
     <string name="console_needs_bios">Requiere BIOS</string>
 
     <string name="favorites_title">Favoritos</string>
-    <string name="favorites_body">Los juegos marcados con ＋ Favoritos aparecen aquí.</string>
 
     <string name="settings_title">Ajustes</string>
     <string name="settings_body">Video, audio, controles, emulación, BIOS, biblioteca, núcleos y más.</string>
@@ -111,12 +108,6 @@
     <string name="romset_wrong_version">Romset de otra versión (no es la de FBNeo).</string>
     <string name="romset_needs_parent">Necesita el romset principal en la misma carpeta.</string>
     <string name="romset_unknown">Romset no reconocido por FBNeo.</string>
-    <string name="home_library_title">Tu biblioteca</string>
-    <plurals name="home_library_count">
-        <item quantity="one">%1$d juego encontrado. La pantalla de inicio completa llega en la próxima fase.</item>
-        <item quantity="many">%1$d juegos encontrados. La pantalla de inicio completa llega en la próxima fase.</item>
-        <item quantity="other">%1$d juegos encontrados. La pantalla de inicio completa llega en la próxima fase.</item>
-    </plurals>
     <string name="copy_to_tv">Copiar a la TV</string>
     <string name="copy_starting">Preparando la copia…</string>
     <string name="copy_progress">Copiando %1$d de %2$d: %3$s</string>
@@ -134,5 +125,73 @@
         <item quantity="one">La copia se detuvo por un error de lectura (%1$d juego copiado). ¿Se retiró la memoria USB?</item>
         <item quantity="many">La copia se detuvo por un error de lectura (%1$d juegos copiados). ¿Se retiró la memoria USB?</item>
         <item quantity="other">La copia se detuvo por un error de lectura (%1$d juegos copiados). ¿Se retiró la memoria USB?</item>
+    </plurals>
+
+    <!-- Fase 4: interface streaming -->
+    <string name="play">Jugar</string>
+    <string name="add_favorite">＋ Favoritos</string>
+    <string name="remove_favorite">✓ En favoritos</string>
+    <string name="hero_continue">Sigue donde lo dejaste</string>
+    <string name="hero_featured">Destacado</string>
+    <string name="see_all">Ver todos</string>
+    <string name="row_continue">Seguir jugando</string>
+    <string name="row_favorites">Favoritos</string>
+    <string name="row_recent">Añadidos recientemente</string>
+    <string name="row_most_played">Más jugados</string>
+    <string name="genre_action">Acción</string>
+    <string name="genre_platform">Plataformas</string>
+    <string name="genre_sports">Deportes</string>
+    <string name="genre_racing">Carreras</string>
+    <string name="genre_puzzle">Puzle</string>
+    <string name="genre_rpg">RPG</string>
+    <string name="genre_shooter">Disparos</string>
+    <string name="genre_fighting">Lucha</string>
+    <string name="genre_adventure">Aventura</string>
+    <string name="genre_strategy">Estrategia</string>
+    <string name="genre_simulation">Simulación</string>
+    <string name="home_step_1">Abre “Transferir juegos” y permite el acceso a los archivos: Retrô Play crea la carpeta Jogos en la TV.</string>
+    <string name="home_step_2">Copia tus juegos a la subcarpeta de la consola (Jogos/Super Nintendo, Jogos/Mega Drive…) con una memoria USB, un gestor de archivos o la app Downloader.</string>
+    <string name="home_step_3">Vuelve aquí: los juegos aparecen solos, con nombre, portada e información.</string>
+    <string name="legal_notice_short">Retrô Play no incluye juegos ni BIOS. Usa solo copias que poseas legalmente.</string>
+    <string name="details_played">Jugado %1$s · tiempo total: %2$s</string>
+    <string name="details_unidentified">Juego no encontrado en la base de datos (hack, traducción o dump distinto). Funciona normalmente.</string>
+    <string name="details_core_downloading">Descargando el núcleo… %1$d%%. El juego se abre enseguida.</string>
+    <string name="game_options">Opciones del juego</string>
+    <string name="delete">Borrar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete_title">¿Borrar “%1$s”?</string>
+    <string name="delete_body">El archivo %1$s se borrará de la TV. No se puede deshacer.</string>
+    <string name="delete_done">Juego borrado.</string>
+    <string name="delete_no_permission">No se pudo borrar: la app no tiene permiso para cambiar esta carpeta.</string>
+    <string name="delete_not_found">El juego ya no estaba en la biblioteca.</string>
+    <string name="options_core">Núcleo: %1$s (cambio de núcleo en Ajustes, próximamente)</string>
+    <string name="options_cover">Portada</string>
+    <string name="options_no_cover">Este juego no tiene portadas en libretro-thumbnails.</string>
+    <string name="cover_auto">Automática</string>
+    <string name="cover_boxart">Caja</string>
+    <string name="cover_title">Pantalla de título</string>
+    <string name="cover_snap">Escena del juego</string>
+    <string name="duration_minutes">%1$d min</string>
+    <string name="duration_hours">%1$d h %2$d min</string>
+    <string name="search_hint">Escribe el nombre del juego</string>
+    <string name="search_space">Espacio</string>
+    <string name="search_clear">Borrar</string>
+    <string name="search_voice">Búsqueda por voz</string>
+    <string name="search_voice_prompt">Di el nombre del juego</string>
+    <string name="search_no_voice">La búsqueda por voz no está disponible en esta TV.</string>
+    <string name="search_empty_library">Tu biblioteca está vacía. Pon juegos en la carpeta Jogos.</string>
+    <string name="search_start">Los resultados aparecen mientras escribes.</string>
+    <string name="search_no_results">No se encontraron juegos para “%1$s”.</string>
+    <string name="favorites_browse">Ver consolas</string>
+    <string name="filter_az">A–Z</string>
+    <string name="filter_recent">Recientes</string>
+    <string name="filter_most_played">Más jugados</string>
+    <string name="filter_favorites">Favoritos</string>
+    <string name="console_no_favorites">Aún no hay favoritos de esta consola. (%1$s)</string>
+    <string name="favorites_body">Los juegos marcados con ＋ Favoritos aparecen aquí.</string>
+    <plurals name="players">
+        <item quantity="one">%1$d jugador</item>
+        <item quantity="many">%1$d jugadores</item>
+        <item quantity="other">%1$d jugadores</item>
     </plurals>
 </resources>

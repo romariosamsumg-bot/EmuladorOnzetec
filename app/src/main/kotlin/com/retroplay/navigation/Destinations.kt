@@ -31,3 +31,6 @@ enum class TopLevelDestination(
 
 /** Página de um console (lista de jogos e status do núcleo). */
 @Serializable data class ConsoleDetailRoute(val systemId: String)
+
+/** Detalhes de um jogo da biblioteca. */
+@Serializable data class GameDetailsRoute(val gameId: Long)

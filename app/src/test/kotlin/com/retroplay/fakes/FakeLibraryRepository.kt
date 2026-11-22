@@ -2,6 +2,8 @@ package com.retroplay.fakes
 
 import com.retroplay.data.di.LibraryRepositoryModule
 import com.retroplay.domain.library.CopyState
+import com.retroplay.domain.library.CoverType
+import com.retroplay.domain.library.DeleteResult
 import com.retroplay.domain.library.DefaultFolders
 import com.retroplay.domain.library.Game
 import com.retroplay.domain.library.GameFolder
@@ -43,6 +45,23 @@ class FakeLibraryRepository : LibraryRepository {
     override fun observeCount(): Flow<Int> = games.map { l -> l.count { it.systemId != null } }
     override fun observeCopy(): Flow<CopyState> = copy
     override suspend fun game(id: Long) = games.value.firstOrNull { it.id == id }
+    override fun observeGame(id: Long): Flow<Game?> = games.map { l -> l.firstOrNull { it.id == id } }
+    val deleted = mutableListOf<Long>()
+    var deleteResult = DeleteResult.DELETED
+
+    private fun update(id: Long, f: (Game) -> Game) {
+        games.value = games.value.map { if (it.id == id) f(it) else it }
+    }
+
+    override suspend fun setFavorite(id: Long, favorite: Boolean) = update(id) { it.copy(isFavorite = favorite) }
+    override suspend fun setCover(id: Long, cover: CoverType?) = update(id) { it.copy(coverOverride = cover) }
+    override suspend fun recordPlayStarted(id: Long, atMillis: Long) = update(id) { it.copy(playCount = it.playCount + 1, lastPlayedAt = atMillis) }
+    override suspend fun addPlayTime(id: Long, millis: Long) = update(id) { it.copy(playTimeMs = it.playTimeMs + millis) }
+    override suspend fun deleteGame(id: Long): DeleteResult {
+        deleted += id
+        if (deleteResult == DeleteResult.DELETED) games.value = games.value.filter { it.id != id }
+        return deleteResult
+    }
 
     override suspend fun addFolder(uri: String, source: GameSource, displayName: String, isDefault: Boolean): GameFolder {
         added += uri
@@ -78,12 +97,17 @@ class FakeLibraryRepository : LibraryRepository {
             romsetStatus: RomsetStatus = RomsetStatus.NOT_APPLICABLE,
             missing: Int = 0,
             thumbs: Int = 0,
+            genre: String = "Platform",
+            favorite: Boolean = false,
+            playCount: Int = 0,
+            lastPlayedAt: Long? = null,
         ) = Game(
             id = id, uri = "/storage/emulated/0/Jogos/$fileName", source = GameSource.FILE, folderId = 1, fileName = fileName,
             sizeBytes = 524288, systemId = system, title = title, datName = if (status == IdentStatus.IDENTIFIED) "$title (USA)" else null,
-            region = "USA", year = "1991", developer = "Dev", genre = "Platform", players = 2, thumbs = thumbs, thumbName = null,
-            coverOverride = null, status = status, romsetStatus = romsetStatus, missingFiles = missing, isFavorite = false,
-            playCount = 0, lastPlayedAt = null, addedAt = 0, playTimeMs = 0,
+            region = "USA", year = "1991", developer = "Dev", genre = genre, players = 2, thumbs = thumbs, thumbName = null,
+            coverOverride = null, status = status, romsetStatus = romsetStatus, missingFiles = missing,
+            playCount = playCount, lastPlayedAt = lastPlayedAt, addedAt = id, playTimeMs = 0,
+            isFavorite = favorite,
         )
     }
 }

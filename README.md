@@ -23,7 +23,7 @@ baixados sob demanda.
 | 1 | Esqueleto: Gradle, módulos, Hilt, tema, manifest de TV, banner, menu lateral, splash | ✅ |
 | 2 | Emulação mínima (LibretroDroid + download do snes9x2010) | ✅ (falta validar 60 fps na TV) |
 | 3 | Biblioteca (Room, pasta Jogos, USB/SAF, varredura, CRC + DAT, capas) | ✅ |
-| 4 | UI streaming (hero, fileiras, detalhes, busca, páginas de console) | ⏳ |
+| 4 | UI streaming (hero, fileiras, detalhes, busca, páginas de console) | ✅ |
 | 5 | Transferência pelo celular (servidor local, QR code, PIN) | ⏳ |
 | 6 | Menu de jogo e saves | ⏳ |
 | 7 | Configurações completas | ⏳ |
@@ -86,6 +86,18 @@ o pendrive sai da biblioteca ao final, para não duplicar).
 
 O banco de identificação (`data/src/main/assets/db/retroplay-dat.sqlite`) é gerado por
 `python3 tools/dat/build_database.py <saida.sqlite>` a partir dos DATs públicos.
+
+## Usando o app
+
+- **Início**: jogo em destaque (o último jogado ou um aleatório) com ▶ Jogar e ＋ Favoritos, e
+  fileiras: Continuar jogando, Favoritos, Adicionados recentemente, uma por console, Mais jogados
+  e gêneros. O nome do jogo aparece sob o card depois de um instante com o foco nele.
+- **Detalhes do jogo** (OK num card): Jogar, Favoritar, Opções do jogo (escolher a capa: caixa,
+  tela de título ou cena) e Apagar (pede confirmação; o foco começa em "Cancelar").
+- **Buscar**: teclado em grade pelo D-pad (ou busca por voz, se a TV tiver); resultados enquanto
+  digita, sem diferenciar acentos.
+- **Consoles**: grade de capas por console com filtros A–Z, Recentes, Mais jogados e Favoritos.
+- Ao voltar de uma tela, o foco volta ao card de onde você saiu.
 
 ## Testando a emulação (Fase 2)
 

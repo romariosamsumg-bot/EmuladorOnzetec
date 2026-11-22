@@ -13,12 +13,10 @@
 
     <!-- Início -->
     <string name="home_empty_title">Sua biblioteca está vazia</string>
-    <string name="home_empty_body">Importe seus jogos pelo celular (Wi-Fi) ou por um pendrive. Use apenas cópias que você possui legalmente.</string>
     <string name="home_supported_systems">Consoles suportados</string>
 
     <!-- Buscar -->
     <string name="search_title">Buscar</string>
-    <string name="search_body">Encontre jogos pelo nome. A busca chega na Fase 4.</string>
 
     <!-- Consoles -->
     <string name="consoles_title">Consoles</string>
@@ -27,7 +25,6 @@
 
     <!-- Favoritos -->
     <string name="favorites_title">Favoritos</string>
-    <string name="favorites_body">Os jogos marcados com ＋ Favoritos aparecem aqui.</string>
 
     <!-- Transferir -->
 
@@ -122,12 +119,6 @@
     <string name="romset_wrong_version">Romset de outra versão (não é a do FBNeo).</string>
     <string name="romset_needs_parent">Precisa do romset principal na mesma pasta.</string>
     <string name="romset_unknown">Romset não reconhecido pelo FBNeo.</string>
-    <string name="home_library_title">Sua biblioteca</string>
-    <plurals name="home_library_count">
-        <item quantity="one">%1$d jogo encontrado. A tela inicial completa chega na próxima fase.</item>
-        <item quantity="many">%1$d jogos encontrados. A tela inicial completa chega na próxima fase.</item>
-        <item quantity="other">%1$d jogos encontrados. A tela inicial completa chega na próxima fase.</item>
-    </plurals>
     <string name="copy_to_tv">Copiar para a TV</string>
     <string name="copy_starting">Preparando a cópia…</string>
     <string name="copy_progress">Copiando %1$d de %2$d: %3$s</string>
@@ -145,5 +136,73 @@
         <item quantity="one">A cópia parou por um erro de leitura (%1$d jogo copiado). O pendrive foi removido?</item>
         <item quantity="many">A cópia parou por um erro de leitura (%1$d jogos copiados). O pendrive foi removido?</item>
         <item quantity="other">A cópia parou por um erro de leitura (%1$d jogos copiados). O pendrive foi removido?</item>
+    </plurals>
+
+    <!-- Fase 4: interface streaming -->
+    <string name="play">Jogar</string>
+    <string name="add_favorite">＋ Favoritos</string>
+    <string name="remove_favorite">✓ Nos favoritos</string>
+    <string name="hero_continue">Continue de onde parou</string>
+    <string name="hero_featured">Em destaque</string>
+    <string name="see_all">Ver todos</string>
+    <string name="row_continue">Continuar jogando</string>
+    <string name="row_favorites">Favoritos</string>
+    <string name="row_recent">Adicionados recentemente</string>
+    <string name="row_most_played">Mais jogados</string>
+    <string name="genre_action">Ação</string>
+    <string name="genre_platform">Plataforma</string>
+    <string name="genre_sports">Esportes</string>
+    <string name="genre_racing">Corrida</string>
+    <string name="genre_puzzle">Quebra-cabeça</string>
+    <string name="genre_rpg">RPG</string>
+    <string name="genre_shooter">Tiro</string>
+    <string name="genre_fighting">Luta</string>
+    <string name="genre_adventure">Aventura</string>
+    <string name="genre_strategy">Estratégia</string>
+    <string name="genre_simulation">Simulação</string>
+    <string name="home_step_1">Abra “Transferir jogos” e permita o acesso aos arquivos: o Retrô Play cria a pasta Jogos na TV.</string>
+    <string name="home_step_2">Copie seus jogos para a subpasta do console (Jogos/Super Nintendo, Jogos/Mega Drive…) por pendrive, gerenciador de arquivos ou app Downloader.</string>
+    <string name="home_step_3">Volte aqui: os jogos aparecem sozinhos, com nome, capa e informações.</string>
+    <string name="legal_notice_short">O Retrô Play não inclui jogos nem BIOS. Use apenas cópias que você possui legalmente.</string>
+    <string name="details_played">Jogado %1$s · tempo total: %2$s</string>
+    <string name="details_unidentified">Jogo não encontrado no banco de dados (hack, tradução ou dump diferente). Ele funciona normalmente.</string>
+    <string name="details_core_downloading">Baixando o núcleo… %1$d%%. O jogo abre em seguida.</string>
+    <string name="game_options">Opções do jogo</string>
+    <string name="delete">Apagar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete_title">Apagar “%1$s”?</string>
+    <string name="delete_body">O arquivo %1$s será apagado da TV. Isso não pode ser desfeito.</string>
+    <string name="delete_done">Jogo apagado.</string>
+    <string name="delete_no_permission">Não foi possível apagar: o app não tem permissão para alterar esta pasta.</string>
+    <string name="delete_not_found">O jogo já não estava mais na biblioteca.</string>
+    <string name="options_core">Núcleo: %1$s (troca de núcleo nas Configurações, em breve)</string>
+    <string name="options_cover">Capa</string>
+    <string name="options_no_cover">Este jogo não tem capas no libretro-thumbnails.</string>
+    <string name="cover_auto">Automática</string>
+    <string name="cover_boxart">Caixa (boxart)</string>
+    <string name="cover_title">Tela de título</string>
+    <string name="cover_snap">Cena do jogo</string>
+    <string name="duration_minutes">%1$d min</string>
+    <string name="duration_hours">%1$d h %2$d min</string>
+    <string name="search_hint">Digite o nome do jogo</string>
+    <string name="search_space">Espaço</string>
+    <string name="search_clear">Limpar</string>
+    <string name="search_voice">Buscar por voz</string>
+    <string name="search_voice_prompt">Diga o nome do jogo</string>
+    <string name="search_no_voice">Busca por voz não disponível nesta TV.</string>
+    <string name="search_empty_library">Sua biblioteca está vazia. Coloque jogos na pasta Jogos.</string>
+    <string name="search_start">Os resultados aparecem enquanto você digita.</string>
+    <string name="search_no_results">Nenhum jogo encontrado para “%1$s”.</string>
+    <string name="favorites_browse">Ver consoles</string>
+    <string name="filter_az">A–Z</string>
+    <string name="filter_recent">Recentes</string>
+    <string name="filter_most_played">Mais jogados</string>
+    <string name="filter_favorites">Favoritos</string>
+    <string name="console_no_favorites">Nenhum favorito deste console ainda. (%1$s)</string>
+    <string name="favorites_body">Os jogos marcados com ＋ Favoritos aparecem aqui.</string>
+    <plurals name="players">
+        <item quantity="one">%1$d jogador</item>
+        <item quantity="many">%1$d jogadores</item>
+        <item quantity="other">%1$d jogadores</item>
     </plurals>
 </resources>

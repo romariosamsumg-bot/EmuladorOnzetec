@@ -12,10 +12,20 @@ object GameLauncher {
     const val EXTRA_ROM_PATH = "rom"
     const val EXTRA_TITLE = "title"
     const val EXTRA_FILE_NAME = "file_name"
+    const val EXTRA_GAME_ID = "game_id"
 
     /** @param romUri caminho de arquivo ou URI content:// (pendrive/SAF). */
-    fun intent(context: Context, system: GameSystem, core: CoreDescriptor, romUri: String, fileName: String, title: String): Intent =
+    fun intent(
+        context: Context,
+        system: GameSystem,
+        core: CoreDescriptor,
+        romUri: String,
+        fileName: String,
+        title: String,
+        gameId: Long? = null,
+    ): Intent =
         Intent(context, GameActivity::class.java)
+            .putExtra(EXTRA_GAME_ID, gameId ?: -1L)
             .putExtra(EXTRA_SYSTEM, system.id.value)
             .putExtra(EXTRA_CORE, core.id)
             .putExtra(EXTRA_ROM_PATH, romUri)

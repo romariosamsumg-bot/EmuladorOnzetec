@@ -60,7 +60,8 @@ object LibraryModule {
         @ApplicationContext context: Context,
         db: LibraryDatabase,
         gamesFolder: GamesFolderManager,
-    ): RoomLibraryRepository = RoomLibraryRepository(db, WorkManager.getInstance(context), gamesFolder)
+        files: FileAccess,
+    ): RoomLibraryRepository = RoomLibraryRepository(db, WorkManager.getInstance(context), gamesFolder, files)
 }
 
 /** Separado para que os testes de UI troquem por um repositório falso. */

@@ -27,6 +27,11 @@ class FileAccess(private val resolver: ContentResolver) {
         if (isDocument(uri)) resolver.openInputStream(Uri.parse(uri)) ?: error("Não foi possível abrir $uri")
         else File(uri).inputStream()
 
+    /** Apaga o arquivo. Lança [SecurityException] se não houver permissão de escrita. */
+    fun delete(uri: String): Boolean =
+        if (isDocument(uri)) DocumentsContract.deleteDocument(resolver, Uri.parse(uri))
+        else File(uri).let { !it.exists() || it.delete() }
+
     /** Canal com posicionamento: permite ler só o índice de um .zip/.7z grande. */
     fun openChannel(uri: String): SeekableByteChannel =
         if (isDocument(uri)) {

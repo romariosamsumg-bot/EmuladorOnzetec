@@ -24,7 +24,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.foundation.focusGroup
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -56,6 +55,8 @@ import com.retroplay.feature.settings.SettingsScreen
 import com.retroplay.feature.transfer.TransferScreen
 import com.retroplay.navigation.ConsoleDetailRoute
 import com.retroplay.navigation.ConsolesRoute
+import com.retroplay.navigation.GameDetailsRoute
+import com.retroplay.feature.details.GameDetailsEntry
 import com.retroplay.navigation.FavoritesRoute
 import com.retroplay.navigation.HomeRoute
 import com.retroplay.navigation.SearchRoute
@@ -133,7 +134,9 @@ fun RetroPlayShell(navController: NavHostController = rememberNavController()) {
                 .fillMaxSize()
                 .padding(start = CollapsedDrawerWidth)
                 .focusRequester(contentRequester)
-                .focusRestorer()
+                // Grupo simples: NÃO usar focusRestorer aqui — ele devolveria o foco a um item
+                // da tela anterior (que está saindo da composição) e o foco se perderia.
+                .focusGroup()
                 .testTag("content"),
         ) {
             NavHost(
@@ -148,12 +151,19 @@ fun RetroPlayShell(navController: NavHostController = rememberNavController()) {
                     HomeEntry(
                         onOpenTransfer = { navController.navigateTopLevel(TopLevelDestination.TRANSFER) },
                         onOpenConsole = { navController.navigate(ConsoleDetailRoute(it.id.value)) },
+                        onOpenGame = { navController.navigate(GameDetailsRoute(it.id)) },
                     )
                 }
-                composable<SearchRoute> { SearchScreen() }
+                composable<SearchRoute> { SearchScreen(onOpenGame = { navController.navigate(GameDetailsRoute(it.id)) }) }
                 composable<ConsolesRoute> { ConsolesEntry(onOpenConsole = { navController.navigate(ConsoleDetailRoute(it.id.value)) }) }
-                composable<ConsoleDetailRoute> { ConsoleEntry() }
-                composable<FavoritesRoute> { FavoritesScreen() }
+                composable<ConsoleDetailRoute> { ConsoleEntry(onOpenGame = { navController.navigate(GameDetailsRoute(it.id)) }) }
+                composable<GameDetailsRoute> { GameDetailsEntry(onBack = { navController.popBackStack() }) }
+                composable<FavoritesRoute> {
+                    FavoritesScreen(
+                        onOpenGame = { navController.navigate(GameDetailsRoute(it.id)) },
+                        onBrowse = { navController.navigateTopLevel(TopLevelDestination.CONSOLES) },
+                    )
+                }
                 composable<TransferRoute> { TransferScreen() }
                 composable<SettingsRoute> { SettingsScreen() }
             }

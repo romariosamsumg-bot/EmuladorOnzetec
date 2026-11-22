@@ -1,0 +1,94 @@
+package com.retroplay.feature.play
+
+import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import com.retroplay.domain.core.CoreInstallState
+import com.retroplay.domain.core.CoreRepository
+import com.retroplay.domain.library.Game
+import com.retroplay.domain.system.CoreDescriptor
+import com.retroplay.domain.system.GameSystem
+import com.retroplay.domain.system.SystemCatalog
+import com.retroplay.feature.game.GameLauncher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+/** Pedido para abrir um jogo na GameActivity. */
+data class LaunchRequest(
+    val system: GameSystem,
+    val core: CoreDescriptor,
+    val uri: String,
+    val fileName: String,
+    val title: String,
+    val gameId: Long?,
+)
+
+/**
+ * Abre jogos de qualquer tela. Se o núcleo do console ainda não foi baixado, baixa e abre o
+ * jogo assim que terminar, expondo o progresso em [coreDownload].
+ */
+class PlayLauncher(
+    private val scope: CoroutineScope,
+    private val cores: CoreRepository,
+    private val catalog: SystemCatalog,
+) {
+    private val _launches = Channel<LaunchRequest>(Channel.BUFFERED)
+    val launches: Flow<LaunchRequest> = _launches.receiveAsFlow()
+
+    /** Estado do núcleo sendo baixado para um jogo pendente (null = nada pendente). */
+    private val _coreDownload = MutableStateFlow<CoreInstallState?>(null)
+    val coreDownload: StateFlow<CoreInstallState?> = _coreDownload.asStateFlow()
+    private var pendingJob: Job? = null
+
+    fun play(game: Game) {
+        val system = game.systemId?.let { catalog.byId(it) } ?: return
+        play(LaunchRequest(system, system.defaultCore, game.uri, game.fileName, game.title, game.id))
+    }
+
+    fun play(request: LaunchRequest) {
+        pendingJob?.cancel()
+        pendingJob = scope.launch {
+            if (cores.installed(request.core) != null) {
+                _launches.send(request)
+                return@launch
+            }
+            cores.install(request.core)
+            cores.observe(request.core).first { state ->
+                _coreDownload.value = state
+                state is CoreInstallState.Installed || state is CoreInstallState.Failed
+            }.let { final ->
+                if (final is CoreInstallState.Installed) {
+                    _coreDownload.value = null
+                    _launches.send(request)
+                }
+            }
+        }
+    }
+
+    class Factory @Inject constructor(private val cores: CoreRepository, private val catalog: SystemCatalog) {
+        fun create(scope: CoroutineScope) = PlayLauncher(scope, cores, catalog)
+    }
+}
+
+/** Abre a GameActivity a cada pedido emitido pelo [PlayLauncher]. */
+@Composable
+fun LaunchGamesEffect(launcher: PlayLauncher) {
+    val context = LocalContext.current
+    LaunchedEffect(launcher) {
+        launcher.launches.collect { context.startGame(it) }
+    }
+}
+
+fun Context.startGame(r: LaunchRequest) {
+    startActivity(GameLauncher.intent(this, r.system, r.core, r.uri, r.fileName, r.title, r.gameId))
+}

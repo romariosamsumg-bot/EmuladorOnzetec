@@ -104,6 +104,8 @@ sealed interface ScanState {
     data object Failed : ScanState
 }
 
+enum class DeleteResult { DELETED, NO_PERMISSION, NOT_FOUND }
+
 /** Situação das pastas padrão (Jogos e a pasta privada do app). */
 data class DefaultFolders(
     /** Caminho da pasta Jogos (ex.: /storage/emulated/0/Jogos). */
@@ -125,6 +127,17 @@ interface LibraryRepository {
     fun observeCount(): Flow<Int>
 
     suspend fun game(id: Long): Game?
+    fun observeGame(id: Long): Flow<Game?>
+
+    suspend fun setFavorite(id: Long, favorite: Boolean)
+    suspend fun setCover(id: Long, cover: CoverType?)
+
+    /** Registra que o jogo foi aberto agora (contagem + "continuar jogando"). */
+    suspend fun recordPlayStarted(id: Long, atMillis: Long)
+    suspend fun addPlayTime(id: Long, millis: Long)
+
+    /** Apaga o arquivo do jogo (e o tira da biblioteca). */
+    suspend fun deleteGame(id: Long): DeleteResult
     suspend fun addFolder(uri: String, source: GameSource, displayName: String, isDefault: Boolean = false): GameFolder
     suspend fun removeFolder(id: Long)
 

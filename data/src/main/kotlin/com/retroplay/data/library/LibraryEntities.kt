@@ -123,6 +123,21 @@ interface GameDao {
     @Query("SELECT * FROM game WHERE id = :id")
     suspend fun byId(id: Long): GameEntity?
 
+    @Query("SELECT * FROM game WHERE id = :id")
+    fun observeById(id: Long): Flow<GameEntity?>
+
+    @Query("UPDATE game SET is_favorite = :favorite WHERE id = :id")
+    suspend fun setFavorite(id: Long, favorite: Boolean)
+
+    @Query("UPDATE game SET cover_override = :cover WHERE id = :id")
+    suspend fun setCover(id: Long, cover: String?)
+
+    @Query("UPDATE game SET play_count = play_count + 1, last_played_at = :at WHERE id = :id")
+    suspend fun recordPlayStarted(id: Long, at: Long)
+
+    @Query("UPDATE game SET play_time_ms = play_time_ms + :ms WHERE id = :id")
+    suspend fun addPlayTime(id: Long, ms: Long)
+
     @Query("SELECT * FROM game WHERE folder_id = :folderId")
     suspend fun byFolder(folderId: Long): List<GameEntity>
 

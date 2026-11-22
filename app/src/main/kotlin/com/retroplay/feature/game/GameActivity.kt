@@ -31,7 +31,11 @@ import com.swordfish.libretrodroid.GLRetroView
 import com.swordfish.libretrodroid.GLRetroViewData
 import com.swordfish.libretrodroid.ShaderConfig
 import dagger.hilt.android.AndroidEntryPoint
+import android.os.SystemClock
+import com.retroplay.domain.library.LibraryRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -50,6 +54,12 @@ class GameActivity : ComponentActivity() {
     @Inject lateinit var catalog: SystemCatalog
     @Inject lateinit var coreRepository: CoreRepository
     @Inject lateinit var romPreparer: RomPreparer
+    @Inject lateinit var library: LibraryRepository
+
+    /** Escopo que sobrevive ao finish(): grava estatísticas mesmo ao sair do jogo. */
+    private val statsScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var gameId: Long = -1
+    private var sessionStart = 0L
 
     private lateinit var container: FrameLayout
     private var retroView: GLRetroView? = null
@@ -72,6 +82,7 @@ class GameActivity : ComponentActivity() {
             return
         }
         val fileName = intent.getStringExtra(GameLauncher.EXTRA_FILE_NAME) ?: romUri.substringAfterLast('/')
+        gameId = intent.getLongExtra(GameLauncher.EXTRA_GAME_ID, -1)
         lifecycleScope.launch { start(system, core.id, romUri, fileName) }
     }
 
@@ -133,6 +144,9 @@ class GameActivity : ComponentActivity() {
         lifecycleScope.launch {
             view.getGLRetroEvents().filterIsInstance<GLRetroView.GLRetroEvents.FrameRendered>().first()
             gameRunning = true
+            sessionStart = SystemClock.elapsedRealtime()
+            // "Continuar jogando" e "Mais jogados" na Home.
+            if (gameId > 0) statsScope.launch { library.recordPlayStarted(gameId, System.currentTimeMillis()) }
         }
     }
 
@@ -193,9 +207,19 @@ class GameActivity : ComponentActivity() {
 
     // ---------------------------------------------------------------- ciclo de vida
 
+    override fun onResume() {
+        super.onResume()
+        if (gameRunning) sessionStart = SystemClock.elapsedRealtime()
+    }
+
     override fun onPause() {
         super.onPause()
         saveSram()
+        if (gameRunning && gameId > 0 && sessionStart > 0) {
+            val played = SystemClock.elapsedRealtime() - sessionStart
+            sessionStart = 0
+            statsScope.launch { library.addPlayTime(gameId, played) }
+        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

@@ -8,18 +8,15 @@
     <string name="nav_settings">Settings</string>
 
     <string name="home_empty_title">Your library is empty</string>
-    <string name="home_empty_body">Import your games from your phone (Wi-Fi) or from a USB drive. Only use copies you legally own.</string>
     <string name="home_supported_systems">Supported consoles</string>
 
     <string name="search_title">Search</string>
-    <string name="search_body">Find games by name. Search arrives in Phase 4.</string>
 
     <string name="consoles_title">Consoles</string>
     <string name="consoles_body">Pick a console to see its games.</string>
     <string name="console_needs_bios">Requires BIOS</string>
 
     <string name="favorites_title">Favorites</string>
-    <string name="favorites_body">Games marked with ＋ Favorites show up here.</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_body">Video, audio, controls, emulation, BIOS, library, cores and more.</string>
@@ -107,11 +104,6 @@
     <string name="romset_wrong_version">Romset from another version (not FBNeo’s).</string>
     <string name="romset_needs_parent">Needs the parent romset in the same folder.</string>
     <string name="romset_unknown">Romset not recognized by FBNeo.</string>
-    <string name="home_library_title">Your library</string>
-    <plurals name="home_library_count">
-        <item quantity="one">%1$d game found. The full home screen arrives in the next phase.</item>
-        <item quantity="other">%1$d games found. The full home screen arrives in the next phase.</item>
-    </plurals>
     <string name="copy_to_tv">Copy to TV</string>
     <string name="copy_starting">Preparing the copy…</string>
     <string name="copy_progress">Copying %1$d of %2$d: %3$s</string>
@@ -126,5 +118,73 @@
     <plurals name="copy_failed">
         <item quantity="one">Copy stopped due to a read error (%1$d game copied). Was the USB drive removed?</item>
         <item quantity="other">Copy stopped due to a read error (%1$d games copied). Was the USB drive removed?</item>
+    </plurals>
+
+    <!-- Fase 4: interface streaming -->
+    <string name="play">Play</string>
+    <string name="add_favorite">＋ Favorites</string>
+    <string name="remove_favorite">✓ In favorites</string>
+    <string name="hero_continue">Pick up where you left off</string>
+    <string name="hero_featured">Featured</string>
+    <string name="see_all">See all</string>
+    <string name="row_continue">Continue playing</string>
+    <string name="row_favorites">Favorites</string>
+    <string name="row_recent">Recently added</string>
+    <string name="row_most_played">Most played</string>
+    <string name="genre_action">Action</string>
+    <string name="genre_platform">Platform</string>
+    <string name="genre_sports">Sports</string>
+    <string name="genre_racing">Racing</string>
+    <string name="genre_puzzle">Puzzle</string>
+    <string name="genre_rpg">RPG</string>
+    <string name="genre_shooter">Shooter</string>
+    <string name="genre_fighting">Fighting</string>
+    <string name="genre_adventure">Adventure</string>
+    <string name="genre_strategy">Strategy</string>
+    <string name="genre_simulation">Simulation</string>
+    <string name="home_step_1">Open “Transfer games” and allow file access: Retrô Play creates the Jogos folder on the TV.</string>
+    <string name="home_step_2">Copy your games to the console subfolder (Jogos/Super Nintendo, Jogos/Mega Drive…) using a USB drive, a file manager or the Downloader app.</string>
+    <string name="home_step_3">Come back here: games show up automatically, with name, cover and info.</string>
+    <string name="legal_notice_short">Retrô Play includes no games or BIOS. Only use copies you legally own.</string>
+    <string name="details_played">Played %1$s · total time: %2$s</string>
+    <string name="details_unidentified">Game not found in the database (hack, translation or different dump). It works normally.</string>
+    <string name="details_core_downloading">Downloading the core… %1$d%%. The game opens right after.</string>
+    <string name="game_options">Game options</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_title">Delete “%1$s”?</string>
+    <string name="delete_body">The file %1$s will be deleted from the TV. This cannot be undone.</string>
+    <string name="delete_done">Game deleted.</string>
+    <string name="delete_no_permission">Could not delete: the app has no permission to change this folder.</string>
+    <string name="delete_not_found">The game was no longer in the library.</string>
+    <string name="options_core">Core: %1$s (core switching in Settings, coming soon)</string>
+    <string name="options_cover">Cover</string>
+    <string name="options_no_cover">This game has no covers on libretro-thumbnails.</string>
+    <string name="cover_auto">Automatic</string>
+    <string name="cover_boxart">Box art</string>
+    <string name="cover_title">Title screen</string>
+    <string name="cover_snap">In-game snap</string>
+    <string name="duration_minutes">%1$d min</string>
+    <string name="duration_hours">%1$d h %2$d min</string>
+    <string name="search_hint">Type the game name</string>
+    <string name="search_space">Space</string>
+    <string name="search_clear">Clear</string>
+    <string name="search_voice">Voice search</string>
+    <string name="search_voice_prompt">Say the game name</string>
+    <string name="search_no_voice">Voice search is not available on this TV.</string>
+    <string name="search_empty_library">Your library is empty. Put games in the Jogos folder.</string>
+    <string name="search_start">Results show up as you type.</string>
+    <string name="search_no_results">No games found for “%1$s”.</string>
+    <string name="favorites_browse">Browse consoles</string>
+    <string name="filter_az">A–Z</string>
+    <string name="filter_recent">Recent</string>
+    <string name="filter_most_played">Most played</string>
+    <string name="filter_favorites">Favorites</string>
+    <string name="console_no_favorites">No favorites for this console yet. (%1$s)</string>
+    <string name="favorites_body">Games marked with ＋ Favorites show up here.</string>
+    <plurals name="players">
+        <item quantity="one">%1$d player</item>
+        <item quantity="many">%1$d players</item>
+        <item quantity="other">%1$d players</item>
     </plurals>
 </resources>

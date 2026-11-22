@@ -151,6 +151,7 @@ class DpadNavigationTest {
                 "screen_consoles" -> node("system_snes").assertIsFocused()
                 // Sem permissão de arquivos (padrão do repositório falso): foco no botão de permitir.
                 "screen_transfer" -> node("grant_access").assertIsFocused()
+                "screen_search" -> node("key_a").assertIsFocused()
                 else -> primary.assertIsFocused()
             }
         }
