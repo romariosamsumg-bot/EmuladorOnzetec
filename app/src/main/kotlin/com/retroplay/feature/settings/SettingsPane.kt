@@ -896,7 +896,7 @@ fun optionLabels(def: SettingDef.Choice): Map<String, String> {
 /** Nomes dos idiomas sempre na própria língua. */
 val LANGUAGE_NAMES = mapOf("pt-BR" to "Português (Brasil)", "en" to "English", "es" to "Español")
 
-const val OPEN_SOURCE_LICENSES = """Retrô Play — GPL-3.0
+const val OPEN_SOURCE_LICENSES = """Onzetec Games — GPL-3.0
 
 LibretroDroid (Filippo Scognamiglio) — GPL-3.0
 Núcleos libretro (baixados sob demanda):

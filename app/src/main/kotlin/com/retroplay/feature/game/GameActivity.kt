@@ -912,14 +912,14 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         }
     }
 
-    /** Screenshot em Imagens/Retrô Play (MediaStore, sem permissão no Android 10+). */
+    /** Screenshot em Imagens/Onzetec Games (MediaStore, sem permissão no Android 10+). */
     private fun saveScreenshot(bitmap: Bitmap): Boolean {
         val name = "${fileName.substringBeforeLast('.')}_${System.currentTimeMillis()}.png"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val values = ContentValues().apply {
                 put(MediaStore.Images.Media.DISPLAY_NAME, name)
                 put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Retro Play")
+                put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Onzetec Games")
             }
             val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: return false
             contentResolver.openOutputStream(uri)?.use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) } ?: return false

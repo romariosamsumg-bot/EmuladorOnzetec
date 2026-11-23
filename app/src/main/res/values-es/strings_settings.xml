@@ -257,7 +257,7 @@
     <string name="about_licenses_desc">Bibliotecas y núcleos usados por la app.</string>
     <string name="about_legal">Aviso legal</string>
     <string name="about_legal_desc">Sobre juegos, BIOS y marcas.</string>
-    <string name="legal_text">Retrô Play es software libre bajo la licencia GPL-3.0. No incluye juegos ni BIOS: usa solo copias de juegos y BIOS que poseas. Los nombres de consolas se usan solo para identificar formatos y no implican relación con sus fabricantes.</string>
+    <string name="legal_text">Onzetec Games es software libre bajo la licencia GPL-3.0. No incluye juegos ni BIOS: usa solo copias de juegos y BIOS que poseas. Los nombres de consolas se usan solo para identificar formatos y no implican relación con sus fabricantes.</string>
 
     <string name="game_settings">Ajustes de este juego</string>
     <string name="rename">Renombrar</string>
@@ -303,7 +303,7 @@
     <string name="restore_done">Copia restaurada: %1$d archivos de guardado, %2$d perfiles.</string>
     <string name="settings_exported">Ajustes exportados.</string>
     <string name="settings_imported">Ajustes importados.</string>
-    <string name="backup_invalid">Este archivo no es una copia de Retrô Play.</string>
+    <string name="backup_invalid">Este archivo no es una copia de Onzetec Games.</string>
     <string name="backup_newer">Esta copia es de una versión más nueva de la app. Actualiza la app primero.</string>
     <string name="backup_failed">No se pudo leer o escribir el archivo.</string>
     <string name="set_smb">Añadir carpeta de red (SMB)</string>

@@ -115,7 +115,7 @@ class BackupManager(
         } catch (e: Exception) {
             throw BackupException(BackupException.Reason.CORRUPTED, "Backup ilegível", e)
         }
-        val m = manifest ?: run { staging.deleteRecursively(); throw BackupException(BackupException.Reason.NOT_A_BACKUP, "Não é um backup do Retrô Play") }
+        val m = manifest ?: run { staging.deleteRecursively(); throw BackupException(BackupException.Reason.NOT_A_BACKUP, "Não é um backup do Onzetec Games") }
         if (m.format > FORMAT) { staging.deleteRecursively(); throw BackupException(BackupException.Reason.NEWER_FORMAT, "Backup de uma versão mais nova") }
 
         // Arquivos: copia do staging para o lugar definitivo só depois de ler o zip inteiro.

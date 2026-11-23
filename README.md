@@ -1,10 +1,10 @@
-# Retrô Play
+# Onzetec Games
 
 Frontend de emuladores de consoles clássicos para **Android TV / Google TV** e **celular**, com
 interface "estilo streaming", navegação por controle remoto, gamepad ou toque e núcleos
 **libretro** baixados sob demanda. O mesmo APK serve para a TV e para o celular.
 
-> **Aviso legal:** o Retrô Play **não inclui jogos nem BIOS**. Use apenas cópias de jogos e
+> **Aviso legal:** o Onzetec Games **não inclui jogos nem BIOS**. Use apenas cópias de jogos e
 > BIOS que você possui legalmente.
 
 ## Consoles suportados
@@ -45,7 +45,7 @@ Testado para a TCL P7K (Google TV, Android 11+); vale para outras TVs e boxes An
 3. Escolha **um** jeito de levar o APK até a TV:
    - **Downloader** (o mais fácil): instale o app *Downloader* pela Play Store da TV, digite o
      endereço do APK e confirme a instalação. O endereço da versão mais recente é sempre:
-     `https://github.com/romariosamsumg-bot/EmuladorOnzetec/releases/latest/download/RetroPlay.apk`
+     `https://github.com/romariosamsumg-bot/EmuladorOnzetec/releases/latest/download/OnzetecGames.apk`
      (se o repositório tiver outro nome, troque o trecho `usuário/repositório`). Dica: encurte o
      link num encurtador de URL para digitar menos com o controle remoto.
    - **Pendrive**: copie o `.apk` para um pendrive, ligue na TV e abra-o com um gerenciador de
@@ -57,7 +57,7 @@ Testado para a TCL P7K (Google TV, Android 11+); vale para outras TVs e boxes An
      adb connect 192.168.0.20:5555     # aceite o pedido que aparece na TV
      adb install -r app-release.apk
      ```
-4. Abra o **Retrô Play** na tela inicial da TV (ícone/banner em "Apps").
+4. Abra o **Onzetec Games** na tela inicial da TV (ícone/banner em "Apps").
 5. Na primeira vez, em **Transferir jogos**, toque em **Permitir acesso aos arquivos** para o app
    criar a pasta **Jogos**. Os núcleos de emulação são baixados sozinhos na primeira vez que você
    joga cada console (precisa de internet só nessa hora).
@@ -66,7 +66,7 @@ Para atualizar, instale o APK novo por cima (os jogos, saves e configurações f
 
 ## No celular (Android 8 ou mais novo)
 
-1. Baixe o `RetroPlay.apk` no celular e abra-o. O Android pede para **permitir instalar apps
+1. Baixe o `OnzetecGames.apk` no celular e abra-o. O Android pede para **permitir instalar apps
    desta fonte** (do navegador ou do gerenciador de arquivos): permita e instale.
 2. O app abre sempre **deitado** e em tela cheia, com a mesma interface da TV; tudo funciona
    **por toque** (e também com controle Bluetooth).
@@ -122,14 +122,14 @@ No repositório: **Settings → Secrets and variables → Actions → New reposi
 | `KEY_ALIAS` | `retroplay` (ou o alias que você escolheu) |
 | `KEY_PASSWORD` | a senha da chave (no keytool, normalmente a mesma do arquivo) |
 
-Sem esses segredos o robô ainda funciona, mas gera um **APK de debug** (`RetroPlay-debug.apk`):
-instala normalmente, só que como um app separado ("Retrô Play (teste)") e não serve para
+Sem esses segredos o robô ainda funciona, mas gera um **APK de debug** (`OnzetecGames-debug.apk`):
+instala normalmente, só que como um app separado ("Onzetec Games (teste)") e não serve para
 atualizar a versão assinada.
 
 ### 4. Gerar uma versão
 
 - **Pelo site**: aba **Actions → Gerar APK → Run workflow**, digite a versão (ex.: `1.0.0`) e
-  confirme. Em ~15 minutos aparece em **Releases** a versão com o arquivo `RetroPlay.apk`.
+  confirme. Em ~15 minutos aparece em **Releases** a versão com o arquivo `OnzetecGames.apk`.
 - **Ou por tag**: crie uma Release em **Releases → Draft a new release** com a tag `v1.0.0` e
   publique; o robô anexa o APK a ela. (Pelo terminal: `git tag v1.0.0 && git push origin v1.0.0`.)
 - A cada envio para o branch `main` (e em pull requests) o robô também testa e gera o APK, que
@@ -141,7 +141,7 @@ testes em *Artifacts*. "A chave não abre" significa senha ou alias errados nos 
 ### 5. Baixar na TV
 
 No app *Downloader* da TV, use o endereço
-`https://github.com/romariosamsumg-bot/EmuladorOnzetec/releases/latest/download/RetroPlay.apk`
+`https://github.com/romariosamsumg-bot/EmuladorOnzetec/releases/latest/download/OnzetecGames.apk`
 (ele aponta sempre para a versão mais recente) e siga [Como instalar na TV](#como-instalar-na-tv-google-tv--android-tv).
 Para atualizar, repita: o app novo instala por cima, mantendo jogos, saves e configurações.
 
@@ -150,7 +150,7 @@ Para atualizar, repita: o app novo instala por cima, mantendo jogos, saves e con
 ### Pasta **Jogos** (recomendado)
 
 Na primeira vez, abra **Transferir jogos → Permitir acesso aos arquivos** e ative a permissão
-"Acesso a todos os arquivos" para o Retrô Play. O app cria esta estrutura no armazenamento da TV:
+"Acesso a todos os arquivos" para o Onzetec Games. O app cria esta estrutura no armazenamento da TV:
 
 ```
 Jogos/
@@ -163,7 +163,7 @@ Jogos/
 ```
 
 Copie os jogos para a subpasta do console (pelo pendrive com um gerenciador de arquivos, pelo app
-**Downloader** ou pela transferência do celular da Fase 5). Ao abrir o Retrô Play, os jogos
+**Downloader** ou pela transferência do celular da Fase 5). Ao abrir o Onzetec Games, os jogos
 novos são encontrados sozinhos; também dá para tocar em **Verificar agora**.
 
 > Se a TV não tiver a tela dessa permissão, rode no computador (com depuração ADB ativada):
@@ -179,7 +179,7 @@ e um **PIN de 4 dígitos**.
    navegador e informe o PIN.
 2. Toque em **Escolher arquivos** (ou arraste os arquivos, no computador). Dá para mandar vários
    de uma vez; cada um tem barra de progresso.
-3. O Retrô Play identifica o console de cada arquivo e o coloca na subpasta certa
+3. O Onzetec Games identifica o console de cada arquivo e o coloca na subpasta certa
    (`Jogos/Super Nintendo`, `Jogos/BIOS` para a `neogeo.zip`…). Se preferir, escolha o console
    antes de enviar. Os jogos aparecem na biblioteca segundos depois.
 
@@ -286,7 +286,7 @@ O banco de identificação (`data/src/main/assets/db/retroplay-dat.sqlite`) é g
   (espaços 1–9, com miniatura e data) · Carregar estado (inclui o automático) · Rewind ·
   Voltar 5 segundos · Reiniciar · Inserir ficha (Arcade) · Acelerar (2x/4x/8x) · Shader (CRT,
   LCD, Nítido) · Proporção (original ou pixel perfeito, no SNES e Mega Drive/Master System) ·
-  Controles · Opções do núcleo · Mostrar FPS · Screenshot (vai para Imagens/Retro Play) · Sair.
+  Controles · Opções do núcleo · Mostrar FPS · Screenshot (vai para Imagens/Onzetec Games) · Sair.
 - **Save automático** ao sair pelo menu e ao apertar Home na TV; ao voltar, o menu aparece.
   Nos detalhes do jogo, **Continuar do save** abre direto no último save; "Continuar jogando"
   na tela inicial mostra a miniatura do último save e o tempo jogado.
@@ -350,7 +350,7 @@ run-ahead.
 ## Testando a emulação
 
 1. Instale o APK na TV e abra **Consoles → Super Nintendo**.
-2. Escolha **ROM de teste do Retrô Play** e aperte OK. Na primeira vez o núcleo `snes9x2010`
+2. Escolha **ROM de teste do Onzetec Games** e aperte OK. Na primeira vez o núcleo `snes9x2010`
    (~1,6 MB) é baixado do buildbot do libretro para o ABI da TV, com barra de progresso, e o
    jogo abre em seguida.
 3. Com o gamepad: o D-pad (ou o analógico) move o quadrado; B, A, Y e X mudam a cor de fundo e
@@ -383,15 +383,22 @@ core/ui/      Tema escuro/OLED, cores de destaque, ícones genéricos
 domain/       Kotlin puro: registro de consoles, detecção por extensão, modelos de núcleo
 data/         Núcleos (OkHttp + WorkManager), biblioteca (Room), varredura, banco de DATs, preparo de ROMs
 baselineprofile/  Gerador do Baseline Profile (inicialização e Início) para rodar numa TV/emulador
-tools/        Scripts: ícone/banner, ROM de teste + mini frontend libretro, gerador do banco de DATs,
+tools/        Scripts: marca (tools/brand: ícone, splash, banner, logo), ROM de teste + mini frontend libretro, gerador do banco de DATs,
               opções de cada núcleo e teste de romsets em núcleos reais (tools/cores)
 ```
 
 Para **adicionar um console**: crie um `GameSystem` em
 `domain/src/main/kotlin/com/retroplay/domain/system/SystemRegistry.kt` e inclua-o em `all`.
 
-Para **trocar o nome do app**: edite `app_name` em `app/src/main/res/values/strings.xml` e
-regere o banner com `python3 tools/generate_brand_assets.py "Novo Nome"`.
+Para **trocar o nome do app**: edite `app_name` em `app/src/main/res/values/strings.xml`
+(e em `app/src/debug/res/values/strings.xml`). O identificador `com.retroplay.tv` não muda:
+trocá-lo faria o Android tratar como outro app (sem atualizar por cima).
+
+**Marca (ícone, splash, banner da TV e logo)**: as artes ficam em `tools/brand/icone.png` (TV
+quadrada, fundo azul-marinho) e `tools/brand/logo.png` (logo com fundo transparente). Para
+trocar, substitua os arquivos e rode `python3 tools/brand/build_brand.py` (requer Pillow): ele
+gera o ícone adaptativo (com versão monocromática para os ícones temáticos), a splash, o banner
+640×360 da TV e o logo usado no app.
 
 ## Como compilar (linha de comando)
 

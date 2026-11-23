@@ -301,7 +301,12 @@ private fun EmptyHome(
         item(key = "intro") {
             Row(Modifier.padding(horizontal = 48.dp), horizontalArrangement = Arrangement.spacedBy(40.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(stringResource(R.string.app_name), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                    // Logo da marca (tools/brand/logo.png).
+                    androidx.compose.foundation.Image(
+                        painter = painterResource(R.drawable.logo_onzetec),
+                        contentDescription = stringResource(R.string.app_name),
+                        modifier = Modifier.height(72.dp).testTag("home_logo"),
+                    )
                     Text(stringResource(R.string.home_empty_title), style = MaterialTheme.typography.displaySmall)
                     listOf(R.string.home_step_1, R.string.home_step_2, R.string.home_step_3).forEachIndexed { i, step ->
                         Text(

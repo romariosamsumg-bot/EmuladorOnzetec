@@ -40,7 +40,7 @@
     <string name="core_error_abi">This device is not compatible with the available cores.</string>
     <string name="core_error_unknown">Could not download the core.</string>
     <string name="error_no_space">Not enough space on the TV. Free some space (delete games or apps) and try again.</string>
-    <string name="test_rom_title">Retrô Play test ROM</string>
+    <string name="test_rom_title">Onzetec Games test ROM</string>
     <string name="test_rom_subtitle">Free homebrew: the D-pad moves the square; buttons change the color and play sounds</string>
     <string name="pick_file">Choose file…</string>
     <string name="pick_file_subtitle">Open a ROM from a USB drive or the TV storage</string>
@@ -63,7 +63,7 @@
     <string name="games_folder_title">Games folder</string>
     <string name="games_folder_ready">Ready at %1$s. Games copied there show up automatically.</string>
     <string name="games_folder_layout">Use the subfolders %1$s. The Neo Geo BIOS (neogeo.zip) goes in %2$s.</string>
-    <string name="games_folder_needs_access">To let Retrô Play create and read the %1$s folder (where you put games via USB drive, file manager or the Downloader app), allow file access.</string>
+    <string name="games_folder_needs_access">To let Onzetec Games create and read the %1$s folder (where you put games via USB drive, file manager or the Downloader app), allow file access.</string>
     <string name="grant_all_files_access">Allow file access</string>
     <string name="all_files_access_adb">This TV has no screen for this permission. On a computer with ADB debugging enabled, run: %1$s — or use “Add folder or USB drive” below.</string>
     <string name="library_title">Library</string>
@@ -76,7 +76,7 @@
     <string name="library_scan_failed">The last check failed. Try again.</string>
     <string name="scan_now">Check now</string>
     <string name="needs_system_title">Choose the console (%1$d)</string>
-    <string name="needs_system_body">Could not tell which console these files are for. Choose once and Retrô Play remembers.</string>
+    <string name="needs_system_body">Could not tell which console these files are for. Choose once and Onzetec Games remembers.</string>
     <string name="choose_system_title">Which console is this game for?</string>
     <string name="folders_title">Checked folders</string>
     <string name="folders_body">Choose other TV folders or a USB drive. Games are read directly from there.</string>
@@ -139,9 +139,9 @@
     <string name="genre_adventure">Adventure</string>
     <string name="genre_strategy">Strategy</string>
     <string name="genre_simulation">Simulation</string>
-    <string name="home_step_1">Open “Transfer games” and allow file access: Retrô Play creates the Jogos folder on the TV.</string>
+    <string name="home_step_1">Open “Transfer games” and allow file access: Onzetec Games creates the Jogos folder on the TV.</string>
     <string name="home_step_3">Come back here: games show up automatically, with name, cover and info.</string>
-    <string name="legal_notice_short">Retrô Play includes no games or BIOS. Only use copies you legally own.</string>
+    <string name="legal_notice_short">Onzetec Games includes no games or BIOS. Only use copies you legally own.</string>
     <string name="details_played">Played %1$s · total time: %2$s</string>
     <string name="details_unidentified">Game not found in the database (hack, translation or different dump). It works normally.</string>
     <string name="details_core_downloading">Downloading the core… %1$d%%. The game opens right after.</string>
@@ -238,7 +238,7 @@
     <string name="save_failed">Could not save (slot %1$d)</string>
     <string name="loaded_slot">Save loaded</string>
     <string name="load_failed">Could not load the save</string>
-    <string name="screenshot_saved">Screenshot saved to Pictures/Retro Play</string>
+    <string name="screenshot_saved">Screenshot saved to Pictures/Onzetec Games</string>
     <string name="screenshot_failed">Could not take the screenshot</string>
     <string name="speed_normal">Normal speed</string>
     <string name="rewind_disabled_hint">Turn on rewind in the menu (Back) to go back in time</string>

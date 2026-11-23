@@ -55,7 +55,7 @@ object ErrorLog {
 
     /** Cabeçalho com dados do aparelho, para o arquivo exportado. */
     fun header(versionName: String, abi: String?): String = buildString {
-        append("Retrô Play ").append(versionName).append('\n')
+        append("Onzetec Games ").append(versionName).append('\n')
         append("Aparelho: ").append(Build.MANUFACTURER).append(' ').append(Build.MODEL).append('\n')
         append("Android ").append(Build.VERSION.RELEASE).append(" (API ").append(Build.VERSION.SDK_INT).append(")\n")
         append("ABI: ").append(abi ?: "?").append("\n\n")

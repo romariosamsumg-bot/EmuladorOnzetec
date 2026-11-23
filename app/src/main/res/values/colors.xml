@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="retro_background">#FF0B0B10</color>
+    <!-- Azul-marinho da marca Onzetec Games (fundo do ícone e da splash). -->
+    <color name="brand_navy">#FF011C38</color>
 </resources>

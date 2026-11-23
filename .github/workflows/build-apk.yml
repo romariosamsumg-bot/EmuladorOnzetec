@@ -1,10 +1,10 @@
-# Gera o APK do Retrô Play.
+# Gera o APK do Onzetec Games.
 #
 # - Em todo push e pull request: roda os testes e o lint e gera o APK (baixe em "Artifacts").
 # - Com os 4 segredos de assinatura cadastrados (KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS,
 #   KEY_PASSWORD), o APK é o release assinado; sem eles, é um APK de debug (também instala na TV).
 # - Ao criar uma tag "v1.2.3" (ou rodar manualmente informando a versão), publica uma Release com
-#   o APK. O link fixo para a TV fica: .../releases/latest/download/RetroPlay.apk
+#   o APK. O link fixo para a TV fica: .../releases/latest/download/OnzetecGames.apk
 # Passo a passo para leigos no README ("Gerar o APK pelo GitHub").
 name: Gerar APK
 
@@ -100,13 +100,13 @@ jobs:
         run: |
           ./gradlew :app:assembleRelease --stacktrace
           "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --print-certs app/build/outputs/apk/release/app-release.apk
-          cp app/build/outputs/apk/release/app-release.apk RetroPlay.apk
+          cp app/build/outputs/apk/release/app-release.apk OnzetecGames.apk
 
       - name: Gerar o APK de debug (sem chave)
         if: steps.chave.outputs.assinado != 'true'
         run: |
           ./gradlew :app:assembleDebug --stacktrace
-          cp app/build/outputs/apk/debug/app-debug.apk RetroPlay-debug.apk
+          cp app/build/outputs/apk/debug/app-debug.apk OnzetecGames-debug.apk
 
       - name: Apagar a chave do servidor
         if: always()
@@ -115,8 +115,8 @@ jobs:
       - name: Guardar o APK (Artifacts)
         uses: actions/upload-artifact@v4
         with:
-          name: RetroPlay-${{ steps.versao.outputs.nome }}
-          path: RetroPlay*.apk
+          name: OnzetecGames-${{ steps.versao.outputs.nome }}
+          path: OnzetecGames*.apk
           if-no-files-found: error
 
       - name: Guardar os relatórios dos testes se falharem
@@ -134,15 +134,15 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.versao.outputs.nome }}
-          name: Retrô Play ${{ steps.versao.outputs.nome }}
+          name: Onzetec Games ${{ steps.versao.outputs.nome }}
           target_commitish: ${{ github.sha }}
           # Sem assinatura, a Release fica como "pré-lançamento" (o link "latest" não aponta para ela).
           prerelease: ${{ steps.chave.outputs.assinado != 'true' }}
-          files: RetroPlay*.apk
+          files: OnzetecGames*.apk
           body: |
             APK para Android TV / Google TV (ARM 32 e 64 bits).
 
             **Instalar na TV:** no app *Downloader*, digite o endereço deste arquivo
-            (`RetroPlay.apk`) ou copie-o para um pendrive. Passo a passo no README.
+            (`OnzetecGames.apk`) ou copie-o para um pendrive. Passo a passo no README.
 
-            O Retrô Play não inclui jogos nem BIOS. Use apenas cópias que você possui.
+            O Onzetec Games não inclui jogos nem BIOS. Use apenas cópias que você possui.

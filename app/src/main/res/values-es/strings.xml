@@ -40,7 +40,7 @@
     <string name="core_error_abi">Este dispositivo no es compatible con los núcleos disponibles.</string>
     <string name="core_error_unknown">No se pudo descargar el núcleo.</string>
     <string name="error_no_space">No hay espacio suficiente en la TV. Libera espacio (borra juegos o apps) y vuelve a intentarlo.</string>
-    <string name="test_rom_title">ROM de prueba de Retrô Play</string>
+    <string name="test_rom_title">ROM de prueba de Onzetec Games</string>
     <string name="test_rom_subtitle">Homebrew libre: la cruceta mueve el cuadrado; los botones cambian el color y suenan</string>
     <string name="pick_file">Elegir archivo…</string>
     <string name="pick_file_subtitle">Abrir una ROM desde una memoria USB o la TV</string>
@@ -63,7 +63,7 @@
     <string name="games_folder_title">Carpeta Jogos</string>
     <string name="games_folder_ready">Lista en %1$s. Los juegos copiados allí aparecen solos.</string>
     <string name="games_folder_layout">Usa las subcarpetas %1$s. La BIOS de Neo Geo (neogeo.zip) va en %2$s.</string>
-    <string name="games_folder_needs_access">Para que Retrô Play cree y lea la carpeta %1$s (donde pones los juegos por USB, gestor de archivos o la app Downloader), permite el acceso a los archivos.</string>
+    <string name="games_folder_needs_access">Para que Onzetec Games cree y lea la carpeta %1$s (donde pones los juegos por USB, gestor de archivos o la app Downloader), permite el acceso a los archivos.</string>
     <string name="grant_all_files_access">Permitir acceso a los archivos</string>
     <string name="all_files_access_adb">Esta TV no tiene la pantalla de este permiso. En un ordenador con depuración ADB activada, ejecuta: %1$s — o usa “Añadir carpeta o memoria USB” abajo.</string>
     <string name="library_title">Biblioteca</string>
@@ -77,7 +77,7 @@
     <string name="library_scan_failed">La última revisión falló. Inténtalo de nuevo.</string>
     <string name="scan_now">Revisar ahora</string>
     <string name="needs_system_title">Elige la consola (%1$d)</string>
-    <string name="needs_system_body">No se pudo saber de qué consola son estos archivos. Elige una vez y Retrô Play lo recuerda.</string>
+    <string name="needs_system_body">No se pudo saber de qué consola son estos archivos. Elige una vez y Onzetec Games lo recuerda.</string>
     <string name="choose_system_title">¿De qué consola es este juego?</string>
     <string name="folders_title">Carpetas revisadas</string>
     <string name="folders_body">Elige otras carpetas de la TV o una memoria USB. Los juegos se leen directamente desde allí.</string>
@@ -146,9 +146,9 @@
     <string name="genre_adventure">Aventura</string>
     <string name="genre_strategy">Estrategia</string>
     <string name="genre_simulation">Simulación</string>
-    <string name="home_step_1">Abre “Transferir juegos” y permite el acceso a los archivos: Retrô Play crea la carpeta Jogos en la TV.</string>
+    <string name="home_step_1">Abre “Transferir juegos” y permite el acceso a los archivos: Onzetec Games crea la carpeta Jogos en la TV.</string>
     <string name="home_step_3">Vuelve aquí: los juegos aparecen solos, con nombre, portada e información.</string>
-    <string name="legal_notice_short">Retrô Play no incluye juegos ni BIOS. Usa solo copias que poseas legalmente.</string>
+    <string name="legal_notice_short">Onzetec Games no incluye juegos ni BIOS. Usa solo copias que poseas legalmente.</string>
     <string name="details_played">Jugado %1$s · tiempo total: %2$s</string>
     <string name="details_unidentified">Juego no encontrado en la base de datos (hack, traducción o dump distinto). Funciona normalmente.</string>
     <string name="details_core_downloading">Descargando el núcleo… %1$d%%. El juego se abre enseguida.</string>
@@ -245,7 +245,7 @@
     <string name="save_failed">No se pudo guardar (espacio %1$d)</string>
     <string name="loaded_slot">Partida cargada</string>
     <string name="load_failed">No se pudo cargar la partida</string>
-    <string name="screenshot_saved">Captura guardada en Imágenes/Retro Play</string>
+    <string name="screenshot_saved">Captura guardada en Imágenes/Onzetec Games</string>
     <string name="screenshot_failed">No se pudo hacer la captura</string>
     <string name="speed_normal">Velocidad normal</string>
     <string name="rewind_disabled_hint">Activa el rebobinado en el menú (Atrás) para volver en el tiempo</string>

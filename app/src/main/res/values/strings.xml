@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Nome do app: troque aqui (único lugar). Para o banner da TV rode tools/generate_brand_assets.py -->
-    <string name="app_name" translatable="false">Retrô Play</string>
+    <string name="app_name" translatable="false">Onzetec Games</string>
 
     <!-- Menu lateral -->
     <string name="nav_home">Início</string>
@@ -51,7 +51,7 @@
     <string name="core_error_abi">Este aparelho não é compatível com os núcleos disponíveis.</string>
     <string name="core_error_unknown">Não foi possível baixar o núcleo.</string>
     <string name="error_no_space">Espaço insuficiente na TV. Libere espaço (apague jogos ou apps) e tente de novo.</string>
-    <string name="test_rom_title">ROM de teste do Retrô Play</string>
+    <string name="test_rom_title">ROM de teste do Onzetec Games</string>
     <string name="test_rom_subtitle">Homebrew livre: o D-pad move o quadrado; os botões mudam a cor e tocam sons</string>
     <string name="pick_file">Escolher arquivo…</string>
     <string name="pick_file_subtitle">Abrir uma ROM de um pendrive ou da memória da TV</string>
@@ -74,7 +74,7 @@
     <string name="games_folder_title">Pasta Jogos</string>
     <string name="games_folder_ready">Pronta em %1$s. Jogos copiados para lá aparecem sozinhos.</string>
     <string name="games_folder_layout">Use as subpastas %1$s. A BIOS do Neo Geo (neogeo.zip) vai em %2$s.</string>
-    <string name="games_folder_needs_access">Para o Retrô Play criar e ler a pasta %1$s (onde você coloca os jogos pelo pendrive, gerenciador de arquivos ou app Downloader), permita o acesso aos arquivos.</string>
+    <string name="games_folder_needs_access">Para o Onzetec Games criar e ler a pasta %1$s (onde você coloca os jogos pelo pendrive, gerenciador de arquivos ou app Downloader), permita o acesso aos arquivos.</string>
     <string name="grant_all_files_access">Permitir acesso aos arquivos</string>
     <string name="all_files_access_adb">Esta TV não tem a tela dessa permissão. No computador, com a depuração ADB ativada, rode: %1$s — ou use “Adicionar pasta ou pendrive” abaixo.</string>
     <string name="library_title">Biblioteca</string>
@@ -88,7 +88,7 @@
     <string name="library_scan_failed">A última verificação falhou. Tente de novo.</string>
     <string name="scan_now">Verificar agora</string>
     <string name="needs_system_title">Escolha o console (%1$d)</string>
-    <string name="needs_system_body">Não deu para saber de qual console são estes arquivos. Escolha uma vez e o Retrô Play lembra.</string>
+    <string name="needs_system_body">Não deu para saber de qual console são estes arquivos. Escolha uma vez e o Onzetec Games lembra.</string>
     <string name="choose_system_title">De qual console é este jogo?</string>
     <string name="folders_title">Pastas verificadas</string>
     <string name="folders_body">Escolha outras pastas da TV ou um pendrive/HD USB. Os jogos são lidos direto de lá.</string>
@@ -157,9 +157,9 @@
     <string name="genre_adventure">Aventura</string>
     <string name="genre_strategy">Estratégia</string>
     <string name="genre_simulation">Simulação</string>
-    <string name="home_step_1">Abra “Transferir jogos” e permita o acesso aos arquivos: o Retrô Play cria a pasta Jogos na TV.</string>
+    <string name="home_step_1">Abra “Transferir jogos” e permita o acesso aos arquivos: o Onzetec Games cria a pasta Jogos na TV.</string>
     <string name="home_step_3">Volte aqui: os jogos aparecem sozinhos, com nome, capa e informações.</string>
-    <string name="legal_notice_short">O Retrô Play não inclui jogos nem BIOS. Use apenas cópias que você possui legalmente.</string>
+    <string name="legal_notice_short">O Onzetec Games não inclui jogos nem BIOS. Use apenas cópias que você possui legalmente.</string>
     <string name="details_played">Jogado %1$s · tempo total: %2$s</string>
     <string name="details_unidentified">Jogo não encontrado no banco de dados (hack, tradução ou dump diferente). Ele funciona normalmente.</string>
     <string name="details_core_downloading">Baixando o núcleo… %1$d%%. O jogo abre em seguida.</string>
@@ -256,7 +256,7 @@
     <string name="save_failed">Não foi possível salvar (espaço %1$d)</string>
     <string name="loaded_slot">Save carregado</string>
     <string name="load_failed">Não foi possível carregar o save</string>
-    <string name="screenshot_saved">Screenshot salva em Imagens/Retro Play</string>
+    <string name="screenshot_saved">Screenshot salva em Imagens/Onzetec Games</string>
     <string name="screenshot_failed">Não foi possível tirar a screenshot</string>
     <string name="speed_normal">Velocidade normal</string>
     <string name="rewind_disabled_hint">Ative o rewind no menu (Voltar) para voltar no tempo</string>

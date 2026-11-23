@@ -44,16 +44,16 @@ class GamesFolderManager(private val context: Context, private val catalog: Syst
     }
 
     private fun readmeText() = buildString {
-        appendLine("Retrô Play — pasta de jogos")
+        appendLine("Onzetec Games — pasta de jogos")
         appendLine()
         appendLine("Coloque os jogos na subpasta do console correspondente:")
         catalog.all.forEach { appendLine("  ${it.displayName}/  (${it.extensions.joinToString(" ") { e -> ".$e" }})") }
         appendLine("  $BIOS_FOLDER/  (neogeo.zip, para os jogos de Neo Geo do Arcade)")
         appendLine()
         appendLine("Arquivos .zip e .7z funcionam. Romsets de Arcade (MAME 0.37 ou FBNeo) ficam compactados como estão.")
-        appendLine("Depois de copiar, abra o Retrô Play: os jogos novos aparecem sozinhos.")
+        appendLine("Depois de copiar, abra o Onzetec Games: os jogos novos aparecem sozinhos.")
         appendLine()
-        appendLine("O Retrô Play não inclui jogos nem BIOS. Use apenas cópias que você possui legalmente.")
+        appendLine("O Onzetec Games não inclui jogos nem BIOS. Use apenas cópias que você possui legalmente.")
     }
 
     companion object {
