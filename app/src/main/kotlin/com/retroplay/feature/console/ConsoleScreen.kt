@@ -152,7 +152,7 @@ fun ConsoleScreen(
                 }
             }
         }
-        if (hasTestRom && filter != GameFilter.FAVORITES) {
+        if (hasTestRom && filter !in TEST_ROM_HIDDEN) {
             item(key = "testrom") {
                 GameCard(
                     system = system, game = null, title = stringResource(R.string.test_rom_title), onClick = onPlayTestRom,
@@ -163,7 +163,7 @@ fun ConsoleScreen(
             }
         }
         items(list, key = { it.id }) { game ->
-            val first = !(hasTestRom && filter != GameFilter.FAVORITES) && game == list.first()
+            val first = !(hasTestRom && filter !in TEST_ROM_HIDDEN) && game == list.first()
             GameCard(
                 system = system, game = game, title = game.title, onClick = { onOpenGame(game) },
                 cardModifier = (if (first) Modifier.focusRequester(firstItem) else Modifier).rememberFocus(memory, "g${game.id}"),
@@ -174,7 +174,11 @@ fun ConsoleScreen(
         if (games != null && list.isEmpty()) {
             item(span = { GridItemSpan(maxLineSpan) }, key = "empty") {
                 Text(
-                    stringResource(if (filter == GameFilter.FAVORITES) R.string.console_no_favorites else R.string.roms_hint, "Jogos/${system.displayName}"),
+                    when (filter) {
+                        GameFilter.FAVORITES -> stringResource(R.string.console_no_favorites, "Jogos/${system.displayName}")
+                        GameFilter.POPULAR -> stringResource(R.string.console_no_popular)
+                        else -> stringResource(R.string.roms_hint, "Jogos/${system.displayName}")
+                    },
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 24.dp).testTag("console_empty"),
@@ -245,6 +249,7 @@ private fun Header(system: GameSystem, coreName: String, state: CoreInstallState
 
 private fun filterLabel(f: GameFilter) = when (f) {
     GameFilter.AZ -> R.string.filter_az
+    GameFilter.POPULAR -> R.string.filter_popular
     GameFilter.RECENT -> R.string.filter_recent
     GameFilter.MOST_PLAYED -> R.string.filter_most_played
     GameFilter.FAVORITES -> R.string.filter_favorites
@@ -258,3 +263,6 @@ fun coreErrorMessage(error: CoreError): Int = when (error) {
     CoreError.UNSUPPORTED_ABI -> R.string.core_error_abi
     CoreError.UNKNOWN -> R.string.core_error_unknown
 }
+
+/** Filtros que listam só uma seleção de jogos: a ROM de teste não aparece neles. */
+private val TEST_ROM_HIDDEN = setOf(GameFilter.FAVORITES, GameFilter.POPULAR)

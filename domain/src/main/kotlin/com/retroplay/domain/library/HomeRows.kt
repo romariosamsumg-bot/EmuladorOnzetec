@@ -13,6 +13,7 @@ sealed interface RowType {
     data object RecentlyAdded : RowType { override val key = "recent" }
     data class BySystem(val system: SystemId) : RowType { override val key = "system_${system.value}" }
     data object MostPlayed : RowType { override val key = "most_played" }
+    data object Popular : RowType { override val key = "popular" }
     data class ByGenre(val genre: String) : RowType { override val key = "genre_$genre" }
 }
 
@@ -32,6 +33,7 @@ object HomeRowsBuilder {
         }
         add(RowType.ContinuePlaying, playable.filter { it.lastPlayedAt != null }.sortedByDescending { it.lastPlayedAt })
         add(RowType.Favorites, playable.filter { it.isFavorite }.sortedBy { it.title.lowercase() })
+        add(RowType.Popular, PopularGames.overall(playable, catalog.all.map { it.id }))
         add(RowType.RecentlyAdded, playable.sortedByDescending { it.addedAt })
         for (system in catalog.all) {
             add(RowType.BySystem(system.id), playable.filter { it.systemId == system.id }.sortedBy { it.title.lowercase() })
@@ -82,10 +84,11 @@ object SearchMatcher {
 }
 
 /** Ordenações/filtros da página do console. */
-enum class GameFilter { AZ, RECENT, MOST_PLAYED, FAVORITES }
+enum class GameFilter { AZ, POPULAR, RECENT, MOST_PLAYED, FAVORITES }
 
 fun List<Game>.applyFilter(filter: GameFilter): List<Game> = when (filter) {
     GameFilter.AZ -> sortedBy { it.title.lowercase() }
+    GameFilter.POPULAR -> firstOrNull()?.systemId?.let { PopularGames.forSystem(this, it) }.orEmpty()
     GameFilter.RECENT -> sortedWith(compareByDescending<Game> { it.lastPlayedAt ?: 0L }.thenByDescending { it.addedAt })
     GameFilter.MOST_PLAYED -> sortedWith(compareByDescending<Game> { it.playCount }.thenBy { it.title.lowercase() })
     GameFilter.FAVORITES -> filter { it.isFavorite }.sortedBy { it.title.lowercase() }
@@ -99,6 +102,7 @@ val RowType.group: String
         RowType.RecentlyAdded -> "recent"
         is RowType.BySystem -> "systems"
         RowType.MostPlayed -> "most_played"
+        RowType.Popular -> "popular"
         is RowType.ByGenre -> "genres"
     }
 

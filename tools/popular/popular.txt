@@ -1,0 +1,323 @@
+# Jogos mais populares por console (curadoria: vendas, aclamação e lembrança na época, com
+# atenção ao público brasileiro). Ordem = posição no ranking. Uma linha por jogo; nomes
+# alternativos (regiões, romsets do arcade) separados por " | ". Comentários com "#".
+# Depois de editar: python3 tools/popular/build_popular.py (confere no banco e gera o Kotlin).
+
+[snes]
+Super Mario World
+The Legend of Zelda - A Link to the Past
+Donkey Kong Country
+Super Mario Kart
+Street Fighter II Turbo | Street Fighter II Turbo - Hyper Fighting
+Super Metroid
+Chrono Trigger
+Mortal Kombat II
+Super Mario World 2 - Yoshi's Island | Yoshi's Island
+Donkey Kong Country 2 - Diddy's Kong Quest
+International Superstar Soccer Deluxe
+Top Gear
+Super Bomberman
+Mega Man X
+Super Street Fighter II | Super Street Fighter II - The New Challengers
+Teenage Mutant Ninja Turtles IV - Turtles in Time
+Super Mario RPG - Legend of the Seven Stars
+Final Fantasy III | Final Fantasy VI
+Killer Instinct
+Ultimate Mortal Kombat 3
+Donkey Kong Country 3 - Dixie Kong's Double Trouble!
+Super Castlevania IV
+Contra III - The Alien Wars
+Star Fox
+F-Zero
+Secret of Mana
+EarthBound
+Super Punch-Out!!
+Kirby Super Star
+International Superstar Soccer
+Super Bomberman 2
+Super Bomberman 3
+Super Bomberman 4
+Super Bomberman 5
+Mortal Kombat
+Mortal Kombat 3
+Final Fight
+Final Fight 2
+Final Fight 3
+Disney's Aladdin | Aladdin
+The Lion King
+Goof Troop
+Top Gear 2
+Top Gear 3000
+Mega Man X2
+Mega Man X3
+Mega Man 7
+Super Mario All-Stars
+Super Ghouls 'N Ghosts | Super Ghouls'n Ghosts
+Street Fighter Alpha 2
+Zombies Ate My Neighbors
+Sunset Riders
+Teenage Mutant Ninja Turtles - Tournament Fighters
+Earthworm Jim
+Earthworm Jim 2
+Rock n' Roll Racing
+The Lost Vikings
+Demon's Crest
+ActRaiser
+Breath of Fire
+Breath of Fire II
+Illusion of Gaia
+Terranigma
+Lufia II - Rise of the Sinistrals
+Final Fantasy II | Final Fantasy IV
+Secret of Evermore
+Harvest Moon
+Kirby's Dream Land 3
+Kirby's Dream Course
+Tetris Attack
+Super Double Dragon
+Battletoads-Double Dragon | Battletoads & Double Dragon - The Ultimate Team
+Spider-Man and Venom - Maximum Carnage | Spider-Man & Venom - Maximum Carnage
+X-Men - Mutant Apocalypse
+The Magical Quest Starring Mickey Mouse
+Tiny Toon Adventures - Buster Busts Loose!
+Pocky & Rocky
+Fatal Fury Special
+Art of Fighting
+NBA Jam
+NBA Jam - Tournament Edition
+Uniracers
+Pilotwings
+Super Tennis
+Gradius III
+Axelay
+Super R-Type
+Ogre Battle - The March of the Black Queen
+Rockman & Forte | Mega Man & Bass
+Mario Paint
+
+[megadrive]
+Sonic The Hedgehog
+Sonic The Hedgehog 2
+Streets of Rage 2 | Bare Knuckle II - Shitou e no Chinkonka
+Mortal Kombat II
+Sonic The Hedgehog 3
+Sonic & Knuckles
+Street Fighter II' - Special Champion Edition | Street Fighter II' Plus - Champion Edition
+Golden Axe
+Streets of Rage | Bare Knuckle - Ikari no Tetsuken
+Ultimate Mortal Kombat 3
+Disney's Aladdin | Aladdin
+The Lion King
+Gunstar Heroes
+Altered Beast
+Mortal Kombat
+Super Street Fighter II
+Streets of Rage 3 | Bare Knuckle III
+Shinobi III - Return of the Ninja Master
+The Revenge of Shinobi
+Castlevania - Bloodlines
+Contra - Hard Corps
+Comix Zone
+Earthworm Jim
+Earthworm Jim 2
+Vectorman
+Vectorman 2
+Ecco the Dolphin
+ToeJam & Earl
+Rocket Knight Adventures
+Ristar
+Strider
+Phantasy Star IV | Phantasy Star - The End of the Millennium
+Shining Force
+Shining Force II
+Golden Axe II
+Golden Axe III
+Thunder Force III
+Thunder Force IV
+Road Rash
+Road Rash II
+NBA Jam
+NBA Jam Tournament Edition
+FIFA Soccer 95
+International Superstar Soccer Deluxe
+Teenage Mutant Ninja Turtles - The Hyperstone Heist
+Teenage Mutant Ninja Turtles - Tournament Fighters
+X-Men
+X-Men 2 - Clone Wars
+Spider-Man - Venom - Maximum Carnage | Spider-Man and Venom - Maximum Carnage
+Mega Bomberman
+Dynamite Headdy
+Castle of Illusion Starring Mickey Mouse
+QuackShot Starring Donald Duck
+World of Illusion Starring Mickey Mouse and Donald Duck
+Mickey Mania - The Timeless Adventures of Mickey Mouse
+Alex Kidd in the Enchanted Castle
+Sunset Riders
+Michael Jackson's Moonwalker
+Top Gear 2
+Micro Machines
+Landstalker
+Beyond Oasis | The Story of Thor
+Alien Soldier
+Desert Strike - Return to the Gulf
+Jurassic Park
+Fatal Fury
+Samurai Shodown
+Virtua Fighter 2
+Super Hang-On
+OutRun | Out Run
+Columns
+Mega Man - The Wily Wars
+Sonic Spinball | Sonic The Hedgehog Spinball
+Dr. Robotnik's Mean Bean Machine
+Sonic 3D Blast | Sonic 3D - Flickies' Island
+Splatterhouse 2
+Shadow Dancer - The Secret of Shinobi
+Light Crusader
+Pulseman
+Batman Returns
+Mighty Morphin Power Rangers
+Captain America and the Avengers
+
+[mastersystem]
+Alex Kidd in Miracle World
+Sonic The Hedgehog
+Sonic The Hedgehog 2
+Wonder Boy III - The Dragon's Trap
+Turma da Monica em O Resgate
+Monica no Castelo do Dragao
+Castle of Illusion Starring Mickey Mouse
+Street Fighter II
+Mortal Kombat
+Phantasy Star
+Shinobi
+Land of Illusion Starring Mickey Mouse
+Wonder Boy in Monster Land
+Psycho Fox
+Golden Axe Warrior
+Double Dragon
+Asterix
+Sonic Chaos
+Mortal Kombat II
+Golden Axe
+Streets of Rage
+R-Type
+Fantasy Zone
+Hang-On
+OutRun | Out Run
+Alex Kidd - The Lost Stars
+Alex Kidd in Shinobi World
+Wonder Boy
+Master of Darkness
+Ninja Gaiden
+The Lucky Dime Caper Starring Donald Duck
+Sapo Xule - O Mestre do Kung Fu
+Sapo Xule - S.O.S Lagoa Poluida
+Disney's Aladdin | Aladdin
+The Lion King
+Sonic Blast
+Ghost House
+Spy vs Spy
+California Games
+Teddy Boy
+Zillion
+Rastan
+Kenseiden
+After Burner
+Enduro Racer
+Power Strike
+Super Monaco GP
+World Cup Italia '90
+Super Kick Off
+Black Belt
+Dynamite Headdy
+Tom and Jerry - The Movie
+Bonanza Bros.
+Shadow Dancer
+Rocky
+
+[arcade]
+Street Fighter II' - Champion Edition | sf2ce
+The King of Fighters '97 | kof97
+Metal Slug - Super Vehicle-001 | mslug
+Cadillacs and Dinosaurs | dino
+Mortal Kombat II | mk2
+The King of Fighters '98 - The Slugfest | kof98
+The Punisher | punisher
+Street Fighter II - The World Warrior | Street Fighter II: The World Warrior | sf2
+Metal Slug X - Super Vehicle-001 | mslugx
+Metal Slug 2 - Super Vehicle-001/II | mslug2
+Metal Slug 3 | mslug3
+Final Fight | ffight
+Captain Commando | captcomm
+Teenage Mutant Ninja Turtles | tmnt
+The Simpsons | simpsons
+Pac-Man | PuckMan | pacman | puckman
+Galaga | galaga
+Mortal Kombat | mk
+Ultimate Mortal Kombat 3 | umk3
+Mortal Kombat 3 | mk3
+Street Fighter II' - Hyper Fighting | Street Fighter II': Hyper Fighting | sf2hf
+Super Street Fighter II Turbo | ssf2t
+Street Fighter Alpha 3 | sfa3
+Street Fighter III 3rd Strike - Fight for the Future | sfiii3
+Marvel vs. Capcom - Clash of Super Heroes | mvsc
+X-Men vs. Street Fighter | xmvsf
+Marvel Super Heroes | msh
+The King of Fighters 2002 | kof2002
+The King of Fighters '94 | kof94
+The King of Fighters '95 | kof95
+The King of Fighters '96 | kof96
+Garou - Mark of the Wolves | garou
+Samurai Shodown II | samsho2
+The Last Blade 2 | lastbld2
+Fatal Fury Special | fatfursp
+Real Bout Fatal Fury | rbff1
+Knights of the Round | knights
+Warriors of Fate | wof
+Teenage Mutant Ninja Turtles - Turtles in Time | tmnt2
+X-Men | xmen
+Sunset Riders | ssriders
+Alien vs. Predator | avsp
+Dungeons & Dragons - Shadow over Mystara | ddsom
+Ms. Pac-Man | mspacman
+Donkey Kong | dkong
+Space Invaders | invaders
+Frogger | frogger
+Dig Dug | digdug
+Centipede | centiped
+Asteroids | asteroid
+1942 | 1942
+1943 - The Battle of Midway | 1943: The Battle of Midway | 1943
+1944 - The Loop Master | 1944
+19XX - The War Against Destiny | 19xx
+Bubble Bobble | bublbobl
+Double Dragon | ddragon
+Golden Axe | goldnaxe
+Out Run | outrun
+NBA Jam | nbajam
+NBA Jam TE | nbajamte
+Pang! | Pang | pang
+Super Pang | spang
+Raiden | raiden
+Raiden II | raiden2
+Strikers 1945 | s1945
+Blazing Star | blazstar
+Pulstar | pulstar
+Twinkle Star Sprites | twinspri
+Puzzle Bobble | pbobblen
+Tetris | tetris
+Shinobi | shinobi
+Altered Beast | altbeast
+Ghouls'n Ghosts | ghouls
+Ghosts'n Goblins | gng
+Contra | contra
+Gauntlet | gauntlet
+Rampage | rampage
+Windjammers | wjammers
+Neo Turf Masters | turfmast
+Super Sidekicks 3 - The Next Glory | sidekick3
+Darkstalkers - The Night Warriors | dstlk
+Vampire Savior - The Lord of Vampire | vsav
+Bomberman | Neo Bomberman | neobombe
+Sengoku 3 | sengoku3

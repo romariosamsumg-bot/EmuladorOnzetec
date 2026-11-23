@@ -114,6 +114,8 @@ class HomeStreamingTest {
         node("card_continue/1").assertIsFocused()
         press(Key.DirectionDown) // Favoritos → Sonic
         node("card_favorites/3").assertIsFocused()
+        press(Key.DirectionDown) // Mais populares: Super Mario World (1º do SNES)
+        node("card_popular/1").assertIsFocused()
         press(Key.DirectionDown) // Recentes: o mais novo primeiro (id 6)
         node("card_recent/6").assertIsFocused()
         press(Key.DirectionRight)

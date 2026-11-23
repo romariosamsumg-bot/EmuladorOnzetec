@@ -186,7 +186,15 @@ fun CoreOptionsDialog(
 /** Ordem atual das fileiras (inclui grupos novos que não estavam gravados). */
 fun parseRowOrder(raw: String): List<String> {
     val saved = raw.split(',').map { it.trim() }.filter { it in HomeRowGroups.DEFAULT_ORDER }.distinct()
-    return saved + HomeRowGroups.DEFAULT_ORDER.filter { it !in saved }
+    // Grupos novos (ex.: "popular" numa ordem salva antes de existir) entram logo depois do
+    // grupo que os antecede na ordem padrão.
+    val out = saved.toMutableList()
+    HomeRowGroups.DEFAULT_ORDER.forEachIndexed { i, g ->
+        if (g in out) return@forEachIndexed
+        val prev = HomeRowGroups.DEFAULT_ORDER.take(i).lastOrNull { it in out }
+        if (prev == null) out.add(g) else out.add(out.indexOf(prev) + 1, g)
+    }
+    return out
 }
 
 fun parseHidden(raw: String): Set<String> = raw.split(',').map { it.trim() }.filter { it.isNotEmpty() }.toSet()
@@ -204,6 +212,7 @@ fun rowGroupName(group: String): String = when (group) {
     HomeRowGroups.RECENT -> stringResource(R.string.row_recent)
     HomeRowGroups.SYSTEMS -> stringResource(R.string.row_systems)
     HomeRowGroups.MOST_PLAYED -> stringResource(R.string.row_most_played)
+    HomeRowGroups.POPULAR -> stringResource(R.string.row_popular)
     else -> stringResource(R.string.row_genres)
 }
 

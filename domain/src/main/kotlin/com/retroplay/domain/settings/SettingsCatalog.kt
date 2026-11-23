@@ -98,8 +98,9 @@ object HomeRowGroups {
     const val RECENT = "recent"
     const val SYSTEMS = "systems"
     const val MOST_PLAYED = "most_played"
+    const val POPULAR = "popular"
     const val GENRES = "genres"
-    val DEFAULT_ORDER = listOf(CONTINUE, FAVORITES, RECENT, SYSTEMS, MOST_PLAYED, GENRES)
+    val DEFAULT_ORDER = listOf(CONTINUE, FAVORITES, POPULAR, RECENT, SYSTEMS, MOST_PLAYED, GENRES)
 }
 
 /** Opção de núcleo libretro (formato legado "Descrição; padrão|valor2|valor3"). */

@@ -262,6 +262,7 @@ private fun rowTitle(type: RowType, system: GameSystem?): String = when (type) {
     RowType.Favorites -> stringResource(R.string.row_favorites)
     RowType.RecentlyAdded -> stringResource(R.string.row_recent)
     RowType.MostPlayed -> stringResource(R.string.row_most_played)
+    RowType.Popular -> stringResource(R.string.row_popular)
     is RowType.BySystem -> system?.displayName.orEmpty()
     is RowType.ByGenre -> genreName(type.genre)
 }

@@ -275,4 +275,7 @@
     <string name="phone_steps_short">Móvil en la misma red Wi-Fi que la TV: apunta la cámara al código QR o abre la dirección en el navegador.</string>
     <string name="all_files_adb_hint">Si nada funciona: en el ordenador, con la depuración ADB activada, ejecuta %1$s, o usa “Añadir carpeta o memoria USB” en la pantalla Transferir.</string>
     <string name="made_by">Hecho por Romário Marcelino</string>
+    <string name="row_popular">Más populares</string>
+    <string name="filter_popular">Populares</string>
+    <string name="console_no_popular">Ninguno de los juegos populares de esta consola está en tu biblioteca.</string>
 </resources>

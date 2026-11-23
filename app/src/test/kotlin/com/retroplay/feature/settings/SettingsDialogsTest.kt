@@ -118,6 +118,11 @@ class SettingsDialogsTest {
 
         assertEquals(HomeRowGroups.DEFAULT_ORDER, parseRowOrder(""))
         assertEquals("genres", parseRowOrder("genres,xyz")[0])
+        // Ordem salva antes de existir "Mais populares": a fileira nova entra depois de Favoritos.
+        assertEquals(
+            listOf("systems", "continue", "favorites", "popular", "recent", "most_played", "genres"),
+            parseRowOrder("systems,continue,favorites,recent,most_played,genres"),
+        )
         assertEquals(listOf("b", "a", "c"), moveItem(listOf("a", "b", "c"), 1, -1))
         assertEquals(listOf("a", "b", "c"), moveItem(listOf("a", "b", "c"), 0, -1))
         assertEquals(setOf("recent"), parseHidden(" recent ,"))

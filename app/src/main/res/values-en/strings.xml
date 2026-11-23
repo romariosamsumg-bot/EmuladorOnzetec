@@ -267,4 +267,7 @@
     <string name="phone_steps_short">Phone on the same Wi-Fi as the TV: point the camera at the QR code or open the address in the browser.</string>
     <string name="all_files_adb_hint">If nothing works: on a computer with ADB debugging on, run %1$s, or use “Add folder or USB drive” on the Transfer screen.</string>
     <string name="made_by">Made by Romário Marcelino</string>
+    <string name="row_popular">Most popular</string>
+    <string name="filter_popular">Popular</string>
+    <string name="console_no_popular">None of this console\'s popular games are in your library.</string>
 </resources>

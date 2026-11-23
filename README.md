@@ -290,7 +290,17 @@ O menu lateral mostra o símbolo do Onzetec Games; aberto, mostra o logo complet
   varredura ou a "reconstruir a biblioteca".
 - **Buscar**: teclado em grade pelo D-pad (ou busca por voz, se a TV tiver); resultados enquanto
   digita, sem diferenciar acentos.
-- **Consoles**: grade de capas por console com filtros A–Z, Recentes, Mais jogados e Favoritos.
+- **Consoles**: grade de capas por console com filtros A–Z, **Populares**, Recentes, Mais jogados e
+  Favoritos.
+- **Mais populares**: fileira na Início (todos os consoles intercalados: o 1º de cada um, depois o
+  2º...) e filtro "Populares" na página de cada console. Vem de listas curadas embutidas no app
+  (`tools/popular/popular.txt`: Super Nintendo 90, Mega Drive 82, Master System 55, Arcade 84),
+  montadas por vendas, aclamação e lembrança da época, com atenção a clássicos do Brasil (Turma
+  da Mônica, Sapo Xulé). Não há ranking ao vivo: o app cruza a lista com a sua biblioteca pelo
+  título (sem "The", acentos e região), pelo nome do DAT e, no Arcade, pelo romset. Várias
+  versões do mesmo jogo aparecem uma vez só (preferência: Brasil, EUA/Mundo, Europa, Japão).
+  Para editar a lista: mude o `.txt` e rode `python3 tools/popular/build_popular.py`, que confere
+  cada nome no banco de DATs e gera `PopularGamesData.kt`.
 - Ao voltar de uma tela, o foco volta ao card de onde você saiu.
 
 ## Durante o jogo

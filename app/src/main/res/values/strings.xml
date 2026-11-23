@@ -286,4 +286,7 @@
     <string name="phone_steps_short">Celular na mesma rede Wi-Fi da TV: aponte a câmera para o QR code ou abra o endereço no navegador.</string>
     <string name="all_files_adb_hint">Se nada funcionar: no computador, com a depuração ADB ativada, rode %1$s, ou use “Adicionar pasta ou pendrive” na tela Transferir.</string>
     <string name="made_by">Feito por Romário Marcelino</string>
+    <string name="row_popular">Mais populares</string>
+    <string name="filter_popular">Populares</string>
+    <string name="console_no_popular">Nenhum jogo da lista de populares deste console está na sua biblioteca.</string>
 </resources>
