@@ -1,5 +1,6 @@
 package com.retroplay.feature.game
 
+import com.retroplay.data.scan.FileAccess
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.ContentValues
@@ -254,7 +255,11 @@ class GameActivity : ComponentActivity(), GameMenuActions {
                     library.observeBios().first().filter { it.system == system.id }.forEach { b ->
                         runCatching { romPreparer.stageSystemFile(b.uri, systemDir, b.setName + ".bin") }
                     }
-                    romPreparer.prepareDisc(romUri, fileName)
+                    if (fileName.substringAfterLast('.').lowercase() in setOf("zip", "7z")) {
+                        prepareDiscArchive(romUri)
+                    } else {
+                        romPreparer.prepareDisc(romUri, fileName)
+                    }
                 }
             } else {
                 withContext(Dispatchers.IO) {
@@ -512,6 +517,34 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     }
 
     // ================================================================== menu
+
+    /**
+     * PlayStation em .zip/.7z: extrai (só na primeira vez) mostrando o progresso na tela.
+     * Roda fora da thread da tela.
+     */
+    private suspend fun prepareDiscArchive(romUri: String): File {
+        val label = withContext(Dispatchers.Main) {
+            android.widget.TextView(this@GameActivity).apply {
+                setTextColor(android.graphics.Color.WHITE)
+                textSize = 20f
+                text = getString(R.string.disc_extracting, 0)
+                container.addView(this, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER))
+            }
+        }
+        var shown = -1
+        return try {
+            val size = if (FileAccess.needsCopy(romUri)) 0L else File(romUri).length()
+            romPreparer.prepareDiscArchive(romUri, fileName, size) { f ->
+                val pct = (f * 100).toInt()
+                if (pct != shown) {
+                    shown = pct
+                    label.post { label.text = getString(R.string.disc_extracting, pct) }
+                }
+            }
+        } finally {
+            withContext(Dispatchers.Main) { container.removeView(label) }
+        }
+    }
 
     /** Discos do jogo (.m3u) e o disco em uso. */
     private var discs = 1

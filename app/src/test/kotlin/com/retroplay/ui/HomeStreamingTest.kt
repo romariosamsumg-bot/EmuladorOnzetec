@@ -1,5 +1,7 @@
 package com.retroplay.ui
 
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTestTag
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.input.key.Key
@@ -146,7 +148,8 @@ class HomeStreamingTest {
         node("details_favorite").assertIsFocused()
         press(Key.DirectionCenter)
         assertTrue(library.games.value.first { it.id == 1L }.isFavorite)
-        compose.onNodeWithTag("details_favorite").assertTextContains("Nos favoritos", substring = true)
+        // A tela atualiza quando a biblioteca emite de novo (assíncrono): espera o texto mudar.
+        compose.waitUntil(5_000) { compose.onAllNodes(hasTestTag("details_favorite") and hasText("Nos favoritos", substring = true)).fetchSemanticsNodes().isNotEmpty() }
 
         // Opções do jogo → capa "Tela de título"
         press(Key.DirectionRight)

@@ -117,7 +117,25 @@ class RomIdentifier(private val catalog: SystemCatalog, private val dat: DatLook
             )
         }
 
-        // 2) ROM de console doméstico dentro do compactado (pega a maior, ignorando leia-me etc.).
+        // 2) Disco de CD compactado (.cue + .bin, .chd, .pbp, .iso): identificado pelo nome do arquivo
+        //    de dentro, sem descompactar. Vem antes do Mega Drive, que também usa .bin.
+        val disc = allowed.firstOrNull { it.identification == IdentificationStrategy.DISC_SERIAL }
+        if (disc != null && (hint == null || hint == disc) && forced?.identification != IdentificationStrategy.ARCADE_ROMSET) {
+            val main = DiscImages.mainDiscEntry(entries.map { it.name })
+            if (main != null) {
+                val game = lookupDisc(disc, null, DiscImages.baseName(main))
+                val discNo = if (main.lowercase().endsWith(".m3u")) null else DiscImages.discNumber(main)
+                val multi = entries.count { e -> DiscImages.isDiscFile(e.name) && !e.name.lowercase().endsWith(".bin") } > 1
+                val title = when {
+                    game == null -> null
+                    multi || discNo == null -> game.title.replace(DISC_SUFFIX, "")
+                    else -> "${game.title} (Disco $discNo)"
+                }
+                return discResult(disc, game?.copy(title = title ?: game.title))
+            }
+        }
+
+        // 3) ROM de console doméstico dentro do compactado (pega a maior, ignorando leia-me etc.).
         val homeSystems = allowed.filter { it.identification == IdentificationStrategy.CONTENT_HASH }
         val romEntry = entries
             .filter { e -> homeSystems.any { s -> entryExt(e) in s.extensions - archiveExt } }
@@ -130,7 +148,7 @@ class RomIdentifier(private val catalog: SystemCatalog, private val dat: DatLook
             return result(match, candidates, hint, crc, romEntry.name)
         }
 
-        // 3) Numa pasta de arcade (ex.: "Arcade", "MAME"), um .zip desconhecido é tratado como romset
+        // 4) Numa pasta de arcade (ex.: "Arcade", "MAME"), um .zip desconhecido é tratado como romset
         //    não reconhecido (o usuário vê o aviso em vez de o arquivo sumir).
         val arcadeHint = arcade.firstOrNull { it == hint || it == forced }
         if (arcadeHint != null) {

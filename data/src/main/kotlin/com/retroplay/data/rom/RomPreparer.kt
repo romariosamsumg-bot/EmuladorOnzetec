@@ -181,6 +181,112 @@ class RomPreparer(
     }
 
     /**
+     * Disco dentro de .zip/.7z: extrai uma vez para uma pasta do app e reaproveita nas próximas
+     * vezes (enquanto o compactado não mudar). Guarda só os [keep] discos mais recentes, para não
+     * encher a TV. Vários discos sem .m3u: cria o .m3u (o menu ganha "Trocar disco").
+     * @param onProgress fração extraída (0..1)
+     */
+    fun prepareDiscArchive(uri: String, fileName: String, sourceSize: Long, keep: Int = 2, onProgress: (Float) -> Unit = {}): File {
+        val root = File(cacheDir, DISC_CACHE).apply { mkdirs() }
+        val dir = File(root, safeName(fileName.substringBeforeLast('.')).ifBlank { "disco" })
+        val stamp = File(dir, STAMP)
+        val signature = "$uri|$sourceSize"
+        if (stamp.isFile && stamp.readText() == signature) {
+            mainDisc(dir)?.let { stamp.setLastModified(System.currentTimeMillis()); return it }
+        }
+        // Abre espaço: apaga as extrações mais antigas (fica com keep-1 além desta).
+        root.listFiles()?.filter { it.isDirectory && it != dir }?.sortedByDescending { File(it, STAMP).lastModified() }
+            ?.drop(keep - 1)?.forEach { it.deleteRecursively() }
+        dir.deleteRecursively()
+        dir.mkdirs()
+        val ext = fileName.substringAfterLast('.').lowercase()
+        try {
+            if (ext == "7z") extractAll7z(uri, dir, onProgress) else extractAllZip(uri, dir, onProgress)
+        } catch (e: RomPrepareException) {
+            dir.deleteRecursively(); throw e
+        } catch (e: IOException) {
+            dir.deleteRecursively()
+            if (e.message?.contains("ENOSPC") == true) throw RomPrepareException(RomPrepareException.Reason.NO_SPACE, "Sem espaço", e)
+            throw RomPrepareException(RomPrepareException.Reason.CORRUPTED, "Falha ao extrair $fileName", e)
+        }
+        val main = mainDisc(dir) ?: run {
+            dir.deleteRecursively()
+            throw RomPrepareException(RomPrepareException.Reason.NO_ROM_INSIDE, "Nenhum disco dentro de $fileName")
+        }
+        stamp.writeText(signature)
+        return main
+    }
+
+    /** O arquivo a abrir na pasta extraída; vários discos sem .m3u: cria um. */
+    private fun mainDisc(dir: File): File? {
+        val names = dir.listFiles()?.filter { it.isFile && it.name != STAMP }?.map { it.name }.orEmpty()
+        val main = com.retroplay.domain.library.DiscImages.mainDiscEntry(names) ?: return null
+        if (!main.lowercase().endsWith(".m3u")) {
+            val ext = main.substringAfterLast('.').lowercase()
+            val discs = names.filter { it.lowercase().endsWith(".$ext") }
+                .sortedWith(compareBy({ com.retroplay.domain.library.DiscImages.discNumber(it) ?: 0 }, { it.lowercase() }))
+            if (discs.size > 1) {
+                val m3u = File(dir, "discos.m3u")
+                m3u.writeText(discs.joinToString("\n", postfix = "\n"))
+                return m3u
+            }
+        }
+        return File(dir, main)
+    }
+
+    private fun extractAllZip(uri: String, dir: File, onProgress: (Float) -> Unit) {
+        val total = if (!FileAccess.needsCopy(uri)) runCatching { ZipFile(File(uri)).use { z -> z.entries().asSequence().sumOf { maxOf(it.size, 0L) } } }.getOrDefault(0L) else 0L
+        if (total > 0) checkSpace(dir, total / 2 + 1)
+        var done = 0L
+        val input = if (FileAccess.needsCopy(uri)) open(uri) else File(uri).also { if (!it.isFile) throw RomPrepareException(RomPrepareException.Reason.NOT_FOUND, "Arquivo não encontrado") }.inputStream()
+        java.util.zip.ZipInputStream(input.buffered(256 * 1024)).use { zin ->
+            while (true) {
+                val e = zin.nextEntry ?: break
+                if (e.isDirectory) continue
+                val out = File(dir, safeName(e.name))
+                out.outputStream().use { o ->
+                    val buf = ByteArray(256 * 1024)
+                    while (true) {
+                        val n = zin.read(buf)
+                        if (n < 0) break
+                        o.write(buf, 0, n)
+                        done += n
+                        if (total > 0) onProgress((done.toFloat() / total).coerceAtMost(1f))
+                    }
+                }
+            }
+        }
+    }
+
+    private fun extractAll7z(uri: String, dir: File, onProgress: (Float) -> Unit) {
+        val access = files
+        val channel = if (!FileAccess.needsCopy(uri)) java.nio.file.Files.newByteChannel(File(uri).toPath())
+        else (access ?: error("FileAccess necessário para content://")).openChannel(uri)
+        @Suppress("DEPRECATION")
+        SevenZFile(channel).use { sz ->
+            val entries = sz.entries.filter { !it.isDirectory }
+            val total = entries.sumOf { maxOf(it.size, 0L) }
+            if (total > 0) checkSpace(dir, total / 2 + 1)
+            var done = 0L
+            for (e in entries) {
+                val out = File(dir, safeName(e.name))
+                sz.getInputStream(e).use { input ->
+                    out.outputStream().use { o ->
+                        val buf = ByteArray(256 * 1024)
+                        while (true) {
+                            val n = input.read(buf)
+                            if (n < 0) break
+                            o.write(buf, 0, n)
+                            done += n
+                            if (total > 0) onProgress((done.toFloat() / total).coerceAtMost(1f))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * BIOS do PlayStation: o PCSX ReARMed procura "scph5501.bin" (e outras) na pasta do sistema.
      * Link simbólico para arquivos comuns; cópia para pendrive/SAF.
      */
@@ -220,6 +326,12 @@ class RomPreparer(
         } else {
             copy(open(uri), dest)
         }
+    }
+
+    companion object {
+        /** Pasta (no cache do app) dos discos extraídos de .zip/.7z. */
+        const val DISC_CACHE = "discos"
+        private const val STAMP = ".origem"
     }
 
     /** Só o nome do arquivo: evita "zip slip" (../../). */

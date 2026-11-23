@@ -284,4 +284,5 @@
     <string name="console_bios_recommended">Sin BIOS (recomendada)</string>
     <string name="bios_psx_header">BIOS de PlayStation</string>
     <string name="bios_psx_missing_desc">Pon scph5501.bin (u otra BIOS de PlayStation) en Jogos/BIOS. Sin ella, el núcleo usa una imitación integrada y algunos juegos pueden fallar.</string>
+    <string name="disc_extracting">Extrayendo el juego… %1$d%% (solo la primera vez)</string>
 </resources>

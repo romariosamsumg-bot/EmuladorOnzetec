@@ -153,7 +153,8 @@ object SystemRegistry : SystemCatalog {
         shortName = "PS1",
         releaseYear = 1994,
         // .bin fica de fora: é a trilha do .cue (e a extensão das ROMs de Mega Drive).
-        extensions = setOf("cue", "chd", "pbp", "m3u", "iso"),
+        // .zip/.7z: o app extrai o disco na hora de jogar (o núcleo não lê compactados).
+        extensions = setOf("cue", "chd", "pbp", "m3u", "iso", "zip", "7z"),
         cores = listOf(
             // O mais leve: feito para processadores ARM (TVs e celulares), com recompilador dinâmico.
             CoreDescriptor("pcsx_rearmed", "PCSX ReARMed", "Leve e rápido, ideal para TVs e celulares. Recomendado."),

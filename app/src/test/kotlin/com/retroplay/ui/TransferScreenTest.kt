@@ -72,6 +72,9 @@ class TransferScreenTest {
 
     /** Início → menu → "Transferir jogos" só com o D-pad. */
     private fun openTransfer() {
+        // Espera a Início carregar e pôr o foco no conteúdo (senão o ← pode se perder).
+        compose.waitUntil(5_000) { compose.onAllNodes(androidx.compose.ui.test.isFocused()).fetchSemanticsNodes().isNotEmpty() }
+        compose.waitForIdle()
         press(Key.DirectionLeft)
         repeat(4) { press(Key.DirectionDown) }
         node("nav_transfer").assertIsFocused()

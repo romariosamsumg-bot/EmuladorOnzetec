@@ -24,10 +24,10 @@ class SystemDetectorTest {
     }
 
     @Test
-    fun `zip e ambiguo entre os 4 sistemas`() {
+    fun `zip e ambiguo entre os 5 sistemas`() {
         val match = detector.matchByFileName("kof98.zip")
         assertTrue(match is ExtensionMatch.Ambiguous)
-        assertEquals(4, (match as ExtensionMatch.Ambiguous).candidates.size)
+        assertEquals(5, (match as ExtensionMatch.Ambiguous).candidates.size)
     }
 
     @Test

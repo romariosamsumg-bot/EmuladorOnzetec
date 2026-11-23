@@ -127,4 +127,60 @@ class RomPreparerTest {
     fun `romset inexistente`() {
         expect(RomPrepareException.Reason.NOT_FOUND) { RomPreparer(tmp.newFolder("c")).prepareArcade(File(tmp.root, "x.zip").path, "x.zip") }
     }
+
+    // ------------------------------------------------------------ PlayStation em .zip/.7z
+
+    @Test
+    fun disco_em_zip_extrai_uma_vez_e_reaproveita() {
+        val z = zip("Crash Bandicoot (USA).zip", "Crash Bandicoot (USA).cue" to "FILE \"Crash Bandicoot (USA).bin\" BINARY\n".toByteArray(),
+            "Crash Bandicoot (USA).bin" to ByteArray(300_000) { (it % 251).toByte() })
+        val cache = tmp.newFolder("cache")
+        val prep = RomPreparer(cache)
+        val progress = mutableListOf<Float>()
+        val cue = prep.prepareDiscArchive(z.absolutePath, z.name, z.length()) { progress += it }
+        assertEquals("Crash Bandicoot (USA).cue", cue.name)
+        assertTrue(File(cue.parentFile, "Crash Bandicoot (USA).bin").length() == 300_000L)
+        assertEquals(1f, progress.last(), 0.001f)
+        // Segunda vez: não extrai de novo (o arquivo é o mesmo).
+        val bin = File(cue.parentFile, "Crash Bandicoot (USA).bin")
+        bin.setLastModified(1_000L)
+        val again = prep.prepareDiscArchive(z.absolutePath, z.name, z.length())
+        assertEquals(cue, again)
+        assertEquals(1_000L, bin.lastModified())
+    }
+
+    @Test
+    fun varios_discos_no_zip_ganham_m3u_e_so_ficam_os_recentes() {
+        val ff7 = zip("FF7.zip",
+            "FF7 (Disc 2).chd" to ByteArray(10), "FF7 (Disc 1).chd" to ByteArray(10), "FF7 (Disc 3).chd" to ByteArray(10))
+        val cache = tmp.newFolder("c2")
+        val prep = RomPreparer(cache)
+        val m3u = prep.prepareDiscArchive(ff7.absolutePath, ff7.name, ff7.length())
+        assertEquals("discos.m3u", m3u.name)
+        assertEquals(listOf("FF7 (Disc 1).chd", "FF7 (Disc 2).chd", "FF7 (Disc 3).chd"), m3u.readLines().filter { it.isNotBlank() })
+        // Guarda só os 2 mais recentes: o terceiro jogo apaga o mais antigo.
+        val a = zip("A.zip", "A.iso" to ByteArray(10))
+        val b = zip("B.zip", "B.pbp" to ByteArray(10))
+        prep.prepareDiscArchive(a.absolutePath, a.name, a.length())
+        Thread.sleep(20)
+        prep.prepareDiscArchive(b.absolutePath, b.name, b.length())
+        val kept = File(cache, RomPreparer.DISC_CACHE).listFiles()!!.map { it.name }.toSet()
+        assertEquals(setOf("A", "B"), kept)
+    }
+
+    @Test
+    fun disco_em_7z_e_zip_sem_disco() {
+        val f = File(tmp.root, "Jogo.7z")
+        org.apache.commons.compress.archivers.sevenz.SevenZOutputFile(f).use { out ->
+            val data = ByteArray(5_000) { 7 }
+            val e = out.createArchiveEntry(File(tmp.root, "x"), "Jogo.iso")
+            e.size = data.size.toLong()
+            out.putArchiveEntry(e); out.write(data); out.closeArchiveEntry()
+        }
+        val iso = RomPreparer(tmp.newFolder("c3")).prepareDiscArchive(f.absolutePath, f.name, f.length())
+        assertEquals("Jogo.iso", iso.name)
+        assertEquals(5_000L, iso.length())
+        val docs = zip("Leia.zip", "leia-me.txt" to "oi".toByteArray())
+        expect(RomPrepareException.Reason.NO_ROM_INSIDE) { RomPreparer(tmp.newFolder("c4")).prepareDiscArchive(docs.absolutePath, docs.name, docs.length()) }
+    }
 }

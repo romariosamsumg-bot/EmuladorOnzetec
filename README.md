@@ -15,7 +15,7 @@ interface "estilo streaming", navegação por controle remoto, gamepad ou toque 
 | Mega Drive / Genesis | genesis_plus_gx | picodrive | .md .gen .smd .bin .zip .7z |
 | Master System / Mark III | genesis_plus_gx | picodrive | .sms .zip .7z |
 | Arcade (fliperama, inclusive Neo Geo) | mame2000 (MAME 0.37) | fbneo, mame2003_plus | .zip .7z (romsets) — jogos de Neo Geo exigem `neogeo.zip` |
-| PlayStation | pcsx_rearmed (PCSX ReARMed) | — | .chd .pbp .cue (+ trilhas .bin) .iso .m3u — BIOS recomendada (`scph5501.bin`) |
+| PlayStation | pcsx_rearmed (PCSX ReARMed) | — | .chd .pbp .cue (+ trilhas .bin) .iso .m3u .zip .7z — BIOS recomendada (`scph5501.bin`) |
 
 ## Estado do desenvolvimento
 
@@ -454,6 +454,13 @@ centro para 3:2 (660×440) em `cover_psx.webp`.
   `PARAM.SFO` do `.pbp`, sem calcular o CRC de CDs de 700 MB. O banco tem 10.102 discos do DAT
   Redump do libretro-database, 90% com capa. O `.chd` é compactado e é identificado pelo nome do
   arquivo. As trilhas `.bin` citadas por um `.cue` não aparecem como jogos à parte.
+- **`.zip` e `.7z`:** o jogo compactado aparece na biblioteca (identificado pelo nome do disco de
+  dentro, sem descompactar). Na primeira vez que você joga, o app extrai o disco para o
+  armazenamento interno ("Extraindo o jogo… N%") e nas próximas abre direto. Ficam guardados só
+  os 2 últimos jogos extraídos, para não encher a TV; o `.zip` original não é alterado. Vários
+  discos no mesmo compactado ganham um `.m3u` automático (com "Trocar disco"). `.rar` não é
+  aceito. Dica: extrair uma vez no PC/celular economiza espaço na TV (o `.zip` e a cópia
+  extraída ocupam o dobro).
 - **BIOS (recomendada):** `scph5501.bin` (ou `scph5500`, `scph5502`, `scph1001`, `scph7001`,
   `scph101`) em `Jogos/BIOS`. O app reconhece pelo CRC, mesmo com outro nome, e a coloca onde o
   núcleo procura. Sem BIOS, o núcleo usa uma imitação embutida e alguns jogos podem falhar; o card

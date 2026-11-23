@@ -23,6 +23,23 @@ object DiscImages {
     fun m3uEntries(text: String): List<String> =
         text.lineSequence().map { it.trim().removePrefix("\uFEFF") }.filter { it.isNotEmpty() && !it.startsWith("#") }.map(::baseName).toList()
 
+    private val DISC_EXT = setOf("m3u", "cue", "chd", "pbp", "iso")
+
+    /** Arquivo de disco (as trilhas .bin contam só junto de um .cue). */
+    fun isDiscFile(name: String) = name.substringAfterLast('.', "").lowercase() in DISC_EXT
+
+    /**
+     * O arquivo que o núcleo deve abrir dentro de um compactado: .m3u; senão .cue; .chd; .pbp; .iso.
+     * Vários discos sem .m3u: o primeiro (o app cria o .m3u ao extrair). null = não é um disco.
+     */
+    fun mainDiscEntry(names: List<String>): String? {
+        val files = names.filter { !it.endsWith("/") }.sortedWith(compareBy({ discNumber(it) ?: 0 }, { it.lowercase() }))
+        for (ext in listOf("m3u", "cue", "chd", "pbp", "iso")) {
+            files.firstOrNull { it.lowercase().endsWith(".$ext") }?.let { return it }
+        }
+        return null
+    }
+
     /** Só o nome do arquivo (o app procura os discos na mesma pasta). */
     fun baseName(path: String) = path.substringAfterLast('/').substringAfterLast('\\')
 

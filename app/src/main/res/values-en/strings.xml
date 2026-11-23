@@ -276,4 +276,5 @@
     <string name="console_bios_recommended">No BIOS (recommended)</string>
     <string name="bios_psx_header">PlayStation BIOS</string>
     <string name="bios_psx_missing_desc">Put scph5501.bin (or another PlayStation BIOS) in Jogos/BIOS. Without it the core uses a built-in replacement and some games may fail.</string>
+    <string name="disc_extracting">Extracting the game… %1$d%% (first time only)</string>
 </resources>

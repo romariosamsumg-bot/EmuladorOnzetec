@@ -201,4 +201,26 @@ class DiscIdentifierTest {
         // ROM de Mega Drive de 512 KB com outro nome continua sendo jogo.
         assertTrue(identifier.identify(folder.target("sonic.bin")) is IdentifyOutcome.GameResult)
     }
+
+    private fun zipTarget(name: String, entries: List<String>, parent: String = "PlayStation") = object : ScanTarget {
+        override val fileName = name
+        override val size = 1L
+        override val parentNames = listOf(parent)
+        override val siblingNames = emptySet<String>()
+        override fun archiveEntries() = entries.map { ArchiveEntry(it, 1000, 0x1234L) }
+        override fun crc32(skipBytes: Long) = 0L
+        override fun md5(skipBytes: Long) = ByteArray(0)
+    }
+
+    @Test
+    fun zip_com_disco_vira_playstation_pelo_nome_de_dentro() {
+        val single = game(identifier.identify(zipTarget("crash.zip", listOf("Crash Bandicoot (USA).cue", "Crash Bandicoot (USA).bin"))))
+        assertEquals(psx, single.system)
+        assertEquals(crash, single.dat)
+        // Fora da pasta PlayStation também (sem dica de pasta).
+        assertEquals(psx, game(identifier.identify(zipTarget("x.7z", listOf("Jogo.chd"), parent = "Downloads"))).system)
+        // .zip de SNES continua sendo SNES.
+        val snes = identifier.identify(zipTarget("mario.zip", listOf("Super Mario World (USA).sfc"), parent = "Super Nintendo"))
+        assertEquals(SystemRegistry.Ids.SNES, game(snes).system)
+    }
 }
