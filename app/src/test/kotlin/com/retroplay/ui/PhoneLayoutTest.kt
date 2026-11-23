@@ -49,7 +49,8 @@ class PhoneLayoutTest {
         library.games.value = listOf(
             game(1, SystemRegistry.Ids.SNES, "Super Mario World", lastPlayedAt = 5_000, playCount = 2),
             game(2, SystemRegistry.Ids.MEGA_DRIVE, "Sonic The Hedgehog", "sonic.md", favorite = true),
-            game(3, SystemRegistry.Ids.NEO_GEO, "Metal Slug", "mslug.zip"),
+            game(3, SystemRegistry.Ids.ARCADE, "Metal Slug", "mslug.zip"),
+            game(4, SystemRegistry.Ids.ARCADE, "Street Fighter II", "sf2.zip"),
         )
     }
 
@@ -73,6 +74,9 @@ class PhoneLayoutTest {
         tap("card_continue/1")
         compose.onNodeWithTag("screen_details", useUnmergedTree = true).fetchSemanticsNode()
         shot("02_details")
+        tap("nav_consoles")
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag("bios_badge_arcade", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        shot("04_consoles")
         tap("nav_settings")
         tap("cat_CONTROLS")
         shot("03_settings")

@@ -151,7 +151,7 @@ class GameMenuTest {
 
     @Test
     fun neo_geo_tem_ficha_e_proporcao_indisponivel() {
-        show(SystemRegistry.NEO_GEO, aspect = null)
+        show(SystemRegistry.ARCADE, aspect = null)
         node("menu_coin").assertExists()
         node("menu_aspect").assertIsNotEnabled()
         screenshot("51_menu_neogeo")

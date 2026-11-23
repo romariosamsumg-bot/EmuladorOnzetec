@@ -43,18 +43,22 @@ class DatDatabase(private val context: Context) : DatLookup {
             args,
         ).use { c ->
             buildList {
-                while (c.moveToNext()) add(readGame(c) to DatRom(c.getString(15), c.getLong(16), c.getLong(17), c.getInt(18) == 1, c.getBlobOrNull(19)))
+                while (c.moveToNext()) add(readGame(c) to DatRom(c.getString(17), c.getLong(18), c.getLong(19), c.getInt(20) == 1, c.getBlobOrNull(21)))
             }
         }
     }
 
-    override fun romset(system: SystemId, setName: String): Pair<DatGame, List<DatRom>>? {
-        val game = db.rawQuery("SELECT $GAME_COLUMNS FROM game g WHERE g.system = ? AND g.romset = ?", arrayOf(system.value, setName))
-            .use { c -> if (c.moveToFirst()) readGame(c) else null } ?: return null
-        val roms = db.rawQuery("SELECT name, size, crc, merge FROM rom WHERE game_id = ?", arrayOf(game.id.toString())).use { c ->
-            buildList { while (c.moveToNext()) add(DatRom(c.getString(0), c.getLong(1), c.getLong(2), c.getInt(3) == 1)) }
+    override fun romset(system: SystemId, setName: String): Pair<DatGame, List<DatRom>>? = romsets(system, setName).firstOrNull()
+
+    /** Uma versão por DAT (MAME 0.37 primeiro, depois FBNeo: a ordem em que foram gravadas). */
+    override fun romsets(system: SystemId, setName: String): List<Pair<DatGame, List<DatRom>>> {
+        val games = db.rawQuery("SELECT $GAME_COLUMNS FROM game g WHERE g.system = ? AND g.romset = ? ORDER BY g.id", arrayOf(system.value, setName))
+            .use { c -> buildList { while (c.moveToNext()) add(readGame(c)) } }
+        return games.map { game ->
+            game to db.rawQuery("SELECT name, size, crc, merge FROM rom WHERE game_id = ?", arrayOf(game.id.toString())).use { c ->
+                buildList { while (c.moveToNext()) add(DatRom(c.getString(0), c.getLong(1), c.getLong(2), c.getInt(3) == 1)) }
+            }
         }
-        return game to roms
     }
 
     @Synchronized
@@ -94,6 +98,8 @@ class DatDatabase(private val context: Context) : DatLookup {
         romset = c.getStringOrNull(12),
         parent = c.getStringOrNull(13),
         isBios = c.getInt(14) == 1,
+        core = c.getStringOrNull(15),
+        bios = c.getStringOrNull(16),
     )
 
     private fun android.database.Cursor.getStringOrNull(i: Int) = if (isNull(i)) null else getString(i)
@@ -103,6 +109,6 @@ class DatDatabase(private val context: Context) : DatLookup {
         const val ASSET_NAME = "retroplay-dat.sqlite"
         private const val GAME_COLUMNS =
             "g.id, g.system, g.name, g.title, g.region, g.year, g.developer, g.publisher, g.genre, g.players, " +
-                "g.thumbs, g.thumb_name, g.romset, g.parent, g.is_bios"
+                "g.thumbs, g.thumb_name, g.romset, g.parent, g.is_bios, g.core, g.bios"
     }
 }

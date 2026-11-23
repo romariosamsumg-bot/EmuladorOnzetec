@@ -40,7 +40,7 @@ sealed interface IdentifyOutcome {
  * Identifica o console e o jogo de um arquivo:
  * 1. extensão → consoles possíveis;
  * 2. CRC32 (do arquivo ou do índice do .zip/.7z) → DAT No-Intro; MD5 só para desempatar;
- * 3. arcade (Neo Geo): nome do romset + CRCs internos (DAT do FBNeo), sem descompactar;
+ * 3. arcade: nome do romset + CRCs internos (DATs do MAME 0.37 e do FBNeo), sem descompactar;
  * 4. dicas pelo nome da pasta e, por fim, pergunta ao usuário (uma vez).
  */
 class RomIdentifier(private val catalog: SystemCatalog, private val dat: DatLookup) {
@@ -79,15 +79,27 @@ class RomIdentifier(private val catalog: SystemCatalog, private val dat: DatLook
         //    O .zip é lido pelo núcleo como está; nunca descompactamos.
         val setName = target.fileName.substringBeforeLast('.').lowercase()
         for (system in arcade) {
-            val (game, roms) = dat.romset(system.id, setName) ?: continue
-            if (!looksLikeRomset(roms, entries)) continue
-            if (game.isBios) {
-                val missing = validate(roms, entries, needParent = false, siblings = emptySet(), biosCrcs = emptySet()).second
-                return IdentifyOutcome.Bios(BiosFound(system.id, setName, complete = missing == 0))
+            // O mesmo nome pode existir em vários DATs (MAME 0.37, FBNeo) com conteúdo diferente:
+            // confere contra todos e fica com o que o .zip satisfaz melhor.
+            val versions = dat.romsets(system.id, setName).filter { looksLikeRomset(it.second, entries) }
+            if (versions.isEmpty()) continue
+            val biosVersions = versions.filter { it.first.isBios }
+            if (biosVersions.isNotEmpty()) {
+                val best = biosVersions
+                    .map { (game, roms) -> game to validate(roms, entries, needParent = false, siblings = emptySet(), biosCrcs = emptySet()).second }
+                    .minWith(compareBy({ it.second }, { coreOrder(system, it.first.core) }))
+                return IdentifyOutcome.Bios(BiosFound(system.id, setName, complete = best.second == 0, core = best.first.core))
             }
-            val biosCrcs = dat.romset(system.id, BIOS_SET)?.second?.map { it.crc }?.toSet().orEmpty()
-            val (status, missing) = validate(roms, entries, game.parent != null, target.siblingNames, biosCrcs, game.parent)
-            return IdentifyOutcome.GameResult(Identification(system.id, game, IdentStatus.IDENTIFIED, status, missing))
+            val results = versions.map { (game, roms) ->
+                val biosCrcs = game.bios?.let { b -> dat.romsets(system.id, b).firstOrNull { it.first.core == game.core }?.second }
+                    ?.map { it.crc }?.toSet().orEmpty()
+                val (status, missing) = validate(roms, entries, game.parent != null, target.siblingNames, biosCrcs, game.parent)
+                Triple(game, status, missing)
+            }
+            val best = results.minWith(compareBy({ statusRank(it.second) }, { it.third }, { coreOrder(system, it.first.core) }))
+            return IdentifyOutcome.GameResult(
+                Identification(system.id, best.first, IdentStatus.IDENTIFIED, best.second, best.third, coreHint = best.first.core),
+            )
         }
 
         // 2) ROM de console doméstico dentro do compactado (pega a maior, ignorando leia-me etc.).
@@ -103,14 +115,16 @@ class RomIdentifier(private val catalog: SystemCatalog, private val dat: DatLook
             return result(match, candidates, hint, crc, romEntry.name)
         }
 
-        // 3) Numa pasta de arcade (ex.: "Neo Geo"), um .zip desconhecido é tratado como romset
+        // 3) Numa pasta de arcade (ex.: "Arcade", "MAME"), um .zip desconhecido é tratado como romset
         //    não reconhecido (o usuário vê o aviso em vez de o arquivo sumir).
         val arcadeHint = arcade.firstOrNull { it == hint || it == forced }
         if (arcadeHint != null) {
-            val known = dat.romset(arcadeHint.id, setName)
-            if (known != null && !known.first.isBios) {
+            val known = dat.romsets(arcadeHint.id, setName).firstOrNull { !it.first.isBios }
+            if (known != null) {
                 val (status, missing) = validate(known.second, entries, false, target.siblingNames, emptySet())
-                return IdentifyOutcome.GameResult(Identification(arcadeHint.id, known.first, IdentStatus.IDENTIFIED, status, missing))
+                return IdentifyOutcome.GameResult(
+                    Identification(arcadeHint.id, known.first, IdentStatus.IDENTIFIED, status, missing, coreHint = known.first.core),
+                )
             }
             return IdentifyOutcome.GameResult(Identification(arcadeHint.id, null, IdentStatus.UNIDENTIFIED, RomsetStatus.UNKNOWN_SET))
         }
@@ -155,6 +169,18 @@ class RomIdentifier(private val catalog: SystemCatalog, private val dat: DatLook
     }
 
     // ------------------------------------------------------------ auxiliares
+
+    /** Completo primeiro; "só falta o pai" logo depois; versões erradas por último. */
+    private fun statusRank(s: RomsetStatus) = when (s) {
+        RomsetStatus.COMPLETE -> 0
+        RomsetStatus.NEEDS_PARENT -> 1
+        RomsetStatus.INCOMPLETE -> 2
+        RomsetStatus.WRONG_VERSION -> 3
+        else -> 4
+    }
+
+    /** Ordem dos núcleos do console (o primeiro é o padrão). */
+    private fun coreOrder(system: GameSystem, core: String?) = system.cores.indexOfFirst { it.id == core }.let { if (it < 0) Int.MAX_VALUE else it }
 
     /** Escolhe entre vários casamentos: dica de pasta, depois MD5 (só se ainda houver empate). */
     private fun pick(

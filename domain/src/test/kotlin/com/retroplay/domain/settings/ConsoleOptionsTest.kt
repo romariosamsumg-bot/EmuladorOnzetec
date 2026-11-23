@@ -13,21 +13,31 @@ class ConsoleOptionsTest {
 
     @Test
     fun neo_geo_modo_e_free_play_por_jogo() {
-        val empty = ConsoleCoreOptions.setup(Ids.NEO_GEO, "fbneo", snap(), "neogeo/kof98", "kof98")
+        val empty = ConsoleCoreOptions.setup(Ids.ARCADE, "fbneo", snap(), "arcade/kof98", "kof98")
         assertEquals("MVS_EUR", empty.variables["fbneo-neogeo-mode"])
         assertEquals("Off", empty.variables["fbneo-dipswitch-kof98-Free_play"])
 
         val s = snap(
-            "s|neogeo|console.neogeo_mode" to "aes",
-            "j|neogeo/kof98|console.neogeo_mode" to "unibios",
-            "j|neogeo/kof98|console.neogeo_freeplay" to "true",
+            "s|arcade|console.neogeo_mode" to "aes",
+            "j|arcade/kof98|console.neogeo_mode" to "unibios",
+            "j|arcade/kof98|console.neogeo_freeplay" to "true",
         )
-        val kof = ConsoleCoreOptions.setup(Ids.NEO_GEO, "fbneo", s, "neogeo/kof98", "kof98")
+        val kof = ConsoleCoreOptions.setup(Ids.ARCADE, "fbneo", s, "arcade/kof98", "kof98")
         assertEquals("UNIBIOS", kof.variables["fbneo-neogeo-mode"])
         assertEquals("On", kof.variables["fbneo-dipswitch-kof98-Free_play"])
-        val mslug = ConsoleCoreOptions.setup(Ids.NEO_GEO, "fbneo", s, "neogeo/mslug", "mslug")
+        val mslug = ConsoleCoreOptions.setup(Ids.ARCADE, "fbneo", s, "arcade/mslug", "mslug")
         assertEquals("AES_EUR", mslug.variables["fbneo-neogeo-mode"])
         assertEquals("Off", mslug.variables["fbneo-dipswitch-mslug-Free_play"])
+    }
+
+    @Test
+    fun mame_2000_pula_aviso_e_pula_quadros_no_modo_economico() {
+        val normal = ConsoleCoreOptions.setup(Ids.ARCADE, "mame2000", snap(), null, "sf2")
+        assertEquals("enabled", normal.variables["mame2000-skip_disclaimer"])
+        assertEquals("disabled", normal.variables["mame2000-frameskip"])
+        assertEquals("auto", ConsoleCoreOptions.setup(Ids.ARCADE, "mame2000", snap("g|video.low_power" to "true"), null, "sf2").variables["mame2000-frameskip"])
+        // As opções do FBNeo não vão para o MAME.
+        assertTrue(normal.variables.keys.none { it.startsWith("fbneo") })
     }
 
     @Test
@@ -64,7 +74,7 @@ class ConsoleOptionsTest {
 
     @Test
     fun opcoes_listadas_por_console() {
-        assertEquals(listOf(ConsoleSettings.NEOGEO_MODE, ConsoleSettings.NEOGEO_FREEPLAY), ConsoleSettings.forSystem(Ids.NEO_GEO))
+        assertEquals(listOf(ConsoleSettings.NEOGEO_MODE, ConsoleSettings.NEOGEO_FREEPLAY), ConsoleSettings.forSystem(Ids.ARCADE))
         assertEquals(listOf(ConsoleSettings.SMS_FM), ConsoleSettings.forSystem(Ids.MASTER_SYSTEM))
     }
 }

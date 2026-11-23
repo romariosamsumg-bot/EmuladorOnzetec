@@ -45,7 +45,7 @@ class HomeRowsTest {
     @Test
     fun `sem console e fileiras vazias ficam de fora`() {
         assertTrue(rows().none { r -> r.games.any { it.systemId == null } })
-        assertTrue(rows().none { it.type == RowType.BySystem(SystemRegistry.Ids.NEO_GEO) })
+        assertTrue(rows().none { it.type == RowType.BySystem(SystemRegistry.Ids.ARCADE) })
         assertTrue(rows().none { it.type == RowType.ByGenre("Action") }) // menos de 4 jogos
     }
 

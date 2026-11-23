@@ -14,7 +14,7 @@ interface "estilo streaming", navegação por controle remoto, gamepad ou toque 
 | Super Nintendo / Super Famicom | snes9x2010 | snes9x | .sfc .smc .fig .swc .zip .7z |
 | Mega Drive / Genesis | genesis_plus_gx | picodrive | .md .gen .smd .bin .zip .7z |
 | Master System / Mark III | genesis_plus_gx | picodrive | .sms .zip .7z |
-| Neo Geo (MVS/AES) | fbneo | — | .zip .7z (romsets) — exige `neogeo.zip` |
+| Arcade (fliperama, inclusive Neo Geo) | mame2000 (MAME 0.37) | fbneo, mame2003_plus | .zip .7z (romsets) — jogos de Neo Geo exigem `neogeo.zip` |
 
 ## Estado do desenvolvimento
 
@@ -72,7 +72,7 @@ Para atualizar, instale o APK novo por cima (os jogos, saves e configurações f
    **por toque** (e também com controle Bluetooth).
 3. Durante o jogo aparece o **controle na tela**: direcional à esquerda, botões do console à
    direita (SNES com X/A/B/Y, L e R; Mega Drive com 3 ou 6 botões; Master System com 1, 2 e
-   Pause; Neo Geo com A, B, C, D e **Ficha**), Select/Start embaixo e **☰** no topo para o menu.
+   Pause; Arcade com A–F, ou A, B, C, D nos jogos de Neo Geo, e **Ficha**), Select/Start embaixo e **☰** no topo para o menu.
    Vale usar vários dedos e deslizar de um botão para outro. Ele **some sozinho** quando você usa
    um controle físico e volta ao tocar na tela.
 4. Ajustes em **Configurações → Controles**: controle na tela (automático, sempre ou nunca),
@@ -157,8 +157,8 @@ Jogos/
 ├─ Super Nintendo/   (.sfc .smc .fig .swc .zip .7z)
 ├─ Mega Drive/       (.md .gen .smd .bin .zip .7z)
 ├─ Master System/    (.sms .zip .7z)
-├─ Neo Geo/          (romsets .zip/.7z do FBNeo, sem descompactar)
-├─ BIOS/             (neogeo.zip)
+├─ Arcade/          (romsets .zip/.7z do MAME 0.37 ou do FBNeo, sem descompactar)
+├─ BIOS/             (neogeo.zip, para os jogos de Neo Geo)
 └─ LEIA-ME.txt
 ```
 
@@ -200,7 +200,7 @@ Jogos num computador, NAS ou roteador com pendrive, na mesma rede: **Configuraç
 Adicionar pasta da rede (SMB)**. Informe o servidor (nome ou IP), o compartilhamento, a subpasta
 (opcional) e o usuário/senha (vazio = convidado). **Testar e adicionar** confere a conexão e já
 procura os jogos. Funciona com SMB 2/3 (Windows 10/11, Samba, a maioria dos NAS). Na hora de
-jogar, o arquivo é copiado para a TV (romsets de Neo Geo grandes podem demorar alguns segundos).
+jogar, o arquivo é copiado para a TV (romsets de Arcade grandes podem demorar alguns segundos).
 A senha fica só na TV, fora do backup. Para tirar a pasta, use **Transferir jogos → Remover**.
 
 ### Como os jogos são identificados
@@ -209,37 +209,46 @@ A senha fica só na TV, fora do backup. Para tirar a pasta, use **Transferir jog
 - O **CRC32** de cada ROM é comparado com os DATs **No-Intro** (libretro-database): o jogo ganha
   nome oficial, ano, gênero, desenvolvedora, nº de jogadores e capa. Em `.zip`/`.7z` o CRC é lido
   do índice do arquivo, **sem descompactar**. MD5 é usado só para desempatar.
-- **Neo Geo**: identificado pelo nome do romset (ex.: `kof98.zip` → "The King of Fighters '98 -
-  The Slugfest") e pelos CRCs dos arquivos internos, conforme o DAT do **FinalBurn Neo**. O app
-  **nunca descompacta nem altera** romsets. Avisos possíveis na página do console:
+- **Arcade**: identificado pelo nome do romset (ex.: `mslug.zip` → "Metal Slug - Super
+  Vehicle-001") e pelos CRCs dos arquivos internos, comparados com dois DATs: o do **MAME 0.37**
+  (núcleo MAME 2000) e o do **FinalBurn Neo**. O app guarda qual dos dois o romset satisfaz e
+  **abre o jogo no núcleo certo sozinho** (romsets do MAME 0.37 no MAME 2000; romsets mais novos,
+  como Metal Slug 3 ou KOF 2000, no FBNeo). O app **nunca descompacta nem altera** romsets.
+  Avisos possíveis na página do console:
   - *Romset incompleto* — faltam arquivos dentro do .zip;
   - *Romset de outra versão* — arquivos com nome certo e conteúdo diferente (comum em romsets
-    de versões antigas do MAME); troque por um romset compatível com o FBNeo atual;
+    de outra versão do MAME); use romsets do MAME 0.37 (b5 a b11) ou do FBNeo atual;
   - *Precisa do romset principal* — é um clone; coloque o romset "pai" em qualquer pasta da
     biblioteca (ao abrir o jogo, o app junta os dois para o núcleo, sem copiar nada);
-  - *Romset não reconhecido* — o nome do .zip não existe no FBNeo.
+  - *Romset não reconhecido* — o nome do .zip não existe no MAME 0.37 nem no FBNeo.
 - Se não der para saber o console (ex.: arquivo corrompido), ele aparece em **Escolha o
   console**; a escolha é lembrada nas próximas verificações.
 - Capas vêm do projeto **libretro-thumbnails** (boxart, tela de título e snap). Sem capa, o app
   gera um card com o nome do jogo e a cor do console. Cache em disco limitado a 200 MB.
 
-### Neo Geo: BIOS e romsets
+### Arcade: romsets e BIOS do Neo Geo
 
-1. Coloque a **`neogeo.zip`** (a BIOS, que você precisa ter) em `Jogos/BIOS` — ou importe em
-   **Configurações → BIOS**. A tela mostra se ela foi encontrada, se está completa e se traz a
-   **UniBIOS**. O app a deixa onde o FinalBurn Neo procura, mesmo que os jogos estejam em outra
-   pasta ou num pendrive.
-2. Coloque os romsets (`.zip`, como estão, sem descompactar) em `Jogos/Neo Geo`.
+1. Coloque os romsets (`.zip`, como estão, sem descompactar) em `Jogos/Arcade` (pastas antigas
+   como `Jogos/Neo Geo` ou `MAME` também funcionam). Use romsets do **MAME 0.37** (b5 a b11) ou
+   do **FBNeo**; o app identifica cada um e escolhe o núcleo.
+2. Só os jogos **de Neo Geo** (Metal Slug, KOF, Samurai Shodown…) precisam da **`neogeo.zip`**
+   (a BIOS, que você precisa ter). Coloque-a em `Jogos/BIOS` ou importe em **Configurações →
+   BIOS**; ela deve ser da mesma versão dos romsets (MAME 0.37 ou FBNeo). O cartão do Arcade, em
+   Consoles, mostra se a BIOS foi encontrada. Jogos de outras placas (Street Fighter II, Final
+   Fight, Cadillacs and Dinosaurs…) não precisam dela.
 3. Se um jogo não abrir, a mensagem diz o motivo: BIOS faltando, romset principal faltando, ou
-   romset incompleto/de outra versão. Nesse último caso, troque o romset por um compatível com
-   o FBNeo atual (romsets de MAME antigos costumam falhar).
+   romset incompleto/de outra versão.
+4. Para trocar o núcleo de um jogo: Detalhes → Opções → Configurações deste jogo → Emulação →
+   Núcleo do Arcade (MAME 2000, FinalBurn Neo ou MAME 2003-Plus).
+5. Na versão 1.2 o antigo "Neo Geo" virou "Arcade": favoritos, histórico, saves e configurações
+   foram levados junto automaticamente.
 4. Romsets grandes ocupam muita RAM; se a TV tiver pouca memória livre, o app avisa antes.
 
 ### Opções de cada console (Configurações → Emulação → escolha o console no topo)
 
 | Console | Opções |
 |---|---|
-| Neo Geo | Modo **MVS** (fliperama), **AES** (console) ou **UniBIOS**; **Free play**. Ficha no Select e "Inserir ficha" no menu do jogo; botões A, B, C, D + Ficha + Start. |
+| Arcade | No FBNeo: modo **MVS** (fliperama), **AES** (console) ou **UniBIOS** e **Free play** para jogos de Neo Geo. No MAME 2000, o "Modo econômico" pula quadros quando a TV não dá conta. Ficha no Select e "Inserir ficha" no menu do jogo; botões A–F (A–D no Neo Geo) + Ficha + Start. |
 | Mega Drive | Controle de **3 ou 6 botões**; região Automática / EUA / Japão / Europa. |
 | Master System | Som **FM (YM2413)** ligado/desligado; o Pause do console fica no Start. |
 | Super Nintendo | Região automática; **Reduzir lentidão** (overclock da CPU e do SuperFX). |
@@ -275,7 +284,7 @@ O banco de identificação (`data/src/main/assets/db/retroplay-dat.sqlite`) é g
 - **Menu rápido**: botão **Voltar** do controle remoto, **Guide** do gamepad ou **Select+Start**.
   O jogo fica congelado e mudo enquanto o menu está aberto. Opções: Continuar · Salvar estado
   (espaços 1–9, com miniatura e data) · Carregar estado (inclui o automático) · Rewind ·
-  Voltar 5 segundos · Reiniciar · Inserir ficha (Neo Geo) · Acelerar (2x/4x/8x) · Shader (CRT,
+  Voltar 5 segundos · Reiniciar · Inserir ficha (Arcade) · Acelerar (2x/4x/8x) · Shader (CRT,
   LCD, Nítido) · Proporção (original ou pixel perfeito, no SNES e Mega Drive/Master System) ·
   Controles · Opções do núcleo · Mostrar FPS · Screenshot (vai para Imagens/Retro Play) · Sair.
 - **Save automático** ao sair pelo menu e ao apertar Home na TV; ao voltar, o menu aparece.
@@ -331,8 +340,8 @@ run-ahead.
   em Emulação, desligue "Voltar no tempo"; no SNES, prefira o núcleo Snes9x 2010.
 - **Controle não funciona**: veja em Configurações → Controles se ele aparece; remapeie com o
   assistente; o controle remoto também joga (setas + OK).
-- **Neo Geo não abre**: a mensagem diz se falta a BIOS, o romset principal (clones) ou se o
-  romset é de outra versão (troque por um compatível com o FBNeo atual).
+- **Jogo de Arcade não abre**: a mensagem diz se falta a BIOS (jogos de Neo Geo), o romset
+  principal (clones) ou se o romset é de outra versão (use romsets do MAME 0.37 ou do FBNeo).
 - **Pasta da rede não conecta**: confira o IP, se o compartilhamento existe e se o SMB 2/3 está
   ligado no computador/NAS; teste o usuário e a senha num computador da mesma rede.
 - **Algo travou**: Configurações → Sobre → **Exportar registro de erros** salva um arquivo para
@@ -375,7 +384,7 @@ domain/       Kotlin puro: registro de consoles, detecção por extensão, model
 data/         Núcleos (OkHttp + WorkManager), biblioteca (Room), varredura, banco de DATs, preparo de ROMs
 baselineprofile/  Gerador do Baseline Profile (inicialização e Início) para rodar numa TV/emulador
 tools/        Scripts: ícone/banner, ROM de teste + mini frontend libretro, gerador do banco de DATs,
-              listagem das opções de cada núcleo (tools/cores)
+              opções de cada núcleo e teste de romsets em núcleos reais (tools/cores)
 ```
 
 Para **adicionar um console**: crie um `GameSystem` em

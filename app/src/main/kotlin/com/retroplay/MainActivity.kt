@@ -105,6 +105,12 @@ class MainActivity : ComponentActivity() {
             }
         }
         lifecycleScope.launch {
+            // App 1.2: "Neo Geo" virou "Arcade" (configurações e pastas de saves).
+            runCatching {
+                com.retroplay.data.migration.SystemRenameMigration(
+                    settings, listOf(java.io.File(filesDir, "states"), java.io.File(filesDir, "saves")), "neogeo", "arcade",
+                ).run()
+            }.onFailure { ErrorLog.record(filesDir, "Migração Neo Geo → Arcade falhou", it) }
             val snap = settings.current()
             settingsReady = true
             ready = true

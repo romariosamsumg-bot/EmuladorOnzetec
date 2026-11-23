@@ -239,7 +239,7 @@ class SettingsScreenTest {
         press(Key.DirectionRight)
         node("scope_global").assertIsFocused()
         press(Key.DirectionRight, 4)
-        node("scope_neogeo").assertIsFocused()
+        node("scope_arcade").assertIsFocused()
         press(Key.DirectionCenter)
         // Desce até as opções do console.
         repeat(20) {
@@ -253,7 +253,7 @@ class SettingsScreenTest {
         press(Key.DirectionDown, 2)
         node("choice_aes").assertIsFocused()
         press(Key.DirectionCenter)
-        waitSetting { runBlocking { settings.current() }.get(com.retroplay.domain.settings.ConsoleSettings.NEOGEO_MODE, ScopeRef.system(SystemRegistry.Ids.NEO_GEO)) == "aes" }
+        waitSetting { runBlocking { settings.current() }.get(com.retroplay.domain.settings.ConsoleSettings.NEOGEO_MODE, ScopeRef.system(SystemRegistry.Ids.ARCADE)) == "aes" }
         press(Key.DirectionDown)
         node("set_console.neogeo_freeplay").assertIsFocused()
         press(Key.DirectionCenter)
@@ -261,7 +261,7 @@ class SettingsScreenTest {
         press(Key.DirectionDown)
         node("choice_true").assertIsFocused()
         press(Key.DirectionCenter)
-        waitSetting { runBlocking { settings.current() }.value(com.retroplay.domain.settings.ConsoleSettings.NEOGEO_FREEPLAY, SystemRegistry.Ids.NEO_GEO) }
+        waitSetting { runBlocking { settings.current() }.value(com.retroplay.domain.settings.ConsoleSettings.NEOGEO_FREEPLAY, SystemRegistry.Ids.ARCADE) }
         compose.waitUntil(5_000) {
             compose.onAllNodes(hasTestTag("set_console.neogeo_mode") and hasText("AES (console)", substring = true)).fetchSemanticsNodes().isNotEmpty()
         }

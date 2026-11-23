@@ -40,6 +40,7 @@ fun SystemCard(
     system: GameSystem,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    biosBadge: com.retroplay.feature.consoles.BiosBadge = com.retroplay.feature.consoles.BiosBadge.NONE,
 ) {
     val accent = Color(system.accentColor)
     Card(
@@ -75,12 +76,15 @@ fun SystemCard(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                if (system.requiresBios) {
-                    Text(
-                        stringResource(R.string.console_needs_bios),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
+                val (label, color) = when (biosBadge) {
+                    com.retroplay.feature.consoles.BiosBadge.NONE -> null to Color.Unspecified
+                    com.retroplay.feature.consoles.BiosBadge.OK -> stringResource(R.string.console_bios_ok) to Color(0xFF5BD68A)
+                    com.retroplay.feature.consoles.BiosBadge.INCOMPLETE -> stringResource(R.string.console_bios_incomplete) to MaterialTheme.colorScheme.error
+                    com.retroplay.feature.consoles.BiosBadge.MISSING_REQUIRED -> stringResource(R.string.console_needs_bios) to MaterialTheme.colorScheme.primary
+                    com.retroplay.feature.consoles.BiosBadge.MISSING_OPTIONAL -> stringResource(R.string.console_bios_missing_neo) to MaterialTheme.colorScheme.onSurfaceVariant
+                }
+                if (label != null) {
+                    Text(label, style = MaterialTheme.typography.bodyMedium, color = color, maxLines = 1, modifier = Modifier.testTag("bios_badge_${system.id.value}"))
                 }
             }
         }

@@ -21,6 +21,10 @@ data class DatGame(
     val romset: String? = null,
     val parent: String? = null,
     val isBios: Boolean = false,
+    /** Arcade: núcleo a que o romset pertence (o DAT de onde veio: "mame2000", "fbneo"). */
+    val core: String? = null,
+    /** Arcade: BIOS exigida pelo jogo (ex.: "neogeo"), ou null. */
+    val bios: String? = null,
 )
 
 data class DatRom(val name: String, val size: Long, val crc: Long, val merge: Boolean, val md5: ByteArray? = null)
@@ -32,6 +36,9 @@ interface DatLookup {
 
     /** Romset de arcade pelo nome do .zip (ex.: "kof98"). */
     fun romset(system: SystemId, setName: String): Pair<DatGame, List<DatRom>>?
+
+    /** Todas as versões do romset (uma por núcleo/DAT), na ordem de preferência. */
+    fun romsets(system: SystemId, setName: String): List<Pair<DatGame, List<DatRom>>> = listOfNotNull(romset(system, setName))
 
     /** Último recurso: casa pelo título "limpo" do nome do arquivo. */
     fun byTitle(system: SystemId, normalizedTitle: String): DatGame?
@@ -47,7 +54,9 @@ data class Identification(
     /** Sistemas possíveis quando [status] == NEEDS_SYSTEM. */
     val candidates: List<SystemId> = emptyList(),
     val crc: Long? = null,
+    /** Arcade: núcleo cujo DAT o romset satisfaz melhor (o app abre o jogo nele). */
+    val coreHint: String? = null,
 )
 
 /** Resultado especial: o arquivo é uma BIOS (ex.: neogeo.zip), não um jogo. */
-data class BiosFound(val system: SystemId, val setName: String, val complete: Boolean)
+data class BiosFound(val system: SystemId, val setName: String, val complete: Boolean, val core: String? = null)

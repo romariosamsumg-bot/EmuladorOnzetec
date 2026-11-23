@@ -60,4 +60,30 @@ class MigrationTest {
             }
         }
     }
+
+    @Test
+    fun `v3 para v4 transforma neo geo em arcade sem perder historico`() {
+        helper.createDatabase("migracao4.db", 3).use { db ->
+            db.execSQL("INSERT INTO folder(id, uri, source, display_name, is_default, added_at) VALUES (1, '/Jogos', 'FILE', 'Jogos', 1, 0)")
+            val cols = "uri, source, folder_id, file_name, size_bytes, last_modified, system, title, thumbs, status, romset_status, missing_files, corrupted, added_at, game_key, custom_title"
+            db.execSQL("INSERT INTO game($cols) VALUES ('/Jogos/Neo Geo/mslug.zip', 'FILE', 1, 'mslug.zip', 10, 5, 'neogeo', 'Metal Slug', 0, 'IDENTIFIED', 'COMPLETE', 0, 0, 0, 'neogeo/mslug', 'Meu Metal Slug')")
+            db.execSQL("INSERT INTO game($cols) VALUES ('/Jogos/mario.sfc', 'FILE', 1, 'mario.sfc', 10, 5, 'snes', 'Mario', 0, 'IDENTIFIED', 'NOT_APPLICABLE', 0, 0, 0, 'snes/mario', null)")
+            db.execSQL("INSERT INTO play_stats VALUES (1, 'neogeo/mslug', 1, 7, 900, 60000)")
+            db.execSQL("INSERT INTO bios(system, set_name, uri, folder_id, complete) VALUES ('neogeo', 'neogeo', '/Jogos/BIOS/neogeo.zip', 1, 1)")
+        }
+        helper.runMigrationsAndValidate("migracao4.db", 4, true, MIGRATION_3_4).use { db ->
+            db.query("SELECT system, game_key, custom_title, last_modified, core_hint FROM game ORDER BY id").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals("arcade", c.getString(0)); assertEquals("arcade/mslug", c.getString(1)); assertEquals("Meu Metal Slug", c.getString(2))
+                assertEquals(-1L, c.getLong(3)) // reavaliado na próxima varredura
+                assertTrue(c.isNull(4))
+                assertTrue(c.moveToNext())
+                assertEquals("snes", c.getString(0)); assertEquals(5L, c.getLong(3))
+            }
+            db.query("SELECT game_key, favorite, play_count FROM play_stats").use { c ->
+                assertTrue(c.moveToFirst()); assertEquals("arcade/mslug", c.getString(0)); assertEquals(1, c.getInt(1)); assertEquals(7, c.getInt(2))
+            }
+            db.query("SELECT system FROM bios").use { c -> assertTrue(c.moveToFirst()); assertEquals("arcade", c.getString(0)) }
+        }
+    }
 }

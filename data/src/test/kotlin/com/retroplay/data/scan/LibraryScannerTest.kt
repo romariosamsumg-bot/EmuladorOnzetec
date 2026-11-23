@@ -63,7 +63,7 @@ class LibraryScannerTest {
 
     /** Cria um romset falso com os CRCs exatos do DAT do FBNeo. */
     private fun romset(setName: String, folder: String, drop: Int = 0): File {
-        val (_, roms) = dat.romset(SystemRegistry.Ids.NEO_GEO, setName)!!
+        val (_, roms) = dat.romset(SystemRegistry.Ids.ARCADE, setName)!!
         val files = roms.filter { !it.merge }.drop(drop).associate { it.name to CrcForge.fake(it.name, it.crc) }
         return zip("$folder/$setName.zip", files)
     }
@@ -107,9 +107,11 @@ class LibraryScannerTest {
         assertEquals(sonicCrc.title, sonic.title)
 
         val kof = all.single { it.fileName == "kof98.zip" }
-        assertEquals("neogeo", kof.system)
+        assertEquals("arcade", kof.system)
         assertEquals("The King of Fighters '98 - The Slugfest", kof.title)
         assertEquals(RomsetStatus.COMPLETE.name, kof.romsetStatus)
+        // Romset montado com o DAT do MAME 0.37: o app abre no MAME 2000.
+        assertEquals("mame2000", kof.coreHint)
 
         val hack = all.single { it.fileName == "meu hack.smc" }
         assertEquals("snes", hack.system)
@@ -215,5 +217,25 @@ class LibraryScannerTest {
         val s = scanner.scan()
         assertEquals(0, s.removed)
         assertEquals(1, games().size)
+    }
+
+    /** Romset falso exatamente como no DAT de um núcleo (MAME 0.37 ou FBNeo). */
+    private fun romsetFor(core: String, setName: String, folder: String): File {
+        val (_, roms) = dat.romsets(SystemRegistry.Ids.ARCADE, setName).first { it.first.core == core }
+        return zip("$folder/$setName.zip", roms.filter { !it.merge }.associate { it.name to CrcForge.fake(it.name, it.crc) })
+    }
+
+    @Test
+    fun `cada romset abre no nucleo cujo dat ele satisfaz`() = runTest {
+        romsetFor("mame2000", "sf2", "Arcade")
+        romsetFor("fbneo", "mslug3", "Arcade") // só existe no FBNeo (posterior ao MAME 0.37)
+        romsetFor("fbneo", "dino", "Arcade")   // o conteúdo também satisfaz o MAME 0.37
+        scanner.scan()
+        val all = db.games().observeAll(1).first().map { it.game }
+        assertEquals("mame2000", all.single { it.fileName == "sf2.zip" }.coreHint)
+        assertEquals("fbneo", all.single { it.fileName == "mslug3.zip" }.coreHint)
+        // Satisfaz os dois DATs: fica com o núcleo padrão (MAME 2000).
+        assertEquals("mame2000", all.single { it.fileName == "dino.zip" }.coreHint)
+        assertTrue(all.all { it.romsetStatus == RomsetStatus.COMPLETE.name })
     }
 }

@@ -22,7 +22,8 @@ data class VirtualPadSpec(
 )
 
 object VirtualPadSpecs {
-    fun forSystem(system: GameSystem, sixButtons: Boolean = true): VirtualPadSpec {
+    /** @param neoGeo arcade: jogo de Neo Geo usa só A, B, C, D (os demais, até 6 botões). */
+    fun forSystem(system: GameSystem, sixButtons: Boolean = true, neoGeo: Boolean = false): VirtualPadSpec {
         val b = system.controllerLayout.buttons
         fun of(rp: RetroPadButton) = b.first { it.retroPad == rp }
         return when (system.id) {
@@ -45,8 +46,13 @@ object VirtualPadSpecs {
                 face = listOf(listOf(of(RetroPadButton.B), of(RetroPadButton.A))),
                 center = listOf(of(RetroPadButton.START)),
             )
-            SystemRegistry.Ids.NEO_GEO -> VirtualPadSpec(
-                face = listOf(listOf(of(RetroPadButton.Y), of(RetroPadButton.X)), listOf(of(RetroPadButton.B), of(RetroPadButton.A))),
+            SystemRegistry.Ids.ARCADE -> VirtualPadSpec(
+                face = if (neoGeo) {
+                    listOf(listOf(of(RetroPadButton.Y), of(RetroPadButton.X)), listOf(of(RetroPadButton.B), of(RetroPadButton.A)))
+                } else {
+                    // Botões 1-2-3 em cima e 4-5-6 embaixo (socos e chutes nos jogos de luta).
+                    listOf(listOf(of(RetroPadButton.B), of(RetroPadButton.A), of(RetroPadButton.Y)), listOf(of(RetroPadButton.X), of(RetroPadButton.L), of(RetroPadButton.R)))
+                },
                 center = listOf(of(RetroPadButton.SELECT), of(RetroPadButton.START)),
             )
             // Console novo: tudo que não é direcional vira botão de ação.

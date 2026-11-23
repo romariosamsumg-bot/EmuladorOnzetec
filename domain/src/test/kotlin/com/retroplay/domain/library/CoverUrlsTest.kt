@@ -16,8 +16,8 @@ class CoverUrlsTest {
     @Test
     fun `caracteres proibidos viram sublinhado`() {
         assertEquals(
-            "https://raw.githubusercontent.com/libretro-thumbnails/SNK_-_Neo_Geo/master/Named_Titles/The%20King%20of%20Fighters%20%2798%20_%20X.png",
-            CoverUrls.url(SystemRegistry.NEO_GEO, "The King of Fighters '98 / X", CoverType.TITLE),
+            "https://raw.githubusercontent.com/libretro-thumbnails/MAME/master/Named_Titles/The%20King%20of%20Fighters%20%2798%20_%20X.png",
+            CoverUrls.url(SystemRegistry.ARCADE, "The King of Fighters '98 / X", CoverType.TITLE),
         )
         assertEquals("a_b_c_d", CoverUrls.sanitize("a&b:c?d"))
     }

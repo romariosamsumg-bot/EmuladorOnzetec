@@ -7,15 +7,15 @@
     <string name="neogeo_bios_incomplete">The Neo Geo BIOS is incomplete. If the game does not start, replace neogeo.zip.</string>
 
     <string name="console_options">Console options</string>
-    <string name="console_options_global_note">Choose a console above to see its options: MVS/AES mode and free play (Neo Geo), 3 or 6 buttons and region (Mega Drive), FM sound (Master System) and slowdown (Super Nintendo).</string>
+    <string name="console_options_global_note">Choose a console above to see its options: 3 or 6 buttons and region (Mega Drive), FM sound (Master System), slowdown (Super Nintendo) and, in Arcade, FBNeo MVS/AES mode and free play.</string>
     <string name="set_neogeo_mode">Neo Geo mode</string>
-    <string name="set_neogeo_mode_desc">MVS is the arcade; AES is the home console.</string>
+    <string name="set_neogeo_mode_desc">In the FBNeo core: MVS is the arcade; AES, the home console.</string>
     <string name="neogeo_mode_mvs">MVS (arcade)</string>
     <string name="neogeo_mode_aes">AES (console)</string>
     <string name="neogeo_mode_unibios">UniBIOS</string>
     <string name="neogeo_mode_unibios_missing">UniBIOS (not in your neogeo.zip)</string>
     <string name="set_neogeo_freeplay">Free play</string>
-    <string name="set_neogeo_freeplay_desc">Play without inserting coins (MVS mode).</string>
+    <string name="set_neogeo_freeplay_desc">Play without coins (FBNeo core, MVS mode).</string>
     <string name="set_md_pad">Mega Drive controller</string>
     <string name="set_md_pad_desc">6 buttons for fighting games; 3 buttons for old games that reject 6.</string>
     <string name="md_pad_3">3 buttons</string>
@@ -34,4 +34,7 @@
     <string name="neogeo_coin_note">Coin is on Select; there is also "Insert coin" in the game menu.</string>
     <string name="core_shared">Shared by %1$s</string>
     <string name="core_in_use_by">Chosen for: %1$s</string>
+    <string name="console_bios_ok">BIOS ok</string>
+    <string name="console_bios_incomplete">BIOS incomplete</string>
+    <string name="console_bios_missing_neo">Neo Geo: BIOS missing</string>
 </resources>

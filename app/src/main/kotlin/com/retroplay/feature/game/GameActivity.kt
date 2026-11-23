@@ -136,6 +136,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     private var sessionStart = 0L
     private var exiting = false
     private var isArcade = false
+    private var arcadeNeoGeo = false
 
     // ---- controle na tela (celular)
     private var padSpec by mutableStateOf<com.retroplay.feature.game.touch.VirtualPadSpec?>(null)
@@ -228,13 +229,14 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             if (isArcade) {
                 // Neo Geo: BIOS e romset "pai" precisam estar onde o FBNeo procura.
                 val check = withContext(Dispatchers.IO) {
-                    ArcadeLaunch.check(system, fileName, dat, library.observeGames(system.id).first(), library.observeBios().first())
+                    ArcadeLaunch.check(system, fileName, dat, library.observeGames(system.id).first(), library.observeBios().first(), coreId)
                 }
                 when (check) {
                     ArcadeCheck.BiosMissing -> { showErrorAndExit(getString(R.string.neogeo_bios_missing)); return }
                     is ArcadeCheck.ParentMissing -> { showErrorAndExit(getString(R.string.neogeo_parent_missing, check.parent + ".zip")); return }
                     is ArcadeCheck.Ready -> withContext(Dispatchers.IO) {
                         warnings += check.warnings
+                        arcadeNeoGeo = check.neoGeo
                         check.bios?.let { romPreparer.stageBios(it.uri, systemDir) }
                         val rom = romPreparer.prepareArcade(romUri, fileName, check.companions)
                         // Os companheiros ficam sempre ao lado do romset (mesma pasta ou pasta montada no cache).
@@ -363,7 +365,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         padOpacity = snap.value(AppSettings.TOUCH_PAD_OPACITY).toInt() / 100f
         padHaptics = snap.value(AppSettings.TOUCH_HAPTICS)
         val sixButtons = snap.value(com.retroplay.domain.settings.ConsoleSettings.MD_PAD, sys, gameKey) == "6"
-        padSpec = com.retroplay.feature.game.touch.VirtualPadSpecs.forSystem(system, sixButtons)
+        padSpec = com.retroplay.feature.game.touch.VirtualPadSpecs.forSystem(system, sixButtons, arcadeNeoGeo)
         padVisible = when (padMode) {
             "always" -> true
             "never" -> false

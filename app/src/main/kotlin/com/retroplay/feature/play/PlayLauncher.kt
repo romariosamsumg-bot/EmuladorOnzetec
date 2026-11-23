@@ -35,6 +35,8 @@ data class LaunchRequest(
     val title: String,
     val gameId: Long?,
     val loadSlot: Int? = null,
+    /** Arcade: núcleo cujo DAT o romset satisfaz. */
+    val coreHint: String? = null,
 )
 
 /**
@@ -57,19 +59,20 @@ class PlayLauncher(
 
     fun play(game: Game, loadSlot: Int? = null) {
         val system = game.systemId?.let { catalog.byId(it) } ?: return
-        play(LaunchRequest(system, system.defaultCore, game.uri, game.fileName, game.title, game.id, loadSlot))
+        play(LaunchRequest(system, system.defaultCore, game.uri, game.fileName, game.title, game.id, loadSlot, game.coreHint))
     }
 
-    /** Núcleo escolhido nas Configurações (jogo > console), ou o padrão do console. */
-    suspend fun coreFor(system: GameSystem, fileName: String): CoreDescriptor {
-        val chosen = settings?.current()?.value(AppSettings.CORE, system.id, GameKey.of(system.id, fileName))
-        return system.cores.firstOrNull { it.id == chosen } ?: system.defaultCore
-    }
+    /**
+     * Núcleo do jogo: escolha do usuário para o jogo → núcleo que o romset satisfaz (arcade) →
+     * escolha para o console → padrão do console.
+     */
+    suspend fun coreFor(system: GameSystem, fileName: String, coreHint: String? = null): CoreDescriptor =
+        chooseCore(system, settings?.current(), GameKey.of(system.id, fileName), coreHint)
 
     fun play(original: LaunchRequest) {
         pendingJob?.cancel()
         pendingJob = scope.launch {
-            val request = original.copy(core = coreFor(original.system, original.fileName))
+            val request = original.copy(core = coreFor(original.system, original.fileName, original.coreHint))
             if (cores.installed(request.core) != null) {
                 _launches.send(request)
                 return@launch
@@ -94,6 +97,15 @@ class PlayLauncher(
     ) {
         fun create(scope: CoroutineScope) = PlayLauncher(scope, cores, catalog, settings)
     }
+}
+
+/** Regra de escolha do núcleo (pura, testável). */
+fun chooseCore(system: GameSystem, snap: com.retroplay.domain.settings.SettingsSnapshot?, gameKey: String, coreHint: String?): CoreDescriptor {
+    fun byId(id: String?) = id?.takeIf { it.isNotEmpty() }?.let { c -> system.cores.firstOrNull { it.id == c } }
+    return byId(snap?.get(AppSettings.CORE, com.retroplay.domain.settings.ScopeRef.game(gameKey)))
+        ?: byId(coreHint)
+        ?: byId(snap?.value(AppSettings.CORE, system.id))
+        ?: system.defaultCore
 }
 
 /** Abre a GameActivity a cada pedido emitido pelo [PlayLauncher]. */

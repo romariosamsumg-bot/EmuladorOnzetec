@@ -204,6 +204,7 @@ class RoomLibraryRepository(
             lastPlayedAt = null,
             addedAt = e.addedAt,
             playTimeMs = 0,
+            coreHint = e.coreHint,
         )
     }
 }

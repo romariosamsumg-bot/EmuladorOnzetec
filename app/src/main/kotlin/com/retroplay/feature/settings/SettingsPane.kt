@@ -121,7 +121,7 @@ class SettingsPane(
         noteRes(R.string.hotkeys_list, "hotkeys")
         when (system) {
             com.retroplay.domain.system.SystemRegistry.Ids.MASTER_SYSTEM -> noteRes(R.string.sms_pause_note, "sms_pause")
-            com.retroplay.domain.system.SystemRegistry.Ids.NEO_GEO -> noteRes(R.string.neogeo_coin_note, "neo_coin")
+            com.retroplay.domain.system.SystemRegistry.Ids.ARCADE -> noteRes(R.string.neogeo_coin_note, "neo_coin")
             else -> Unit
         }
         if (inGlobal) noteRes(R.string.multiplayer_note, "multiplayer")
@@ -905,6 +905,7 @@ Núcleos libretro (baixados sob demanda):
 • Genesis Plus GX — licença não comercial
 • PicoDrive — licença não comercial / MAME
 • FinalBurn Neo — licença não comercial
+• MAME 2000 (MAME 0.37b5) e MAME 2003-Plus — licença MAME (não comercial)
 
 AndroidX, Jetpack Compose, Compose for TV, Room, DataStore, WorkManager, Navigation, Hilt/Dagger — Apache 2.0
 Kotlin, kotlinx.coroutines, kotlinx.serialization — Apache 2.0
@@ -919,5 +920,5 @@ Bouncy Castle — MIT
 MBassador — MIT
 SLF4J — MIT
 
-Bancos de dados: No-Intro e libretro-database (metadados), FBNeo DAT.
+Bancos de dados: No-Intro e libretro-database (metadados), DAT do MAME 0.37b5, DAT do FBNeo.
 Capas: projeto libretro-thumbnails."""

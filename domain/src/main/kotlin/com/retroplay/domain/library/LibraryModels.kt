@@ -72,6 +72,8 @@ data class Game(
     val lastPlayedAt: Long?,
     val addedAt: Long,
     val playTimeMs: Long,
+    /** Arcade: núcleo indicado pelo romset (o DAT que ele satisfaz), ex.: "mame2000". */
+    val coreHint: String? = null,
 ) {
     val availableCovers: List<CoverType> get() = CoverType.entries.filter { thumbs and it.bit != 0 }
 

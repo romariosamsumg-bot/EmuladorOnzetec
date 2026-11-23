@@ -37,7 +37,7 @@ class VirtualPadOverlayTest {
     @Test
     fun dois_dedos_apertam_dois_botoes_e_soltar_libera() {
         val states = mutableListOf<PadState>()
-        val spec = VirtualPadSpecs.forSystem(SystemRegistry.NEO_GEO)
+        val spec = VirtualPadSpecs.forSystem(SystemRegistry.ARCADE)
         compose.setContent {
             RetroPlayTheme {
                 androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color(0xFF1B3A5C), Color(0xFF3B6E3A))))) {

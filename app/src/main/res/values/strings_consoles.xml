@@ -9,15 +9,15 @@
 
     <!-- Opções do console (Configurações → Emulação) -->
     <string name="console_options">Opções do console</string>
-    <string name="console_options_global_note">Escolha um console acima para ver as opções dele: modo MVS/AES e free play (Neo Geo), 3 ou 6 botões e região (Mega Drive), som FM (Master System) e lentidão (Super Nintendo).</string>
+    <string name="console_options_global_note">Escolha um console acima para ver as opções dele: 3 ou 6 botões e região (Mega Drive), som FM (Master System), lentidão (Super Nintendo) e, no Arcade, modo MVS/AES e free play do FBNeo.</string>
     <string name="set_neogeo_mode">Modo do Neo Geo</string>
-    <string name="set_neogeo_mode_desc">MVS é o fliperama; AES é o console de casa.</string>
+    <string name="set_neogeo_mode_desc">No núcleo FBNeo: MVS é o fliperama; AES, o console de casa.</string>
     <string name="neogeo_mode_mvs">MVS (fliperama)</string>
     <string name="neogeo_mode_aes">AES (console)</string>
     <string name="neogeo_mode_unibios">UniBIOS</string>
     <string name="neogeo_mode_unibios_missing">UniBIOS (não está na sua neogeo.zip)</string>
     <string name="set_neogeo_freeplay">Free play</string>
-    <string name="set_neogeo_freeplay_desc">Joga sem inserir fichas (no modo MVS).</string>
+    <string name="set_neogeo_freeplay_desc">Joga sem fichas (núcleo FBNeo, modo MVS).</string>
     <string name="set_md_pad">Controle do Mega Drive</string>
     <string name="set_md_pad_desc">6 botões para jogos de luta; 3 botões para jogos antigos que não aceitam 6.</string>
     <string name="md_pad_3">3 botões</string>
@@ -36,4 +36,7 @@
     <string name="neogeo_coin_note">Ficha (Coin) fica no Select; também há "Inserir ficha" no menu do jogo.</string>
     <string name="core_shared">Compartilhado por %1$s</string>
     <string name="core_in_use_by">Escolhido para: %1$s</string>
+    <string name="console_bios_ok">BIOS ok</string>
+    <string name="console_bios_incomplete">BIOS incompleta</string>
+    <string name="console_bios_missing_neo">Neo Geo: falta a BIOS</string>
 </resources>

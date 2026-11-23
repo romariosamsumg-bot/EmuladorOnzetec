@@ -12,7 +12,7 @@ class RomIdentifierTest {
     private val snes = SystemRegistry.Ids.SNES
     private val md = SystemRegistry.Ids.MEGA_DRIVE
     private val sms = SystemRegistry.Ids.MASTER_SYSTEM
-    private val neo = SystemRegistry.Ids.NEO_GEO
+    private val neo = SystemRegistry.Ids.ARCADE
 
     private fun dg(id: Long, system: SystemId, name: String, romset: String? = null, parent: String? = null, bios: Boolean = false) =
         DatGame(id, system, name, name.substringBefore(" ("), null, null, null, null, null, 1, null, romset, parent, bios)

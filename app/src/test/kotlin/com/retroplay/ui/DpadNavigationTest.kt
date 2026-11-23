@@ -136,7 +136,7 @@ class DpadNavigationTest {
         press(Key.DirectionRight)
         press(Key.DirectionRight)
         press(Key.DirectionRight)
-        node("system_neogeo").assertIsFocused()
+        node("system_arcade").assertIsFocused()
         press(Key.DirectionUp)
         node("home_transfer").assertIsFocused()
     }

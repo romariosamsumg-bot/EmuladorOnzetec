@@ -72,11 +72,15 @@ class VirtualPadModelTest {
 
     @Test
     fun neo_geo_tem_ficha_em_destaque_e_mega_drive_3_ou_6_botoes() {
-        val neo = model(SystemRegistry.NEO_GEO)
+        val neo = VirtualPadModel(VirtualPadSpecs.forSystem(SystemRegistry.ARCADE, neoGeo = true), w, h)
         val coin = neo.elements.first { it.button == RetroPadButton.SELECT }
         assertEquals("Ficha", coin.label)
         assertTrue(coin.highlighted)
         assertEquals(listOf("A", "B", "C", "D"), neo.elements.filter { it.shape == PadShape.CIRCLE && it.button != null }.map { it.label }.sorted())
+        // Outros jogos de arcade: 6 botões (1-2-3 em cima, 4-5-6 embaixo).
+        val luta = model(SystemRegistry.ARCADE)
+        assertEquals(listOf("A", "B", "C", "D", "E", "F"), luta.elements.filter { it.shape == PadShape.CIRCLE && it.button != null }.map { it.label }.sorted())
+        assertTrue(luta.elements.first { it.label == "A" }.y < luta.elements.first { it.label == "D" }.y)
         assertEquals(6, model(SystemRegistry.MEGA_DRIVE, six = true).elements.count { it.shape == PadShape.CIRCLE && it.button != null })
         assertEquals(3, model(SystemRegistry.MEGA_DRIVE, six = false).elements.count { it.shape == PadShape.CIRCLE && it.button != null })
         assertEquals("Pause", model(SystemRegistry.MASTER_SYSTEM).elements.first { it.button == RetroPadButton.START }.label)

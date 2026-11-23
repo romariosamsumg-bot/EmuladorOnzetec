@@ -207,13 +207,13 @@ class ConsoleScreenTest {
     @Test
     fun filtro_favoritos_e_romset_incompleto() {
         library.games.value = listOf(
-            FakeLibraryRepository.game(3, SystemRegistry.Ids.NEO_GEO, "Metal Slug", "mslug.zip", romsetStatus = RomsetStatus.INCOMPLETE, missing = 3),
-            FakeLibraryRepository.game(4, SystemRegistry.Ids.NEO_GEO, "Garou", "garou.zip", favorite = true),
+            FakeLibraryRepository.game(3, SystemRegistry.Ids.ARCADE, "Metal Slug", "mslug.zip", romsetStatus = RomsetStatus.INCOMPLETE, missing = 3),
+            FakeLibraryRepository.game(4, SystemRegistry.Ids.ARCADE, "Garou", "garou.zip", favorite = true),
         )
         openConsoles()
         // Neo Geo fica na 2ª linha da grade de consoles, abaixo do SNES.
         press(Key.DirectionDown)
-        node("system_neogeo").assertIsFocused()
+        node("system_arcade").assertIsFocused()
         press(Key.DirectionCenter)
         waitFor("game_4")
         // A–Z: Garou primeiro.

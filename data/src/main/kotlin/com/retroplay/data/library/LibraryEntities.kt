@@ -69,6 +69,8 @@ data class GameEntity(
     @ColumnInfo(name = "added_at") val addedAt: Long,
     /** Chave estável (console + nome do arquivo) que liga o jogo ao histórico de cada perfil. */
     @ColumnInfo(name = "game_key") val gameKey: String? = null,
+    /** Arcade: núcleo cujo DAT o romset satisfaz (o jogo abre nele, salvo escolha do usuário). */
+    @ColumnInfo(name = "core_hint") val coreHint: String? = null,
 )
 
 /** Nome e capa escolhidos pelo usuário, pela chave estável do jogo. */
@@ -304,7 +306,7 @@ interface BiosDao {
 
 @Database(
     entities = [FolderEntity::class, GameEntity::class, BiosEntity::class, ProfileEntity::class, PlayStatsEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class LibraryDatabase : RoomDatabase() {
@@ -367,5 +369,22 @@ val MIGRATION_2_3 = object : androidx.room.migration.Migration(2, 3) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_game_folder_id` ON `game` (`folder_id`)")
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_game_status` ON `game` (`status`)")
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_game_game_key` ON `game` (`game_key`)")
+    }
+}
+
+/**
+ * v3 → v4 (app 1.2): o sistema "Neo Geo" virou "Arcade" (MAME 2000 + FBNeo). Renomeia o
+ * sistema e as chaves estáveis (favoritos/histórico continuam ligados) e marca os romsets para
+ * serem conferidos de novo contra os dois DATs na próxima varredura.
+ */
+val MIGRATION_3_4 = object : androidx.room.migration.Migration(3, 4) {
+    override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE game ADD COLUMN core_hint TEXT")
+        db.execSQL("UPDATE game SET system = 'arcade', last_modified = -1 WHERE system = 'neogeo'")
+        db.execSQL("UPDATE game SET user_system = 'arcade' WHERE user_system = 'neogeo'")
+        db.execSQL("UPDATE game SET candidates = REPLACE(candidates, 'neogeo', 'arcade') WHERE candidates LIKE '%neogeo%'")
+        db.execSQL("UPDATE game SET game_key = 'arcade/' || SUBSTR(game_key, 8) WHERE game_key LIKE 'neogeo/%'")
+        db.execSQL("UPDATE OR REPLACE play_stats SET game_key = 'arcade/' || SUBSTR(game_key, 8) WHERE game_key LIKE 'neogeo/%'")
+        db.execSQL("UPDATE bios SET system = 'arcade' WHERE system = 'neogeo'")
     }
 }

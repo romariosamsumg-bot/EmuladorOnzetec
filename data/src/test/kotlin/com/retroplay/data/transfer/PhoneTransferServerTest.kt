@@ -96,7 +96,7 @@ class PhoneTransferServerTest {
         assertEquals(401, info("0000").first)
         val (code, body) = info("4321")
         assertEquals(200, code)
-        assertTrue(body.contains("\"megadrive\"") && body.contains("\"Neo Geo\""))
+        assertTrue(body.contains("\"megadrive\"") && body.contains("\"Arcade\""))
     }
 
     @Test
@@ -126,7 +126,7 @@ class PhoneTransferServerTest {
         start()
         assertEquals(200, upload("jogo.zip", zip("Jogo.md" to CrcForge.fake("md", 0x1234L))).first)
         assertTrue(File(root, "Mega Drive/jogo.zip").isFile)
-        val (_, roms) = dat.romset(SystemRegistry.Ids.NEO_GEO, "neogeo")!!
+        val (_, roms) = dat.romset(SystemRegistry.Ids.ARCADE, "neogeo")!!
         val bios = zip(*roms.map { it.name to CrcForge.fake(it.name, it.crc) }.toTypedArray())
         val (code, body) = upload("neogeo.zip", bios)
         assertEquals(200, code)
@@ -137,8 +137,8 @@ class PhoneTransferServerTest {
     @Test
     fun `console escolhido no celular vale para arquivos nao reconhecidos`() {
         start()
-        assertEquals(200, upload("quebrado.zip", ByteArray(300) { 7 }, system = "neogeo").first)
-        assertTrue(File(root, "Neo Geo/quebrado.zip").isFile)
+        assertEquals(200, upload("quebrado.zip", ByteArray(300) { 7 }, system = "arcade").first)
+        assertTrue(File(root, "Arcade/quebrado.zip").isFile)
         // Sem escolha: fica na raiz da pasta Jogos (a TV pergunta o console depois).
         assertEquals(200, upload("outro.zip", ByteArray(300) { 9 }).first)
         assertTrue(File(root, "outro.zip").isFile)

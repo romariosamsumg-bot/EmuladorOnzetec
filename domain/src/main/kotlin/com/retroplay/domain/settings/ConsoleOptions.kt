@@ -29,7 +29,7 @@ object ConsoleSettings {
     val SNES_REDUCE_SLOWDOWN = Bool("console.snes_slowdown", false, scoped = true)
 
     fun forSystem(system: SystemId): List<SettingDef<*>> = when (system) {
-        SystemRegistry.Ids.NEO_GEO -> listOf(NEOGEO_MODE, NEOGEO_FREEPLAY)
+        SystemRegistry.Ids.ARCADE -> listOf(NEOGEO_MODE, NEOGEO_FREEPLAY)
         SystemRegistry.Ids.MEGA_DRIVE -> listOf(MD_PAD, MD_REGION)
         SystemRegistry.Ids.MASTER_SYSTEM -> listOf(SMS_FM)
         SystemRegistry.Ids.SNES -> listOf(SNES_REDUCE_SLOWDOWN)
@@ -57,13 +57,20 @@ object ConsoleCoreOptions {
         val vars = LinkedHashMap<String, String>()
         var pad: PadType? = null
         when (system) {
-            SystemRegistry.Ids.NEO_GEO -> if (coreId == "fbneo") {
-                vars["fbneo-neogeo-mode"] = when (v(ConsoleSettings.NEOGEO_MODE)) {
-                    "aes" -> "AES_EUR"
-                    "unibios" -> "UNIBIOS"
-                    else -> "MVS_EUR"
+            SystemRegistry.Ids.ARCADE -> when (coreId) {
+                "fbneo" -> {
+                    vars["fbneo-neogeo-mode"] = when (v(ConsoleSettings.NEOGEO_MODE)) {
+                        "aes" -> "AES_EUR"
+                        "unibios" -> "UNIBIOS"
+                        else -> "MVS_EUR"
+                    }
+                    if (romset != null) vars[freePlayKey(romset)] = if (v(ConsoleSettings.NEOGEO_FREEPLAY)) "On" else "Off"
                 }
-                if (romset != null) vars[freePlayKey(romset)] = if (v(ConsoleSettings.NEOGEO_FREEPLAY)) "On" else "Off"
+                "mame2000" -> {
+                    // Pula o aviso de abertura; no modo econômico, pula quadros quando a TV não dá conta.
+                    vars["mame2000-skip_disclaimer"] = "enabled"
+                    vars["mame2000-frameskip"] = if (snap.value(AppSettings.LOW_POWER)) "auto" else "disabled"
+                }
             }
             SystemRegistry.Ids.MEGA_DRIVE -> {
                 val six = v(ConsoleSettings.MD_PAD) == "6"

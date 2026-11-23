@@ -147,6 +147,7 @@ class LibraryScanner(
             corrupted = false,
             addedAt = old?.addedAt ?: clock(),
             gameKey = id.system?.let { GameKey.of(it, file.name) },
+            coreHint = id.coreHint,
         )
     }
 

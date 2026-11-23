@@ -11,7 +11,7 @@ class SystemRegistryTest {
     @Test
     fun `registro contem exatamente os 4 consoles suportados`() {
         assertEquals(
-            listOf("snes", "megadrive", "mastersystem", "neogeo"),
+            listOf("snes", "megadrive", "mastersystem", "arcade"),
             SystemRegistry.all.map { it.id.value },
         )
     }
@@ -27,7 +27,8 @@ class SystemRegistryTest {
         assertEquals("snes9x2010", SystemRegistry.SNES.defaultCore.id)
         assertEquals("genesis_plus_gx", SystemRegistry.MEGA_DRIVE.defaultCore.id)
         assertEquals("genesis_plus_gx", SystemRegistry.MASTER_SYSTEM.defaultCore.id)
-        assertEquals("fbneo", SystemRegistry.NEO_GEO.defaultCore.id)
+        assertEquals("mame2000", SystemRegistry.ARCADE.defaultCore.id)
+        assertEquals(listOf("mame2000", "fbneo", "mame2003_plus"), SystemRegistry.ARCADE.cores.map { it.id })
         assertEquals("snes9x_libretro_android.so", SystemRegistry.SNES.cores[1].libraryFileName)
     }
 
@@ -39,15 +40,16 @@ class SystemRegistryTest {
 
     @Test
     fun `apenas o neo geo exige bios`() {
-        assertEquals(listOf(SystemRegistry.NEO_GEO), SystemRegistry.all.filter { it.requiresBios })
-        assertEquals("neogeo.zip", SystemRegistry.NEO_GEO.bios.single().fileName)
-        assertEquals(IdentificationStrategy.ARCADE_ROMSET, SystemRegistry.NEO_GEO.identification)
+        // A BIOS do Neo Geo é exigida jogo a jogo (só os de Neo Geo), não pelo Arcade inteiro.
+        assertEquals(emptyList<GameSystem>(), SystemRegistry.all.filter { it.requiresBios })
+        assertEquals("neogeo.zip", SystemRegistry.ARCADE.bios.single().fileName)
+        assertEquals(IdentificationStrategy.ARCADE_ROMSET, SystemRegistry.ARCADE.identification)
     }
 
     @Test
     fun `neo geo tem botoes A B C D Ficha e Start com Ficha em destaque`() {
-        val layout = SystemRegistry.NEO_GEO.controllerLayout
-        assertEquals(listOf("A", "B", "C", "D", "Ficha", "Start"), layout.buttons.map { it.label })
+        val layout = SystemRegistry.ARCADE.controllerLayout
+        assertEquals(listOf("A", "B", "C", "D", "E", "F", "Ficha", "Start"), layout.buttons.map { it.label })
         val coin = layout.buttonFor(RetroPadButton.SELECT)
         assertNotNull(coin)
         assertTrue(coin!!.highlighted)

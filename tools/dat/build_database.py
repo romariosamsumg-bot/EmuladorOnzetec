@@ -4,7 +4,8 @@
 Fontes (baixadas para um cache local na primeira execução):
   * libretro-database (CC BY-SA 4.0): DATs No-Intro + metadados (gênero, ano, desenvolvedora,
     editora, jogadores) de SNES, Mega Drive e Master System;
-  * FinalBurn Neo: DAT "Neogeo only" (nomes dos romsets e CRCs dos arquivos internos);
+  * Arcade: DAT do MAME 0.37b5 (núcleo MAME 2000) e DAT "Arcade only" do FinalBurn Neo (nomes
+    dos romsets, CRCs dos arquivos internos, pai e BIOS exigida);
   * libretro-thumbnails: lista de capas existentes (só os nomes; nenhuma imagem é baixada).
 
 Uso: python3 tools/dat/build_database.py [saida.sqlite] [cache_dir]
@@ -19,16 +20,19 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import date
 
-DB_VERSION = 1
+DB_VERSION = 2
 LIBRETRO_DB = "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat"
-FBNEO_DAT = "https://raw.githubusercontent.com/libretro/FBNeo/master/dats/FinalBurn%20Neo%20(ClrMame%20Pro%20XML%2C%20Neogeo%20only).dat"
+FBNEO_DAT = "https://raw.githubusercontent.com/libretro/FBNeo/master/dats/FinalBurn%20Neo%20(ClrMame%20Pro%20XML%2C%20Arcade%20only).dat"
+MAME2000_DAT = "https://raw.githubusercontent.com/libretro/mame2000-libretro/master/metadata/MAME%200.37b5%20XML.dat"
+# Ordem de preferência dos DATs de arcade (o primeiro é o núcleo padrão do app).
+ARCADE_DATS = [("mame2000", MAME2000_DAT, "mame2000.xml"), ("fbneo", FBNEO_DAT, "fbneo-arcade.dat")]
 
 # id do sistema no app -> nome no libretro-database / libretro-thumbnails
 SYSTEMS = {
     "snes": "Nintendo - Super Nintendo Entertainment System",
     "megadrive": "Sega - Mega Drive - Genesis",
     "mastersystem": "Sega - Master System - Mark III",
-    "neogeo": "SNK - Neo Geo",
+    "arcade": "MAME",
 }
 META_FIELDS = ["genre", "releaseyear", "developer", "publisher", "maxusers"]
 THUMB_TYPES = {"Named_Boxarts": 1, "Named_Titles": 2, "Named_Snaps": 4}
@@ -195,7 +199,9 @@ def build(out_path, cache):
             thumb_name TEXT,             -- nome da capa quando difere de 'name'
             romset TEXT,                 -- arcade: nome do .zip (ex.: kof98)
             parent TEXT,                 -- arcade: romset pai (clone of)
-            is_bios INTEGER NOT NULL DEFAULT 0
+            is_bios INTEGER NOT NULL DEFAULT 0,
+            core TEXT,                   -- arcade: núcleo do DAT (mame2000, fbneo)
+            bios TEXT                    -- arcade: BIOS exigida (ex.: neogeo)
         );
         CREATE TABLE rom(
             game_id INTEGER NOT NULL,
@@ -211,8 +217,8 @@ def build(out_path, cache):
         thumbs = list_thumbnails(sname, cache)
         by_base = index_by_base(thumbs)
         q = urllib.parse.quote(sname)
-        if sid == "neogeo":
-            counts[sid] = build_neogeo(db, cache, thumbs, by_base)
+        if sid == "arcade":
+            counts.update(build_arcade(db, cache, thumbs, by_base))
             continue
         meta = {}
         for field in META_FIELDS:
@@ -254,9 +260,10 @@ def build(out_path, cache):
     db.execute("CREATE INDEX rom_crc ON rom(crc)")
     db.execute("CREATE INDEX rom_game ON rom(game_id)")
     db.execute("CREATE INDEX game_romset ON game(system, romset)")
+    db.execute("CREATE INDEX game_romset_core ON game(romset, core)")
     db.execute("CREATE INDEX game_title ON game(system, title)")
     for k, v in {"version": str(DB_VERSION), "generated": date.today().isoformat(),
-                 "sources": "libretro-database (CC BY-SA 4.0); FinalBurn Neo DAT; libretro-thumbnails",
+                 "sources": "libretro-database (CC BY-SA 4.0); MAME 0.37b5 DAT (MAME 2000); FinalBurn Neo DAT; libretro-thumbnails",
                  **{f"count_{k}": str(v) for k, v in counts.items()}}.items():
         db.execute("INSERT INTO meta VALUES(?,?)", (k, v))
     db.commit()
@@ -265,32 +272,47 @@ def build(out_path, cache):
     print("jogos por sistema:", counts, "| tamanho:", os.path.getsize(out_path), "bytes")
 
 
-def build_neogeo(db, cache, thumbs, by_base):
-    path = fetch(FBNEO_DAT, os.path.join(cache, "fbneo-neogeo.dat"))
-    root = ET.parse(path).getroot()
-    version = root.findtext("header/version") or "?"
-    db.execute("INSERT OR REPLACE INTO meta VALUES('fbneo_dat_version', ?)", (version,))
-    n = 0
-    for g in root.iter("game"):
-        setname = g.get("name")
-        desc = g.findtext("description") or setname
-        is_bios = 1 if g.get("isbios") == "yes" else 0
-        mask, alt = thumb_info(desc, thumbs, by_base)
-        title = display_title(desc.split(" / ")[0])
-        cur = db.execute(
-            "INSERT INTO game(system,name,title,year,developer,genre,thumbs,thumb_name,romset,parent,is_bios)"
-            " VALUES('neogeo',?,?,?,?,?,?,?,?,?,?)",
-            (desc, title, g.findtext("year"), g.findtext("manufacturer"), None, mask, alt,
-             setname, g.get("cloneof"), is_bios),
-        )
-        for r in g.iter("rom"):
-            if r.get("status") == "nodump" or not r.get("crc"):
-                continue
-            db.execute("INSERT INTO rom(game_id,name,size,crc,merge) VALUES(?,?,?,?,?)",
-                       (cur.lastrowid, r.get("name"), int(r.get("size") or 0), int(r.get("crc"), 16),
-                        1 if r.get("merge") else 0))
-        n += 1
-    return n
+def build_arcade(db, cache, thumbs, by_base):
+    """Um registro por (núcleo, romset): o mesmo nome pode ter conteúdos diferentes em cada DAT."""
+    counts = {}
+    for core, url, file in ARCADE_DATS:
+        path = fetch(url, os.path.join(cache, file))
+        root = ET.parse(path).getroot()
+        version = root.findtext("header/version") or "?"
+        db.execute("INSERT OR REPLACE INTO meta VALUES(?, ?)", (f"{core}_dat_version", version))
+        games = {g.get("name"): g for g in root.iter("game")}
+
+        def bios_of(name, seen=()):
+            """BIOS exigida: o 'romof' que não é o pai (seguindo os clones até o pai)."""
+            g = games.get(name)
+            if g is None or name in seen:
+                return None
+            romof, cloneof = g.get("romof"), g.get("cloneof")
+            if romof and romof != cloneof and games.get(romof) is not None and games[romof].get("isbios") == "yes":
+                return romof
+            return bios_of(cloneof, seen + (name,)) if cloneof else None
+
+        n = 0
+        for setname, g in games.items():
+            desc = g.findtext("description") or setname
+            is_bios = 1 if g.get("isbios") == "yes" else 0
+            mask, alt = thumb_info(desc, thumbs, by_base)
+            title = display_title(desc.split(" / ")[0])
+            cur = db.execute(
+                "INSERT INTO game(system,name,title,year,developer,genre,thumbs,thumb_name,romset,parent,is_bios,core,bios)"
+                " VALUES('arcade',?,?,?,?,?,?,?,?,?,?,?,?)",
+                (desc, title, g.findtext("year"), g.findtext("manufacturer"), None, mask, alt,
+                 setname, g.get("cloneof"), is_bios, core, bios_of(setname)),
+            )
+            for r in g.iter("rom"):
+                if r.get("status") == "nodump" or not r.get("crc"):
+                    continue
+                db.execute("INSERT INTO rom(game_id,name,size,crc,merge) VALUES(?,?,?,?,?)",
+                           (cur.lastrowid, r.get("name"), int(r.get("size") or 0), int(r.get("crc"), 16),
+                            1 if r.get("merge") else 0))
+            n += 1
+        counts[f"arcade_{core}"] = n
+    return counts
 
 
 if __name__ == "__main__":

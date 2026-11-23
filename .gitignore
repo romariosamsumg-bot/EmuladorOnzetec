@@ -12,3 +12,7 @@ captures/
 *.jks
 *.keystore
 keystore.properties
+
+# Downloads do gerador do banco de DATs e caches do Python
+tools/dat/.cache/
+__pycache__/

@@ -15,16 +15,23 @@ import org.junit.Test
 
 class ArcadeLaunchTest {
 
-    private val neo = SystemRegistry.NEO_GEO
+    private val neo = SystemRegistry.ARCADE
     private val dat = object : DatLookup {
         override fun byCrc(crc: Long, systems: Collection<SystemId>) = emptyList<Pair<DatGame, DatRom>>()
         override fun byTitle(system: SystemId, normalizedTitle: String): DatGame? = null
         override fun romset(system: SystemId, setName: String): Pair<DatGame, List<DatRom>>? = when (setName) {
-            "kof98" -> dg("kof98", null) to emptyList()
-            "kof98a" -> dg("kof98a", "kof98") to emptyList()
+            "kof98" -> dg("kof98", null, "neogeo") to emptyList()
+            "kof98a" -> dg("kof98a", "kof98", "neogeo") to emptyList()
+            "sf2" -> dg("sf2", null, null) to emptyList()
             else -> null
         }
-        private fun dg(name: String, parent: String?) = DatGame(1, neo.id, name, name, null, null, null, null, 2, 0, null, romset = name, parent = parent)
+        override fun romsets(system: SystemId, setName: String) = when (setName) {
+            // O mesmo romset com pai diferente no FBNeo (para conferir que vale o núcleo em uso).
+            "kof98a" -> listOfNotNull(romset(system, setName), dg("kof98a", null, "neogeo", core = "fbneo") to emptyList())
+            else -> listOfNotNull(romset(system, setName))
+        }
+        private fun dg(name: String, parent: String?, bios: String?, core: String = "mame2000") =
+            DatGame(1, neo.id, name, name, null, null, null, null, 2, 0, null, romset = name, parent = parent, core = core, bios = bios)
     }
     private val bios = BiosStatus(neo.id, "neogeo", "/storage/emulated/0/Jogos/BIOS/neogeo.zip", complete = true)
     private val kof98 = game(1, neo.id, "KOF 98", "kof98.zip")
@@ -37,10 +44,15 @@ class ArcadeLaunchTest {
 
     @Test
     fun clone_leva_o_pai_de_qualquer_pasta_da_biblioteca() {
-        val r = ArcadeLaunch.check(neo, "kof98a.zip", dat, listOf(kof98, kof98a), listOf(bios)) as ArcadeCheck.Ready
-        assertEquals(listOf(RomCompanion(kof98.uri, "kof98.zip")), r.companions)
+        val r = ArcadeLaunch.check(neo, "kof98a.zip", dat, listOf(kof98, kof98a), listOf(bios), "mame2000") as ArcadeCheck.Ready
+        // Pai primeiro; a BIOS vai junto para a pasta do jogo (o MAME só procura lá).
+        assertEquals(listOf(RomCompanion(kof98.uri, "kof98.zip"), RomCompanion(bios.uri, "neogeo.zip")), r.companions)
         assertEquals(bios, r.bios)
         assertTrue(r.warnings.isEmpty())
+        assertTrue(r.neoGeo)
+        // No FBNeo esse clone não depende do pai.
+        val fb = ArcadeLaunch.check(neo, "kof98a.zip", dat, listOf(kof98a), listOf(bios), "fbneo") as ArcadeCheck.Ready
+        assertEquals(listOf(RomCompanion(bios.uri, "neogeo.zip")), fb.companions)
     }
 
     @Test
@@ -61,6 +73,14 @@ class ArcadeLaunchTest {
     fun consoles_domesticos_nao_passam_pela_verificacao() {
         val r = ArcadeLaunch.check(SystemRegistry.SNES, "mario.sfc", dat, emptyList(), emptyList()) as ArcadeCheck.Ready
         assertTrue(r.companions.isEmpty())
+    }
+
+    @Test
+    fun jogo_sem_bios_abre_sem_neogeo_zip() {
+        val r = ArcadeLaunch.check(neo, "sf2.zip", dat, emptyList(), emptyList(), "mame2000") as ArcadeCheck.Ready
+        assertTrue(r.companions.isEmpty())
+        assertEquals(null, r.bios)
+        assertTrue(!r.neoGeo)
     }
 
     @Test

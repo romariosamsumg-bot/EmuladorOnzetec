@@ -25,7 +25,8 @@ object SystemRegistry : SystemCatalog {
         val SNES = SystemId("snes")
         val MEGA_DRIVE = SystemId("megadrive")
         val MASTER_SYSTEM = SystemId("mastersystem")
-        val NEO_GEO = SystemId("neogeo")
+        /** Fliperama (MAME/FBNeo), inclusive Neo Geo. Antes da versão 1.2 era "neogeo". */
+        val ARCADE = SystemId("arcade")
     }
 
     private val genesisPlusGx = CoreDescriptor(
@@ -104,31 +105,39 @@ object SystemRegistry : SystemCatalog {
         folderAliases = setOf("mastersystem", "sms", "segamastersystem", "markiii", "mark3"),
     )
 
-    val NEO_GEO = GameSystem(
-        id = Ids.NEO_GEO,
-        displayName = "Neo Geo",
-        shortName = "NEO",
-        releaseYear = 1990,
+    val ARCADE = GameSystem(
+        id = Ids.ARCADE,
+        displayName = "Arcade",
+        shortName = "ARC",
+        releaseYear = 1978,
         extensions = setOf("zip", "7z"),
-        cores = listOf(CoreDescriptor("fbneo", "FinalBurn Neo", "Núcleo de arcade com suporte a MVS/AES.")),
+        cores = listOf(
+            // Romsets do MAME 0.37 (b5 a b11): leve, ideal para TV de 2 GB e celular.
+            CoreDescriptor("mame2000", "MAME 2000 (0.37)", "Para romsets do MAME 0.37. Leve, ideal para TVs."),
+            CoreDescriptor("fbneo", "FinalBurn Neo", "Para romsets do FBNeo. Ótimo em Neo Geo, CPS1, CPS2 e CPS3."),
+            CoreDescriptor("mame2003_plus", "MAME 2003-Plus", "Para romsets do MAME 0.78. Mais jogos, mais pesado."),
+        ),
+        // Só os jogos de Neo Geo exigem a BIOS (o app confere jogo a jogo).
         bios = listOf(
-            BiosRequirement("neogeo.zip", "BIOS do Neo Geo (MVS/AES/UniBIOS)", required = true),
+            BiosRequirement("neogeo.zip", "BIOS do Neo Geo (para os jogos de Neo Geo)", required = false),
         ),
         identification = IdentificationStrategy.ARCADE_ROMSET,
-        // Mapeamento clássico do FBNeo para Neo Geo.
+        // Botões 1–6 do fliperama, na ordem que MAME e FBNeo esperam (B, A, Y, X, L, R).
         controllerLayout = ControllerLayout(
             listOf(
                 ConsoleButton("A", B), ConsoleButton("B", A),
                 ConsoleButton("C", Y), ConsoleButton("D", X),
+                ConsoleButton("E", L), ConsoleButton("F", R),
                 ConsoleButton("Ficha", SELECT, highlighted = true),
                 ConsoleButton("Start", START),
             ),
         ),
         accentColor = 0xFFE2A93B,
         iconKey = "arcade_stick",
-        libretroDatabaseName = "SNK - Neo Geo",
-        folderAliases = setOf("neogeo", "neo", "mvs", "aes", "fbneo", "arcade"),
+        libretroDatabaseName = "MAME",
+        folderAliases = setOf("arcade", "arcades", "fliperama", "mame", "mame2000", "mame037", "mame037b11", "fbneo", "fba", "finalburn",
+            "neogeo", "neo", "mvs", "aes", "cps1", "cps2", "cps3"),
     )
 
-    override val all: List<GameSystem> = listOf(SNES, MEGA_DRIVE, MASTER_SYSTEM, NEO_GEO)
+    override val all: List<GameSystem> = listOf(SNES, MEGA_DRIVE, MASTER_SYSTEM, ARCADE)
 }

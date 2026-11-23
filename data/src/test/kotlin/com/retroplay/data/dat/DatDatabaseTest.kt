@@ -43,12 +43,20 @@ class DatDatabaseTest {
     }
 
     @Test
-    fun `romset kof98 do fbneo`() {
-        val (game, roms) = dat.romset(SystemRegistry.Ids.NEO_GEO, "kof98")!!
-        assertEquals("The King of Fighters '98 - The Slugfest", game.title)
-        assertEquals("1998", game.year)
-        assertTrue(roms.any { it.name == "242-p1.p1" && it.crc == 0x8893DF89L && !it.merge })
-        assertTrue(roms.any { it.name == "sp-s2.sp1" && it.merge })
-        assertTrue(dat.romset(SystemRegistry.Ids.NEO_GEO, "neogeo")!!.first.isBios)
+    fun `romset kof98 nos dats do mame 0_37 e do fbneo`() {
+        val versions = dat.romsets(SystemRegistry.Ids.ARCADE, "kof98")
+        assertEquals(listOf("mame2000", "fbneo"), versions.map { it.first.core })
+        versions.forEach { (game, _) ->
+            assertEquals("The King of Fighters '98 - The Slugfest", game.title)
+            assertEquals("1998", game.year)
+            assertEquals("neogeo", game.bios)
+        }
+        val (_, fb) = versions.last()
+        assertTrue(fb.any { it.name == "242-p1.p1" && it.crc == 0x8893DF89L && !it.merge })
+        assertTrue(fb.any { it.name == "sp-s2.sp1" && it.merge })
+        assertTrue(dat.romsets(SystemRegistry.Ids.ARCADE, "neogeo").all { it.first.isBios })
+        // Jogos sem BIOS e clones.
+        assertEquals(null, dat.romset(SystemRegistry.Ids.ARCADE, "sf2")!!.first.bios)
+        assertEquals("mslug2", dat.romsets(SystemRegistry.Ids.ARCADE, "mslug2").first().first.romset)
     }
 }
