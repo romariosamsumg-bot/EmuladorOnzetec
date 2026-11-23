@@ -115,6 +115,7 @@ class SettingsPane(
         bool(AppSettings.ANALOG_TO_DPAD, R.string.set_analog, R.string.set_analog_desc)
         choice(AppSettings.DEADZONE, R.string.set_deadzone, R.string.set_deadzone_desc)
         bool(AppSettings.NINTENDO_LAYOUT, R.string.set_nintendo, R.string.set_nintendo_desc)
+        choice(AppSettings.MENU_COMBO, R.string.set_menu_combo, R.string.set_menu_combo_desc)
         bool(AppSettings.HOTKEYS, R.string.set_hotkeys, R.string.set_hotkeys_desc)
         choice(AppSettings.HOTKEY_MODIFIER, R.string.set_modifier, R.string.set_modifier_desc)
         scopeNote()
@@ -885,6 +886,7 @@ fun optionLabels(def: SettingDef.Choice): Map<String, String> {
         AppSettings.ASPECT -> { v -> if (v == "pixel") R.string.aspect_pixel else R.string.aspect_original }
         AppSettings.AUDIO_LATENCY -> { v -> if (v == "low") R.string.latency_low else R.string.latency_normal }
         AppSettings.HOTKEY_MODIFIER -> { v -> if (v == "l3") R.string.mod_l3 else R.string.mod_select }
+        AppSettings.MENU_COMBO -> { v -> mapOf("start_select" to R.string.combo_start_select, "l3_r3" to R.string.combo_l3_r3, "l1_r1_start" to R.string.combo_l1_r1_start, "off" to R.string.combo_off)[v] }
         AppSettings.FF_MODE -> { v -> if (v == "hold") R.string.ff_hold else R.string.ff_toggle }
         AppSettings.CORE_CHANNEL -> { v -> if (v == "nightly") R.string.channel_nightly else R.string.channel_stable }
         AppSettings.THEME -> { v -> if (v == "oled") R.string.theme_oled else R.string.theme_dark }

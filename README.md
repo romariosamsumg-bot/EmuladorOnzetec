@@ -386,6 +386,10 @@ run-ahead.
    tocam tons diferentes; L, R, Start e Select só mudam a cor. Pelo controle remoto da TV, as
    setas movem o quadrado e o OK equivale ao B.
 4. **Voltar** abre o menu rápido (Sair é a primeira opção e leva para o Início).
+   No gamepad (Bluetooth ou USB), **Start + Select juntos, em qualquer ordem**, também abrem o
+   menu. O atalho é configurável em Configurações → Controles → "Abrir o menu pelo controle":
+   Start + Select (padrão), L3 + R3, L1 + R1 + Start ou desligado. Controles que mandam o
+   Select como "Voltar" também funcionam.
 
 Para testar outros jogos, coloque-os na pasta **Jogos** (veja acima) ou use **Escolher
 arquivo…** na página do console. `.zip`/`.7z` de consoles domésticos são extraídos para um

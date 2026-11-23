@@ -74,7 +74,7 @@
     <string name="set_modifier_desc">Hold it together with another button to use a hotkey.</string>
     <string name="mod_select">Select</string>
     <string name="mod_l3">L3 (press the stick)</string>
-    <string name="hotkeys_list">Modifier + Start: menu · + R1: fast forward · + L1: rewind · + R2: quick save · + L2: quick load</string>
+    <string name="hotkeys_list">Start + Select (any order): menu · Modifier + Start: menu · + R1: fast forward · + L1: rewind · + R2: quick save · + L2: quick load</string>
     <string name="multiplayer_note">Up to 4 players: each new controller becomes the next player, or choose its port above.</string>
 
     <string name="remap_title">Remap buttons · %1$s</string>
@@ -338,4 +338,10 @@
     <string name="set_touch_opacity_desc">Lower keeps the game more visible behind the buttons.</string>
     <string name="set_touch_haptics">Vibrate on touch</string>
     <string name="set_touch_haptics_desc">Short vibration on each on-screen button.</string>
+    <string name="set_menu_combo">Open the menu from the gamepad</string>
+    <string name="set_menu_combo_desc">Buttons pressed together (in any order) that open the game menu, like Back on the remote.</string>
+    <string name="combo_start_select">Start + Select</string>
+    <string name="combo_l3_r3">L3 + R3 (click both sticks)</string>
+    <string name="combo_l1_r1_start">L1 + R1 + Start</string>
+    <string name="combo_off">Off (Back only)</string>
 </resources>

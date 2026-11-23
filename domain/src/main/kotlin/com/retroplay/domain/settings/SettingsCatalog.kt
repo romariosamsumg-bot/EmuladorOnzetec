@@ -31,6 +31,8 @@ object AppSettings {
     val NINTENDO_LAYOUT = Bool("controls.nintendo_layout", false)
     val HOTKEYS = Bool("controls.hotkeys", true)
     val HOTKEY_MODIFIER = Choice("controls.hotkey_modifier", "select", listOf("select", "l3"))
+    /** Botões do controle que abrem o menu do jogo juntos (em qualquer ordem). */
+    val MENU_COMBO = Choice("controls.menu_combo", "start_select", listOf("start_select", "l3_r3", "l1_r1_start", "off"))
     /** Controle na tela (celular): automático (some com controle físico), sempre ou nunca. */
     val TOUCH_PAD = Choice("controls.touch_pad", "auto", listOf("auto", "always", "never"))
     val TOUCH_PAD_OPACITY = Choice("controls.touch_opacity", "60", listOf("30", "45", "60", "80", "100"))

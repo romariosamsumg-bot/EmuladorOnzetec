@@ -72,6 +72,7 @@ import com.retroplay.domain.system.SystemCatalog
 import com.retroplay.domain.system.SystemId
 import com.retroplay.feature.game.input.Hotkey
 import com.retroplay.feature.game.input.HotkeyDetector
+import com.retroplay.feature.game.input.MenuCombo
 import com.retroplay.feature.game.input.InputAction
 import com.retroplay.feature.game.input.InputRouter
 import com.retroplay.feature.game.input.PortAssigner
@@ -151,6 +152,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     private var router = InputRouter()
     private val ports = PortAssigner()
     private var hotkeys = HotkeyDetector()
+    private var menuCombo = MenuCombo.forSetting(MenuCombo.START_SELECT)
     private var hotkeysEnabled = true
     private var analogToDpad = true
     private var deadzone = 0.5f
@@ -365,6 +367,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         analogToDpad = snap.value(AppSettings.ANALOG_TO_DPAD)
         deadzone = snap.value(AppSettings.DEADZONE).toInt() / 100f
         hotkeysEnabled = snap.value(AppSettings.HOTKEYS)
+        menuCombo = MenuCombo.forSetting(snap.value(AppSettings.MENU_COMBO))
         hotkeys = HotkeyDetector(
             modifier = if (snap.value(AppSettings.HOTKEY_MODIFIER) == "l3") KeyEvent.KEYCODE_BUTTON_THUMBL else KeyEvent.KEYCODE_BUTTON_SELECT,
         )
@@ -523,6 +526,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         captureThumbnail { lastThumbnail = it }
         setPaused(true)
         hotkeys.reset()
+        menuCombo.reset()
         menu = GameMenuState(title = intent.getStringExtra(GameLauncher.EXTRA_TITLE) ?: fileName, system = system)
         refreshMenu()
         view.requestRender()
@@ -766,9 +770,29 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         val view = retroView ?: return super.dispatchKeyEvent(event)
-        val fromGamepad = event.isFromSource(InputDevice.SOURCE_GAMEPAD) || event.isFromSource(InputDevice.SOURCE_JOYSTICK)
+        // Botões de gamepad contam mesmo se o controle (alguns USB/Bluetooth) não se anuncia como gamepad.
+        val fromGamepad = event.isFromSource(InputDevice.SOURCE_GAMEPAD) || event.isFromSource(InputDevice.SOURCE_JOYSTICK) ||
+            KeyEvent.isGamepadButton(event.keyCode)
         if (fromGamepad) onPhysicalInput()
         if (menu != null) return super.dispatchKeyEvent(translateForMenu(event))
+        // Atalho do menu (padrão Start + Select, em qualquer ordem): vem antes dos outros atalhos.
+        if (fromGamepad && event.repeatCount == 0) {
+            when (menuCombo.onKey(event.keyCode, event.action == KeyEvent.ACTION_DOWN)) {
+                MenuCombo.Result.OPEN_MENU -> {
+                    // Solta no núcleo os botões que já tinham chegado ao jogo (ex.: Start apertado primeiro).
+                    val port = portFor(event.deviceId, true)
+                    listOf(KeyEvent.KEYCODE_BUTTON_START, KeyEvent.KEYCODE_BUTTON_SELECT, KeyEvent.KEYCODE_BUTTON_L1, KeyEvent.KEYCODE_BUTTON_R1,
+                        KeyEvent.KEYCODE_BUTTON_THUMBL, KeyEvent.KEYCODE_BUTTON_THUMBR).forEach { k ->
+                        (router.route(k, true) as? InputAction.Forward)?.let { view.sendKeyEvent(KeyEvent.ACTION_UP, it.retroKeyCode, port) }
+                    }
+                    hotkeys.reset()
+                    openMenu()
+                    return true
+                }
+                MenuCombo.Result.CONSUME -> return true
+                MenuCombo.Result.NONE -> Unit
+            }
+        }
         if (fromGamepad && hotkeysEnabled && event.repeatCount == 0) {
             val hotkey = hotkeys.onKey(event.keyCode, event.action == KeyEvent.ACTION_DOWN)
             if (hotkey != null) {

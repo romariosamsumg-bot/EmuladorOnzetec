@@ -74,7 +74,7 @@
     <string name="set_modifier_desc">Mantenlo junto con otro botón para usar un atajo.</string>
     <string name="mod_select">Select</string>
     <string name="mod_l3">L3 (pulsar el analógico)</string>
-    <string name="hotkeys_list">Modificador + Start: menú · + R1: acelerar · + L1: retroceder · + R2: guardado rápido · + L2: carga rápida</string>
+    <string name="hotkeys_list">Start + Select (en cualquier orden): menú · Modificador + Start: menú · + R1: acelerar · + L1: retroceder · + R2: guardado rápido · + L2: carga rápida</string>
     <string name="multiplayer_note">Hasta 4 jugadores: cada mando nuevo es el siguiente jugador, o elige su puerto arriba.</string>
 
     <string name="remap_title">Reasignar botones · %1$s</string>
@@ -338,4 +338,10 @@
     <string name="set_touch_opacity_desc">Más bajo deja el juego más visible detrás de los botones.</string>
     <string name="set_touch_haptics">Vibrar al tocar</string>
     <string name="set_touch_haptics_desc">Vibración corta en cada botón del mando en pantalla.</string>
+    <string name="set_menu_combo">Abrir el menú con el mando</string>
+    <string name="set_menu_combo_desc">Botones pulsados juntos (en cualquier orden) que abren el menú del juego, como Atrás en el mando a distancia.</string>
+    <string name="combo_start_select">Start + Select</string>
+    <string name="combo_l3_r3">L3 + R3 (pulsar los dos sticks)</string>
+    <string name="combo_l1_r1_start">L1 + R1 + Start</string>
+    <string name="combo_off">Desactivado (solo Atrás)</string>
 </resources>

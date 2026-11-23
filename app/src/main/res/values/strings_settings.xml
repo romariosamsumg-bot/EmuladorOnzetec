@@ -79,7 +79,7 @@
     <string name="set_modifier_desc">Segure-o junto com outro botão para usar um atalho.</string>
     <string name="mod_select">Select</string>
     <string name="mod_l3">L3 (apertar o analógico)</string>
-    <string name="hotkeys_list">Modificador + Start: menu · + R1: acelerar · + L1: voltar no tempo · + R2: salvar rápido · + L2: carregar rápido</string>
+    <string name="hotkeys_list">Start + Select (qualquer ordem): menu · Modificador + Start: menu · + R1: acelerar · + L1: voltar no tempo · + R2: salvar rápido · + L2: carregar rápido</string>
     <string name="multiplayer_note">Até 4 jogadores: cada controle novo vira o próximo jogador, ou escolha a porta acima.</string>
 
     <!-- Assistente de remapeamento -->
@@ -358,4 +358,10 @@
     <string name="set_touch_opacity_desc">Mais baixo deixa o jogo mais visível atrás dos botões.</string>
     <string name="set_touch_haptics">Vibrar ao tocar</string>
     <string name="set_touch_haptics_desc">Pequena vibração em cada botão do controle na tela.</string>
+    <string name="set_menu_combo">Abrir o menu pelo controle</string>
+    <string name="set_menu_combo_desc">Botões apertados juntos (em qualquer ordem) que abrem o menu do jogo, como o Voltar do controle remoto.</string>
+    <string name="combo_start_select">Start + Select</string>
+    <string name="combo_l3_r3">L3 + R3 (apertar os dois analógicos)</string>
+    <string name="combo_l1_r1_start">L1 + R1 + Start</string>
+    <string name="combo_off">Desligado (só o Voltar)</string>
 </resources>
