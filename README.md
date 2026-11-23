@@ -407,6 +407,12 @@ trocar, substitua os arquivos e rode `python3 tools/brand/build_brand.py` (reque
 gera o ícone adaptativo (com versão monocromática para os ícones temáticos), a splash, o banner
 640×360 da TV e o logo usado no app.
 
+**Capas dos consoles** (menu Consoles e Início): uma imagem só com os quatro quadros em grade 2×2
+(superior esquerdo Super Nintendo, superior direito Mega Drive, inferior esquerdo Master System,
+inferior direito Arcade, com uma faixa preta entre eles) fica em `tools/brand/consoles_grid.png`.
+Para trocar, substitua o arquivo e rode `python3 tools/brand/build_console_covers.py`: ele acha as
+divisórias sozinho e gera `cover_<console>.webp` (3:2, 660×440). Consoles sem capa usam o ícone.
+
 ## Como compilar (linha de comando)
 
 Requisitos: JDK 17+ e Android SDK (plataforma `android-37.2`).

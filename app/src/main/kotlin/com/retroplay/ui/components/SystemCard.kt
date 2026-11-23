@@ -1,6 +1,11 @@
 package com.retroplay.ui.components
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.ui.layout.ContentScale
+import com.retroplay.domain.system.SystemRegistry
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,6 +39,16 @@ import com.retroplay.domain.system.GameSystem
 
 private val CardShape = RoundedCornerShape(12.dp)
 
+/** Capa ilustrada do console (tools/brand/build_console_covers.py); null = ícone genérico. */
+@DrawableRes
+fun consoleCover(system: GameSystem): Int? = when (system.id) {
+    SystemRegistry.Ids.SNES -> R.drawable.cover_snes
+    SystemRegistry.Ids.MEGA_DRIVE -> R.drawable.cover_megadrive
+    SystemRegistry.Ids.MASTER_SYSTEM -> R.drawable.cover_mastersystem
+    SystemRegistry.Ids.ARCADE -> R.drawable.cover_arcade
+    else -> null
+}
+
 /** Card de um console, com zoom, borda luminosa e brilho ao receber foco. */
 @Composable
 fun SystemCard(
@@ -53,19 +68,29 @@ fun SystemCard(
         ),
         colors = CardDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
     ) {
+        val cover = consoleCover(system)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
+                .aspectRatio(3f / 2f)
                 .background(Brush.linearGradient(listOf(accent, accent.copy(alpha = 0.35f)))),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                painter = painterResource(SystemIcons.forKey(system.iconKey)),
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(64.dp),
-            )
+            if (cover != null) {
+                Image(
+                    painter = painterResource(cover),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.matchParentSize().testTag("system_cover_${system.id.value}"),
+                )
+            } else {
+                Icon(
+                    painter = painterResource(SystemIcons.forKey(system.iconKey)),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(64.dp),
+                )
+            }
         }
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(system.displayName, style = MaterialTheme.typography.titleMedium, maxLines = 1)
