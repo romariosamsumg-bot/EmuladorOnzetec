@@ -246,6 +246,14 @@ class GameActivity : ComponentActivity(), GameMenuActions {
                         rom
                     }
                 }
+            } else if (system.identification == IdentificationStrategy.DISC_SERIAL) {
+                withContext(Dispatchers.IO) {
+                    // BIOS encontradas na biblioteca (ex.: Jogos/BIOS/scph5501.bin) vão para a pasta do sistema.
+                    library.observeBios().first().filter { it.system == system.id }.forEach { b ->
+                        runCatching { romPreparer.stageSystemFile(b.uri, systemDir, b.setName + ".bin") }
+                    }
+                    romPreparer.prepareDisc(romUri, fileName)
+                }
             } else {
                 withContext(Dispatchers.IO) {
                     romPreparer.prepare(romUri, fileName, system.extensions, extractArchives = true)
@@ -302,6 +310,12 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             view.getGLRetroEvents().filterIsInstance<GLRetroView.GLRetroEvents.FrameRendered>().first()
             gameRunning = true
             sessionStart = SystemClock.elapsedRealtime()
+            // Jogos de vários discos (.m3u): o menu ganha "Trocar disco".
+            // (Consulta a thread de emulação: fora da thread da tela.)
+            if (system.identification == IdentificationStrategy.DISC_SERIAL) ioScope.launch {
+                val info = runCatching { view.getAvailableDisks() to view.getCurrentDisk() }.getOrNull()
+                withContext(Dispatchers.Main) { info?.let { (n, c) -> discs = n.coerceAtLeast(1); currentDisc = c.coerceAtLeast(0) } }
+            }
             padType?.let { applyPadType(view, it) }
             view.audioEnabled = audioOn
             // Guarda a lista de opções do núcleo para a tela de Configurações.
@@ -496,6 +510,10 @@ class GameActivity : ComponentActivity(), GameMenuActions {
 
     // ================================================================== menu
 
+    /** Discos do jogo (.m3u) e o disco em uso. */
+    private var discs = 1
+    private var currentDisc = 0
+
     private fun openMenu() {
         val view = retroView ?: return
         if (menu != null || !gameRunning) return
@@ -522,6 +540,8 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             aspect = aspect,
             showFps = showFps,
             slotCount = slotCount,
+            discs = discs,
+            currentDisc = currentDisc,
             coreOptions = if ((page ?: current.page) == MenuPage.CORE_OPTIONS) {
                 runCatching { currentCoreOptions() }.getOrDefault(emptyList())
             } else current.coreOptions,
@@ -578,6 +598,20 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         retroView?.reset()
         rewind.clear()
         resume()
+    }
+
+    override fun nextDisc() {
+        val view = retroView ?: return
+        if (discs < 2) return
+        val next = (currentDisc + 1) % discs
+        ioScope.launch {
+            val ok = runCatching { view.changeDisk(next) }.isSuccess
+            withContext(Dispatchers.Main) {
+                if (ok) currentDisc = next
+                flash(if (ok) getString(R.string.disc_changed, next + 1, discs) else getString(R.string.disc_change_failed))
+                refreshMenu()
+            }
+        }
     }
 
     override fun insertCoin() {

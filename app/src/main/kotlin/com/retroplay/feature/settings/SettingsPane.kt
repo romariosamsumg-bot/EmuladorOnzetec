@@ -192,6 +192,22 @@ class SettingsPane(
                 modifier = Modifier.focusRequester(first),
             ) { vm.scanNow() }
         }
+        item(key = "bios_psx") {
+            val bios by vm.bios.collectAsStateWithLifecycle()
+            val status = bios.filter { it.system == com.retroplay.domain.system.SystemRegistry.Ids.PLAYSTATION }.maxByOrNull { it.complete }
+            SettingRow(
+                title = stringResource(R.string.bios_psx_header),
+                description = status?.uri?.let(::readablePath) ?: stringResource(R.string.bios_psx_missing_desc),
+                value = stringResource(
+                    when {
+                        status == null -> R.string.bios_missing
+                        status.complete -> R.string.bios_ok
+                        else -> R.string.bios_incomplete
+                    },
+                ),
+                tag = "bios_psx",
+            ) { vm.scanNow() }
+        }
         item(key = "bios_import") {
             val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(vm::importBios) }
             SettingRow(stringResource(R.string.bios_import), stringResource(R.string.bios_import_desc), null, "bios_import") {

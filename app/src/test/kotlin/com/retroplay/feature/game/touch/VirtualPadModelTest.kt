@@ -92,4 +92,21 @@ class VirtualPadModelTest {
         assertEquals(1f, tvCanvasScale(720.dp)) // tablet/TV grande: não aumenta
         assertEquals(393f / 540f, tvCanvasScale(393.dp), 0.001f)
     }
+
+    @Test
+    fun playstation_tem_losango_e_quatro_gatilhos_sem_sobrepor() {
+        val m = model(SystemRegistry.PLAYSTATION)
+        val pills = m.elements.filter { it.button in setOf(RetroPadButton.L, RetroPadButton.R, RetroPadButton.L2, RetroPadButton.R2) }
+        assertEquals(listOf("L1", "R1", "L2", "R2"), pills.map { it.label })
+        val l1 = pills[0]; val l2 = pills[2]
+        assertEquals(l1.x, l2.x, 0.01f)
+        assertTrue("L2 encosta em L1", l2.y - l1.y >= l1.height)
+        // △ em cima e ✕ embaixo do losango.
+        val tri = m.elements.first { it.label == "△" }
+        val cross = m.elements.first { it.label == "✕" }
+        assertTrue(tri.y < cross.y)
+        assertEquals(tri.x, cross.x, 0.01f)
+        // O L2 não invade o direcional.
+        assertTrue(l2.y + l2.height / 2 < m.dpad.y - m.dpad.height / 2)
+    }
 }

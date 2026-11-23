@@ -1,0 +1,6 @@
+<!-- Controle genérico de duas alças (console de CD dos anos 90). Desenho próprio, sem marcas. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="@android:color/white" android:pathData="M6.5,6h11c2.2,0 3.6,1.6 4,3.8l1,6.2c0.3,1.8 -0.8,3 -2.3,3c-1.2,0 -1.9,-0.7 -2.4,-1.8l-0.8,-1.7h-10l-0.8,1.7c-0.5,1.1 -1.2,1.8 -2.4,1.8c-1.5,0 -2.6,-1.2 -2.3,-3l1,-6.2C2.9,7.6 4.3,6 6.5,6zM6.75,8.5v1.75H5v1.5h1.75v1.75h1.5v-1.75H10v-1.5H8.25V8.5zM17,8.4a0.9,0.9 0,1 0,0.01 0zM18.9,10.3a0.9,0.9 0,1 0,0.01 0zM15.1,10.3a0.9,0.9 0,1 0,0.01 0zM17,12.2a0.9,0.9 0,1 0,0.01 0z"/>
+</vector>

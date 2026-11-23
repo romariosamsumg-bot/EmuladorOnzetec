@@ -9,9 +9,9 @@ import org.junit.Test
 class SystemRegistryTest {
 
     @Test
-    fun `registro contem exatamente os 4 consoles suportados`() {
+    fun `registro contem exatamente os 5 consoles suportados`() {
         assertEquals(
-            listOf("snes", "megadrive", "mastersystem", "arcade"),
+            listOf("snes", "megadrive", "mastersystem", "arcade", "psx"),
             SystemRegistry.all.map { it.id.value },
         )
     }

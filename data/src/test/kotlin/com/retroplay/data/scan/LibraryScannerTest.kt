@@ -125,6 +125,46 @@ class LibraryScannerTest {
         assertTrue(File(root, "Neo Geo/kof98.zip").length() > 0)
     }
 
+    /** Imagem crua (2352 bytes/setor, Mode 2) com ISO 9660 mínima e SYSTEM.CNF apontando para [serial]. */
+    private fun discImage(serial: String): ByteArray {
+        fun le32(b: ByteArray, o: Int, v: Int) { for (i in 0..3) b[o + i] = (v shr (8 * i)).toByte() }
+        fun rec(name: String, lba: Int, size: Int): ByteArray {
+            val n = name.toByteArray(); val len = 33 + n.size + (if (n.size % 2 == 0) 1 else 0)
+            return ByteArray(len).also { r -> r[0] = len.toByte(); le32(r, 2, lba); le32(r, 10, size); r[32] = n.size.toByte(); n.copyInto(r, 33) }
+        }
+        val iso = ByteArray(24 * 2048)
+        iso[16 * 2048] = 1; "CD001".toByteArray().copyInto(iso, 16 * 2048 + 1)
+        rec("\u0000", 20, 2048).copyInto(iso, 16 * 2048 + 156)
+        val cnf = "BOOT = cdrom:\\$serial;1\r\n".toByteArray()
+        rec("SYSTEM.CNF;1", 21, cnf.size).copyInto(iso, 20 * 2048)
+        cnf.copyInto(iso, 21 * 2048)
+        val raw = ByteArray(24 * 2352)
+        for (sct in 0 until 24) { raw[sct * 2352 + 15] = 2; iso.copyInto(raw, sct * 2352 + 24, sct * 2048, sct * 2048 + 2048) }
+        return raw
+    }
+
+    @Test
+    fun `playstation identifica cue pelo codigo do disco e agrupa o m3u`() = runTest {
+        file("PlayStation/Crash.cue", "FILE \"Crash.bin\" BINARY\n  TRACK 01 MODE2/2352\n".toByteArray())
+        file("PlayStation/Crash.bin", discImage("SCUS_949.00"))
+        file("PlayStation/FF7.m3u", "FF7 (Disc 1).cue\nFF7 (Disc 2).cue\n".toByteArray())
+        file("PlayStation/FF7 (Disc 1).cue", "FILE \"FF7 (Disc 1).bin\" BINARY\n".toByteArray())
+        file("PlayStation/FF7 (Disc 1).bin", discImage("SCUS_941.63"))
+        file("PlayStation/FF7 (Disc 2).cue", "FILE \"FF7 (Disc 2).bin\" BINARY\n".toByteArray())
+        file("PlayStation/FF7 (Disc 2).bin", discImage("SCUS_941.64"))
+        // BIOS do PlayStation em Jogos/BIOS: não vira jogo de Mega Drive.
+        file("BIOS/scph5501.bin", ByteArray(512 * 1024))
+        scanner.scan()
+        val games = games().associateBy { it.fileName }
+        assertEquals(setOf("Crash.cue", "FF7.m3u"), games.keys)
+        assertEquals("Crash Bandicoot", games.getValue("Crash.cue").title)
+        assertEquals("psx", games.getValue("Crash.cue").system)
+        assertEquals("Final Fantasy VII", games.getValue("FF7.m3u").title)
+        assertEquals(IdentStatus.IDENTIFIED.name, games.getValue("FF7.m3u").status)
+        val bios = db.bios().byFolder(folderId)
+        assertEquals(listOf("psx" to "scph5501"), bios.map { it.system to it.setName })
+    }
+
     @Test
     fun `rom dentro de 7z e identificada`() = runTest {
         val f = File(root, "Super Nintendo/mario.7z").apply { parentFile!!.mkdirs() }

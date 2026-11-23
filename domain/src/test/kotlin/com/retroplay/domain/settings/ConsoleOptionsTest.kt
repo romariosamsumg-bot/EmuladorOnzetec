@@ -77,4 +77,14 @@ class ConsoleOptionsTest {
         assertEquals(listOf(ConsoleSettings.NEOGEO_MODE, ConsoleSettings.NEOGEO_FREEPLAY), ConsoleSettings.forSystem(Ids.ARCADE))
         assertEquals(listOf(ConsoleSettings.SMS_FM), ConsoleSettings.forSystem(Ids.MASTER_SYSTEM))
     }
+
+    @Test
+    fun playstation_recompilador_ligado_e_pula_quadros_no_modo_economico() {
+        val normal = ConsoleCoreOptions.setup(Ids.PLAYSTATION, "pcsx_rearmed", snap(), null).variables
+        assertEquals("enabled", normal["pcsx_rearmed_drc"])
+        assertEquals("disabled", normal["pcsx_rearmed_show_bios_bootlogo"])
+        assertEquals("disabled", normal["pcsx_rearmed_frameskip_type"])
+        val eco = ConsoleCoreOptions.setup(Ids.PLAYSTATION, "pcsx_rearmed", snap("g|video.low_power" to "true"), null).variables
+        assertEquals("auto", eco["pcsx_rearmed_frameskip_type"])
+    }
 }

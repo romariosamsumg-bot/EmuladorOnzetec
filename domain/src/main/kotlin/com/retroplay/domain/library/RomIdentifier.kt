@@ -28,6 +28,17 @@ interface ScanTarget {
      * Só é chamado para ROMs de console doméstico (poucos MB), nunca para romsets de arcade.
      */
     fun archiveEntryCrc(entryName: String): Long? = null
+
+    /** Lê um trecho do arquivo (discos: só alguns setores do começo, para achar o código do disco). */
+    fun read(offset: Long, length: Int): ByteArray = ByteArray(0)
+
+    /** Outro arquivo da mesma pasta (a trilha do .cue, um disco do .m3u), ou null se não existe. */
+    fun sibling(name: String): ScanTarget? = null
+
+    /** Nomes dos arquivos da mesma pasta (para achar o .m3u que agrupa os discos). */
+    val folderFiles: List<String> get() = emptyList()
+
+    fun readText(maxBytes: Int = 64 * 1024): String = read(0, minOf(size, maxBytes.toLong()).toInt()).toString(Charsets.UTF_8)
 }
 
 sealed interface IdentifyOutcome {
@@ -49,10 +60,14 @@ class RomIdentifier(private val catalog: SystemCatalog, private val dat: DatLook
 
     fun identify(target: ScanTarget, userSystem: SystemId? = null): IdentifyOutcome {
         val ext = SystemDetector.extensionOf(target.fileName) ?: return IdentifyOutcome.NotAGame
+        playStationBios(target, ext)?.let { return it }
+        if (ext == "bin") discTrack(target)?.let { return it }
         val byExt = catalog.all.filter { ext in it.extensions }
         if (byExt.isEmpty()) return IdentifyOutcome.NotAGame
         val hint = folderHint(target.parentNames)
         val forced = userSystem?.let { id -> catalog.byId(id) }
+        val disc = (if (forced != null) listOf(forced) else byExt).firstOrNull { it.identification == IdentificationStrategy.DISC_SERIAL }
+        if (disc != null && ext !in archiveExt) return identifyDisc(target, disc, ext)
 
         return if (ext in archiveExt) identifyArchive(target, byExt, hint, forced)
         else identifyPlain(target, ext, if (forced != null) listOf(forced) else byExt, hint)
@@ -130,6 +145,93 @@ class RomIdentifier(private val catalog: SystemCatalog, private val dat: DatLook
         }
         // Compactado sem nada reconhecível (ex.: documentos): não é jogo.
         return IdentifyOutcome.NotAGame
+    }
+
+    // ------------------------------------------------------------ discos (CD)
+
+    /**
+     * BIOS do PlayStation (512 KB, .bin): reconhecida pelo CRC das versões conhecidas ou pelo
+     * nome "scph…". Vem antes do Mega Drive, que também usa .bin.
+     */
+    private fun playStationBios(target: ScanTarget, ext: String): IdentifyOutcome? {
+        if (ext != "bin" || target.size != PS_BIOS_SIZE) return null
+        val system = catalog.all.firstOrNull { it.identification == IdentificationStrategy.DISC_SERIAL } ?: return null
+        val crc = target.crc32(0)
+        val known = PS_BIOS_CRCS[crc]
+        if (known == null && !target.fileName.lowercase().startsWith("scph")) return null
+        val name = known ?: target.fileName.substringBeforeLast('.').lowercase()
+        return IdentifyOutcome.Bios(BiosFound(system.id, name, complete = known != null))
+    }
+
+    /**
+     * .bin de CD: a trilha citada por um .cue da pasta não é um jogo à parte (o .cue é que aparece);
+     * um .bin grande sem .cue (centenas de MB; cartucho de Mega Drive tem poucos MB) é um disco.
+     */
+    private fun discTrack(target: ScanTarget): IdentifyOutcome? {
+        val system = catalog.all.firstOrNull { it.identification == IdentificationStrategy.DISC_SERIAL } ?: return null
+        val me = target.fileName.lowercase()
+        val inCue = target.folderFiles.filter { it.lowercase().endsWith(".cue") }.any { cue ->
+            target.sibling(cue)?.let { DiscImages.cueFiles(it.readText()).any { f -> f.lowercase() == me } } == true
+        }
+        if (inCue) return IdentifyOutcome.NotAGame
+        if (target.size < DISC_TRACK_MIN_BYTES) return null
+        if (partOfPlaylist(target)) return IdentifyOutcome.NotAGame
+        val serial = runCatching { DiscImages.isoSerial({ o, l -> target.read(o, l) }, target.size) }.getOrNull()
+        val game = lookupDisc(system, serial, target.fileName)
+        val disc = DiscImages.discNumber(target.fileName)
+        return discResult(system, game?.let { g -> if (disc != null) g.copy(title = "${g.title} (Disco $disc)") else g })
+    }
+
+    /**
+     * Disco: .m3u (vários discos, aparece um jogo só), .cue (+ trilhas .bin), .iso, .pbp, .chd.
+     * Identifica pelo código do disco; sem código (ex.: .chd, que é compactado), pelo nome.
+     */
+    private fun identifyDisc(target: ScanTarget, system: GameSystem, ext: String): IdentifyOutcome {
+        if (ext == "m3u") {
+            val first = DiscImages.m3uEntries(target.readText()).firstOrNull()?.let(target::sibling)
+            val serial = first?.let { serialOf(it, SystemDetector.extensionOf(it.fileName).orEmpty()) }
+            val game = lookupDisc(system, serial, first?.fileName ?: target.fileName)
+            return discResult(system, game?.copy(title = game.title.replace(DISC_SUFFIX, "")))
+        }
+        // Disco que faz parte de um .m3u da mesma pasta: só o .m3u aparece na biblioteca.
+        if (partOfPlaylist(target)) return IdentifyOutcome.NotAGame
+        val serial = serialOf(target, ext)
+        val game = lookupDisc(system, serial, target.fileName)
+        val disc = DiscImages.discNumber(target.fileName) ?: game?.let { DiscImages.discNumber(it.name) }
+        return discResult(system, game?.let { g -> if (disc != null && DISC_SUFFIX !in g.title) g.copy(title = "${g.title} (Disco $disc)") else g })
+    }
+
+    private fun discResult(system: GameSystem, game: DatGame?) = IdentifyOutcome.GameResult(
+        Identification(system.id, game, if (game != null) IdentStatus.IDENTIFIED else IdentStatus.UNIDENTIFIED),
+    )
+
+    private fun serialOf(target: ScanTarget, ext: String): String? = runCatching {
+        when (ext) {
+            "cue" -> DiscImages.cueFiles(target.readText()).firstOrNull()?.let(target::sibling)
+                ?.let { track -> DiscImages.isoSerial({ o, l -> track.read(o, l) }, track.size) }
+            "iso" -> DiscImages.isoSerial({ o, l -> target.read(o, l) }, target.size)
+            "pbp" -> DiscImages.pbpSerial { o, l -> target.read(o, l) }
+            else -> null // .chd é compactado: identificado pelo nome
+        }
+    }.getOrNull()
+
+    /** Pelo código do disco (escolhendo o disco certo pelo nome do arquivo); senão, pelo nome. */
+    private fun lookupDisc(system: GameSystem, serial: String?, fileName: String): DatGame? {
+        val bySerial = serial?.let { dat.bySerial(system.id, it) }.orEmpty()
+        if (bySerial.isNotEmpty()) {
+            val disc = DiscImages.discNumber(fileName)
+            return bySerial.firstOrNull { disc != null && DiscImages.discNumber(it.name) == disc }
+                ?: bySerial.firstOrNull { (DiscImages.discNumber(it.name) ?: 1) == 1 }
+                ?: bySerial.first()
+        }
+        return dat.byTitle(system.id, normalizeTitle(fileName))
+    }
+
+    private fun partOfPlaylist(target: ScanTarget): Boolean {
+        val me = target.fileName.lowercase()
+        return target.folderFiles.filter { it.lowercase().endsWith(".m3u") }.any { m3u ->
+            target.sibling(m3u)?.let { DiscImages.m3uEntries(it.readText()).any { e -> e.lowercase() == me } } == true
+        }
     }
 
     /** Ao menos um arquivo do .zip tem CRC ou nome de um arquivo do romset. */
@@ -231,6 +333,21 @@ class RomIdentifier(private val catalog: SystemCatalog, private val dat: DatLook
 
     companion object {
         const val BIOS_SET = "neogeo"
+
+        const val PS_BIOS_SIZE = 512L * 1024
+        /** Acima disso, um .bin é trilha de CD (o maior cartucho de Mega Drive tem 5 MB). */
+        const val DISC_TRACK_MIN_BYTES = 32L * 1024 * 1024
+        private val DISC_SUFFIX = Regex("\\s*\\(Disco? \\d+\\)")
+
+        /** CRC32 das BIOS de PlayStation conhecidas → nome que o PCSX ReARMed procura. */
+        val PS_BIOS_CRCS: Map<Long, String> = mapOf(
+            0x8D8CB7E4L to "scph5501", // EUA v3.0
+            0xFF3EEB8CL to "scph5500", // Japão v3.0
+            0xD786F0B9L to "scph5502", // Europa v3.0
+            0x37157331L to "scph1001", // EUA v2.2
+            0x502224B6L to "scph7001", // EUA v4.1
+            0x171BDCECL to "scph101", // PS one v4.5
+        )
 
         fun normalizeFolder(name: String) = name.lowercase().filter { it.isLetterOrDigit() }
 

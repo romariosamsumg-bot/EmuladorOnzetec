@@ -46,6 +46,7 @@ fun consoleCover(system: GameSystem): Int? = when (system.id) {
     SystemRegistry.Ids.MEGA_DRIVE -> R.drawable.cover_megadrive
     SystemRegistry.Ids.MASTER_SYSTEM -> R.drawable.cover_mastersystem
     SystemRegistry.Ids.ARCADE -> R.drawable.cover_arcade
+    SystemRegistry.Ids.PLAYSTATION -> R.drawable.cover_psx
     else -> null
 }
 
@@ -106,6 +107,7 @@ fun SystemCard(
                     com.retroplay.feature.consoles.BiosBadge.INCOMPLETE -> stringResource(R.string.console_bios_incomplete) to MaterialTheme.colorScheme.error
                     com.retroplay.feature.consoles.BiosBadge.MISSING_REQUIRED -> stringResource(R.string.console_needs_bios) to MaterialTheme.colorScheme.primary
                     com.retroplay.feature.consoles.BiosBadge.MISSING_OPTIONAL -> stringResource(R.string.console_bios_missing_neo) to MaterialTheme.colorScheme.onSurfaceVariant
+                    com.retroplay.feature.consoles.BiosBadge.MISSING_RECOMMENDED -> stringResource(R.string.console_bios_recommended) to MaterialTheme.colorScheme.onSurfaceVariant
                 }
                 if (label != null) {
                     Text(label, style = MaterialTheme.typography.bodyMedium, color = color, maxLines = 1, modifier = Modifier.testTag("bios_badge_${system.id.value}"))

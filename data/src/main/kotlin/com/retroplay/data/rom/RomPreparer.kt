@@ -151,6 +151,51 @@ class RomPreparer(
         return dest
     }
 
+    /**
+     * Disco (.cue/.m3u/.chd/.pbp/.iso): no armazenamento da TV, o núcleo abre direto (e acha as
+     * trilhas .bin e os outros discos ao lado). De pendrive/SAF/rede, copia para o cache o
+     * arquivo e tudo que ele cita (trilhas do .cue, discos do .m3u e as trilhas deles).
+     */
+    fun prepareDisc(uri: String, fileName: String): File {
+        if (!FileAccess.needsCopy(uri)) {
+            return File(uri).also { if (!it.isFile) throw RomPrepareException(RomPrepareException.Reason.NOT_FOUND, "Arquivo não encontrado: $fileName") }
+        }
+        val access = files ?: error("FileAccess necessário para content://")
+        val outDir = File(cacheDir, "rom-run").apply { mkdirs() }
+        outDir.listFiles()?.forEach { it.delete() }
+        val pending = ArrayDeque(listOf(uri to fileName))
+        val done = HashSet<String>()
+        while (pending.isNotEmpty()) {
+            val (u, name) = pending.removeFirst()
+            if (!done.add(name.lowercase())) continue
+            val dest = File(outDir, safeName(name))
+            copy(open(u), dest)
+            val refs = when (name.substringAfterLast('.').lowercase()) {
+                "m3u" -> com.retroplay.domain.library.DiscImages.m3uEntries(dest.readText())
+                "cue" -> com.retroplay.domain.library.DiscImages.cueFiles(dest.readText())
+                else -> emptyList()
+            }
+            refs.forEach { pending += access.sibling(uri, it) to it }
+        }
+        return File(outDir, safeName(fileName))
+    }
+
+    /**
+     * BIOS do PlayStation: o PCSX ReARMed procura "scph5501.bin" (e outras) na pasta do sistema.
+     * Link simbólico para arquivos comuns; cópia para pendrive/SAF.
+     */
+    fun stageSystemFile(uri: String, systemDir: File, fileName: String): File {
+        val dest = File(systemDir, safeName(fileName))
+        val src = File(uri)
+        val upToDate = !FileAccess.needsCopy(uri) && java.nio.file.Files.isSymbolicLink(dest.toPath()) &&
+            runCatching { java.nio.file.Files.readSymbolicLink(dest.toPath()).toFile().canonicalPath == src.canonicalPath }.getOrDefault(false)
+        if (!upToDate) {
+            java.nio.file.Files.deleteIfExists(dest.toPath())
+            stage(uri, dest)
+        }
+        return dest
+    }
+
     /** Tamanho descompactado dos romsets (o FBNeo carrega tudo na RAM). */
     fun uncompressedBytes(files: List<File>): Long = files.sumOf { f ->
         runCatching {

@@ -61,13 +61,21 @@ class DatDatabase(private val context: Context) : DatLookup {
         }
     }
 
+    /** Discos: jogos com este código (o mesmo código vale para todos os discos de um jogo). */
+    override fun bySerial(system: SystemId, serial: String): List<DatGame> =
+        db.rawQuery(
+            "SELECT $GAME_COLUMNS FROM serial s JOIN game g ON g.id = s.game_id WHERE s.serial = ? AND g.system = ? ORDER BY g.name",
+            arrayOf(serial, system.value),
+        ).use { c -> buildList { while (c.moveToNext()) add(readGame(c)) } }
+
     @Synchronized
     override fun byTitle(system: SystemId, normalizedTitle: String): DatGame? {
         val index = titleIndex.getOrPut(system.value) {
             // Índice em memória por console (poucos milhares de títulos), preferindo EUA/Mundo/Europa.
             val all = db.rawQuery("SELECT $GAME_COLUMNS FROM game g WHERE g.system = ? AND g.is_bios = 0", arrayOf(system.value))
                 .use { c -> buildList { while (c.moveToNext()) add(readGame(c)) } }
-            all.sortedBy { regionRank(it.region) }
+            // Região preferida; depois o nome mais curto (Disco 1 antes do 2, sem "(Rev 1)").
+            all.sortedWith(compareBy({ regionRank(it.region) }, { it.name.length }, { it.name }))
                 .groupBy { RomIdentifier.normalizeTitle(it.name + ".x") }
                 .mapValues { it.value.first() }
         }

@@ -113,6 +113,13 @@ object ConsoleCoreOptions {
                     }
                 }
             }
+            SystemRegistry.Ids.PLAYSTATION -> if (coreId == "pcsx_rearmed") {
+                // Recompilador dinâmico ligado (o que deixa o núcleo leve em ARM) e sem o logo da BIOS.
+                vars["pcsx_rearmed_drc"] = "enabled"
+                vars["pcsx_rearmed_show_bios_bootlogo"] = "disabled"
+                // Modo econômico: pula quadros quando a TV/celular não dá conta (o som não engasga).
+                vars["pcsx_rearmed_frameskip_type"] = if (snap.value(AppSettings.LOW_POWER)) "auto" else "disabled"
+            }
         }
         return CoreSetup(vars, pad)
     }

@@ -55,6 +55,14 @@ object VirtualPadSpecs {
                 },
                 center = listOf(of(RetroPadButton.SELECT), of(RetroPadButton.START)),
             )
+            SystemRegistry.Ids.PLAYSTATION -> VirtualPadSpec(
+                // △ em cima, ○ à direita, ✕ embaixo, □ à esquerda.
+                face = listOf(listOf(of(RetroPadButton.X), of(RetroPadButton.A), of(RetroPadButton.B), of(RetroPadButton.Y))),
+                diamond = true,
+                // L1/R1 em cima; L2/R2 logo abaixo.
+                shoulders = listOf(of(RetroPadButton.L), of(RetroPadButton.R), of(RetroPadButton.L2), of(RetroPadButton.R2)),
+                center = listOf(of(RetroPadButton.SELECT), of(RetroPadButton.START)),
+            )
             // Console novo: tudo que não é direcional vira botão de ação.
             else -> VirtualPadSpec(face = b.filter { it.retroPad !in DIRECTIONS }.chunked(3))
         }
@@ -116,9 +124,11 @@ class VirtualPadModel(spec: VirtualPadSpec, val width: Float, val height: Float)
             val x = width / 2 + (i - (spec.center.size - 1) / 2f) * (PILL_W + 24f)
             list += PadElement(b.label, PadShape.PILL, x, height - EDGE / 2 - PILL_H / 2, PILL_W, PILL_H, b.label, b.retroPad, b.highlighted)
         }
+        // Ombros: pares (esquerdo, direito) em fileiras de cima para baixo (L1 R1, depois L2 R2).
         spec.shoulders.forEachIndexed { i, b ->
-            val x = if (i == 0) EDGE + SHOULDER_W / 2 else width - EDGE - SHOULDER_W / 2
-            list += PadElement(b.label, PadShape.PILL, x, EDGE + SHOULDER_H / 2, SHOULDER_W, SHOULDER_H, b.label, b.retroPad)
+            val x = if (i % 2 == 0) EDGE + SHOULDER_W / 2 else width - EDGE - SHOULDER_W / 2
+            val y = EDGE + SHOULDER_H / 2 + (i / 2) * (SHOULDER_H + SHOULDER_GAP)
+            list += PadElement(b.label, PadShape.PILL, x, y, SHOULDER_W, SHOULDER_H, b.label, b.retroPad)
         }
         list += PadElement("menu", PadShape.CIRCLE, width / 2, EDGE / 2 + MENU_RADIUS, MENU_RADIUS * 2, MENU_RADIUS * 2, "☰")
         elements = list
@@ -157,6 +167,7 @@ class VirtualPadModel(spec: VirtualPadSpec, val width: Float, val height: Float)
         const val PILL_H = 40f
         const val SHOULDER_W = 120f
         const val SHOULDER_H = 48f
+        const val SHOULDER_GAP = 14f
         const val MENU_RADIUS = 24f
         const val HIT_MARGIN = 10f
 

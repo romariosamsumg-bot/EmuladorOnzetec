@@ -4,6 +4,8 @@
 Fontes (baixadas para um cache local na primeira execução):
   * libretro-database (CC BY-SA 4.0): DATs No-Intro + metadados (gênero, ano, desenvolvedora,
     editora, jogadores) de SNES, Mega Drive e Master System;
+  * PlayStation: DAT Redump do libretro-database (nome, região e código do disco, ex.: SLUS-00594;
+    o app lê o código do SYSTEM.CNF da imagem, sem calcular o CRC de CDs de 700 MB);
   * Arcade: DAT do MAME 0.37b5 (núcleo MAME 2000) e DAT "Arcade only" do FinalBurn Neo (nomes
     dos romsets, CRCs dos arquivos internos, pai e BIOS exigida);
   * libretro-thumbnails: lista de capas existentes (só os nomes; nenhuma imagem é baixada).
@@ -20,7 +22,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import date
 
-DB_VERSION = 2
+DB_VERSION = 3
 LIBRETRO_DB = "https://raw.githubusercontent.com/libretro/libretro-database/master/metadat"
 FBNEO_DAT = "https://raw.githubusercontent.com/libretro/FBNeo/master/dats/FinalBurn%20Neo%20(ClrMame%20Pro%20XML%2C%20Arcade%20only).dat"
 MAME2000_DAT = "https://raw.githubusercontent.com/libretro/mame2000-libretro/master/metadata/MAME%200.37b5%20XML.dat"
@@ -33,6 +35,7 @@ SYSTEMS = {
     "megadrive": "Sega - Mega Drive - Genesis",
     "mastersystem": "Sega - Master System - Mark III",
     "arcade": "MAME",
+    "psx": "Sony - PlayStation",
 }
 META_FIELDS = ["genre", "releaseyear", "developer", "publisher", "maxusers"]
 THUMB_TYPES = {"Named_Boxarts": 1, "Named_Titles": 2, "Named_Snaps": 4}
@@ -203,6 +206,10 @@ def build(out_path, cache):
             core TEXT,                   -- arcade: núcleo do DAT (mame2000, fbneo)
             bios TEXT                    -- arcade: BIOS exigida (ex.: neogeo)
         );
+        CREATE TABLE serial(
+            serial TEXT NOT NULL,        -- código do disco normalizado (ex.: SLUS-00594)
+            game_id INTEGER NOT NULL
+        );
         CREATE TABLE rom(
             game_id INTEGER NOT NULL,
             name TEXT NOT NULL,
@@ -219,6 +226,9 @@ def build(out_path, cache):
         q = urllib.parse.quote(sname)
         if sid == "arcade":
             counts.update(build_arcade(db, cache, thumbs, by_base))
+            continue
+        if sid == "psx":
+            counts[sid] = build_disc(db, cache, sid, q, thumbs, by_base)
             continue
         meta = {}
         for field in META_FIELDS:
@@ -262,14 +272,46 @@ def build(out_path, cache):
     db.execute("CREATE INDEX game_romset ON game(system, romset)")
     db.execute("CREATE INDEX game_romset_core ON game(romset, core)")
     db.execute("CREATE INDEX game_title ON game(system, title)")
+    db.execute("CREATE INDEX serial_code ON serial(serial)")
     for k, v in {"version": str(DB_VERSION), "generated": date.today().isoformat(),
-                 "sources": "libretro-database (CC BY-SA 4.0); MAME 0.37b5 DAT (MAME 2000); FinalBurn Neo DAT; libretro-thumbnails",
+                 "sources": "libretro-database (CC BY-SA 4.0, inclui DAT Redump do PlayStation); MAME 0.37b5 DAT (MAME 2000); FinalBurn Neo DAT; libretro-thumbnails",
                  **{f"count_{k}": str(v) for k, v in counts.items()}}.items():
         db.execute("INSERT INTO meta VALUES(?,?)", (k, v))
     db.commit()
     db.execute("VACUUM")
     db.close()
     print("jogos por sistema:", counts, "| tamanho:", os.path.getsize(out_path), "bytes")
+
+
+SERIAL = re.compile(r"([A-Z]{4})[_\-. ]?(\d{3})\.?(\d{2})")
+
+
+def normalize_serial(raw):
+    """'SCUS-94163-0' / 'SLUS_005.94' -> 'SCUS-94163' / 'SLUS-00594' (igual ao app)."""
+    return [f"{m.group(1)}-{m.group(2)}{m.group(3)}" for m in SERIAL.finditer((raw or "").upper())]
+
+
+def build_disc(db, cache, sid, q, thumbs, by_base):
+    """Discos (Redump): um jogo por nome; vários códigos por jogo (variações do mesmo disco)."""
+    path = fetch(f"{LIBRETRO_DB}/redump/{q}.dat", os.path.join(cache, f"redump-{sid}.dat"))
+    games = {}
+    for g in parse_clrmamepro(open(path, encoding="utf-8", errors="replace").read()):
+        name = get(g, "name")
+        if not name:
+            continue
+        codes = set(normalize_serial(get(g, "serial")))
+        for r in get_all(g, "rom"):
+            codes.update(normalize_serial(get(r, "serial")))
+        games.setdefault(name, set()).update(codes)
+    for name, codes in games.items():
+        mask, alt = thumb_info(name, thumbs, by_base)
+        cur = db.execute(
+            "INSERT INTO game(system,name,title,region,thumbs,thumb_name) VALUES(?,?,?,?,?,?)",
+            (sid, name, display_title(name), region_of(name), mask, alt),
+        )
+        for c in sorted(codes):
+            db.execute("INSERT INTO serial(serial, game_id) VALUES(?,?)", (c, cur.lastrowid))
+    return len(games)
 
 
 def build_arcade(db, cache, thumbs, by_base):

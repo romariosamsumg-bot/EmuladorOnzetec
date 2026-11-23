@@ -48,9 +48,11 @@ class GamesFolderManager(private val context: Context, private val catalog: Syst
         appendLine()
         appendLine("Coloque os jogos na subpasta do console correspondente:")
         catalog.all.forEach { appendLine("  ${it.displayName}/  (${it.extensions.joinToString(" ") { e -> ".$e" }})") }
-        appendLine("  $BIOS_FOLDER/  (neogeo.zip, para os jogos de Neo Geo do Arcade)")
+        appendLine("  $BIOS_FOLDER/  (neogeo.zip, para os jogos de Neo Geo do Arcade; scph5501.bin, BIOS do PlayStation)")
         appendLine()
         appendLine("Arquivos .zip e .7z funcionam. Romsets de Arcade (MAME 0.37 ou FBNeo) ficam compactados como estão.")
+        appendLine("PlayStation: .chd ou .pbp (um arquivo por jogo) ou .cue junto com as trilhas .bin. Jogos de vários")
+        appendLine("discos: crie um .m3u com o nome de cada disco, um por linha; só ele aparece na biblioteca.")
         appendLine("Depois de copiar, abra o Onzetec Games: os jogos novos aparecem sozinhos.")
         appendLine()
         appendLine("O Onzetec Games não inclui jogos nem BIOS. Use apenas cópias que você possui legalmente.")

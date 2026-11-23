@@ -309,7 +309,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { library.deleteGame(game.id) }
     }
 
-    /** Copia a neogeo.zip escolhida para Jogos/BIOS (ou a pasta do app) e verifica. */
+    /**
+     * Copia a BIOS escolhida para Jogos/BIOS (ou a pasta do app) e verifica: neogeo.zip (Arcade)
+     * ou uma BIOS de PlayStation (.bin, mantém o nome, ex.: scph5501.bin).
+     */
     fun importBios(uri: Uri) {
         viewModelScope.launch {
             val ok = withContext(Dispatchers.IO) {
@@ -317,7 +320,11 @@ class SettingsViewModel @Inject constructor(
                     val dir = if (gamesFolder.hasAllFilesAccess() && gamesFolder.ensureCreated()) File(gamesFolder.gamesDir, GamesFolderManager.BIOS_FOLDER)
                     else File(gamesFolder.appDir, "neogeo")
                     dir.mkdirs()
-                    context.contentResolver.openInputStream(uri)!!.use { input -> File(dir, "neogeo.zip").outputStream().use { input.copyTo(it) } }
+                    val picked = context.contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)
+                        ?.use { c -> if (c.moveToFirst()) c.getString(0) else null }
+                        ?.substringAfterLast('/')
+                    val name = if (picked != null && picked.lowercase().endsWith(".bin")) picked else "neogeo.zip"
+                    context.contentResolver.openInputStream(uri)!!.use { input -> File(dir, name).outputStream().use { input.copyTo(it) } }
                     true
                 }.getOrDefault(false)
             }

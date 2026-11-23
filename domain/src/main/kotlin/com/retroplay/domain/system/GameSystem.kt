@@ -19,6 +19,12 @@ enum class IdentificationStrategy {
      * (DAT do FBNeo). O arquivo nunca é descompactado nem modificado.
      */
     ARCADE_ROMSET,
+
+    /**
+     * Disco (CD): identificado pelo código do disco (ex.: SLUS-00594), lido do SYSTEM.CNF da
+     * imagem ou do PARAM.SFO do .pbp. Imagens de CD são grandes demais para calcular o CRC.
+     */
+    DISC_SERIAL,
 }
 
 /** Um núcleo libretro capaz de rodar o sistema. */

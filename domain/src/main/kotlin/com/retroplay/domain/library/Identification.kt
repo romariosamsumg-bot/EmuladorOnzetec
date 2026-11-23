@@ -40,6 +40,9 @@ interface DatLookup {
     /** Todas as versões do romset (uma por núcleo/DAT), na ordem de preferência. */
     fun romsets(system: SystemId, setName: String): List<Pair<DatGame, List<DatRom>>> = listOfNotNull(romset(system, setName))
 
+    /** Discos (PlayStation): jogos com este código de disco (ex.: "SLUS-00594"). */
+    fun bySerial(system: SystemId, serial: String): List<DatGame> = emptyList()
+
     /** Último recurso: casa pelo título "limpo" do nome do arquivo. */
     fun byTitle(system: SystemId, normalizedTitle: String): DatGame?
 }

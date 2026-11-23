@@ -36,13 +36,12 @@ class LibraryScanner(
     suspend fun scan(onProgress: suspend (processed: Int, total: Int, current: String?) -> Unit = { _, _, _ -> }): ScanSummary {
         val folders = db.folders().all()
         // 1ª passada: lista tudo (rápido) para ter o total e mostrar progresso real.
-        val listing = folders.associateWith { folder ->
-            runCatching {
-                files.walk(folder.uri, GameSource.valueOf(folder.source))
-                    .filter { SystemDetector.extensionOf(it.name) in extensions }
-                    .toList()
-            }.getOrNull()
+        // Lista tudo (inclusive arquivos que não são jogos, como as trilhas .bin de um .cue):
+        // os discos procuram os vizinhos na mesma pasta.
+        val everything = folders.associateWith { folder ->
+            runCatching { files.walk(folder.uri, GameSource.valueOf(folder.source)).toList() }.getOrNull()
         }
+        val listing = everything.mapValues { (_, all) -> all?.filter { SystemDetector.extensionOf(it.name) in extensions } }
         val total = listing.values.sumOf { it?.size ?: 0 }
         var processed = 0
         var added = 0
@@ -55,6 +54,7 @@ class LibraryScanner(
 
         for ((folder, found) in listing) {
             if (found == null) continue // pasta inacessível (pendrive removido?): mantém os jogos
+            val byDir = everything[folder].orEmpty().groupBy { it.parents }
             val existing = db.games().byFolder(folder.id).associateBy { it.uri }
             val existingBios = db.bios().byFolder(folder.id).associateBy { it.uri }
             val batch = ArrayList<GameEntity>(BATCH)
@@ -70,7 +70,7 @@ class LibraryScanner(
                     continue
                 }
                 onProgress(processed, total, file.name)
-                val target = FileScanTarget(file, files, allNames)
+                val target = FileScanTarget(file, files, allNames, byDir[file.parents].orEmpty())
                 val outcome = try {
                     identifier.identify(target, old?.userSystem?.let(::SystemId))
                 } catch (e: Exception) {
@@ -176,7 +176,22 @@ class FileScanTarget(
     private val file: FoundFile,
     private val access: FileAccess,
     override val siblingNames: Set<String> = emptySet(),
+    /** Arquivos da mesma pasta (inclusive os que não são jogos). */
+    private val folder: List<FoundFile> = emptyList(),
 ) : ScanTarget {
+    override val folderFiles: List<String> get() = folder.map { it.name }
+
+    override fun sibling(name: String): ScanTarget? =
+        folder.firstOrNull { it.name.equals(name, ignoreCase = true) }?.let { FileScanTarget(it, access, siblingNames, folder) }
+
+    override fun read(offset: Long, length: Int): ByteArray = access.openChannel(file.uri).use { ch ->
+        if (offset >= ch.size()) return@use ByteArray(0)
+        ch.position(offset)
+        val buf = java.nio.ByteBuffer.allocate(minOf(length.toLong(), ch.size() - offset).toInt())
+        while (buf.hasRemaining() && ch.read(buf) > 0) Unit
+        buf.array().copyOf(buf.position())
+    }
+
     override val fileName get() = file.name
     override val size get() = file.size
     override val parentNames get() = file.parents

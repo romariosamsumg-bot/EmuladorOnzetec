@@ -15,6 +15,7 @@ interface "estilo streaming", navegação por controle remoto, gamepad ou toque 
 | Mega Drive / Genesis | genesis_plus_gx | picodrive | .md .gen .smd .bin .zip .7z |
 | Master System / Mark III | genesis_plus_gx | picodrive | .sms .zip .7z |
 | Arcade (fliperama, inclusive Neo Geo) | mame2000 (MAME 0.37) | fbneo, mame2003_plus | .zip .7z (romsets) — jogos de Neo Geo exigem `neogeo.zip` |
+| PlayStation | pcsx_rearmed (PCSX ReARMed) | — | .chd .pbp .cue (+ trilhas .bin) .iso .m3u — BIOS recomendada (`scph5501.bin`) |
 
 ## Estado do desenvolvimento
 
@@ -164,7 +165,8 @@ Jogos/
 ├─ Mega Drive/       (.md .gen .smd .bin .zip .7z)
 ├─ Master System/    (.sms .zip .7z)
 ├─ Arcade/          (romsets .zip/.7z do MAME 0.37 ou do FBNeo, sem descompactar)
-├─ BIOS/             (neogeo.zip, para os jogos de Neo Geo)
+├─ PlayStation/      (.chd .pbp .iso, ou .cue com as trilhas .bin; .m3u para vários discos)
+├─ BIOS/             (neogeo.zip para o Neo Geo; scph5501.bin, BIOS do PlayStation)
 └─ LEIA-ME.txt
 ```
 
@@ -263,6 +265,7 @@ A senha fica só na TV, fora do backup. Para tirar a pasta, use **Transferir jog
 | Mega Drive | Controle de **3 ou 6 botões**; região Automática / EUA / Japão / Europa. |
 | Master System | Som **FM (YM2413)** ligado/desligado; o Pause do console fica no Start. |
 | Super Nintendo | Região automática; **Reduzir lentidão** (overclock da CPU e do SuperFX). |
+| PlayStation | Recompilador dinâmico ligado (o que deixa o PCSX ReARMed leve em processadores ARM); sem o logo da BIOS; no "Modo econômico", pula quadros quando a TV/celular não dá conta. |
 
 Valem para o console inteiro ou só para um jogo (Detalhes → Opções → Configurações deste jogo),
 nos dois núcleos de cada console (ex.: Genesis Plus GX ou PicoDrive). Mega Drive e Master System
@@ -294,7 +297,8 @@ O menu lateral mostra o símbolo do Onzetec Games; aberto, mostra o logo complet
   Favoritos.
 - **Mais populares**: fileira na Início (todos os consoles intercalados: o 1º de cada um, depois o
   2º...) e filtro "Populares" na página de cada console. Vem de listas curadas embutidas no app
-  (`tools/popular/popular.txt`: Super Nintendo 90, Mega Drive 82, Master System 55, Arcade 84),
+  (`tools/popular/popular.txt`: Super Nintendo 90, Mega Drive 82, Master System 55, Arcade 84,
+  PlayStation 89),
   montadas por vendas, aclamação e lembrança da época, com atenção a clássicos do Brasil (Turma
   da Mônica, Sapo Xulé). Não há ranking ao vivo: o app cruza a lista com a sua biblioteca pelo
   título (sem "The", acentos e região), pelo nome do DAT e, no Arcade, pelo romset. Várias
@@ -430,6 +434,35 @@ gera o ícone adaptativo (com versão monocromática para os ícones temáticos)
 inferior direito Arcade, com uma faixa preta entre eles) fica em `tools/brand/consoles_grid.png`.
 Para trocar, substitua o arquivo e rode `python3 tools/brand/build_console_covers.py`: ele acha as
 divisórias sozinho e gera `cover_<console>.webp` (3:2, 660×440). Consoles sem capa usam o ícone.
+
+A capa do PlayStation veio de uma imagem à parte (`tools/brand/console_psx.png`), cortada no
+centro para 3:2 (660×440) em `cover_psx.webp`.
+
+## PlayStation
+
+- **Núcleo:** só o **PCSX ReARMed**, o mais leve: feito para processadores ARM (TVs e celulares),
+  com recompilador dinâmico. Roda praticamente todo o catálogo em TVs comuns.
+- **Formatos:** `.chd` e `.pbp` (um arquivo por jogo, recomendados), `.cue` + trilhas `.bin`,
+  `.iso` e `.m3u`. Jogos de vários discos (ex.: Final Fantasy VII): crie um `.m3u` com o nome de
+  cada disco, um por linha. Só o `.m3u` aparece na biblioteca e o menu do jogo ganha **Trocar
+  disco** (disco 1/3 → 2/3...). Sem `.m3u`, cada disco aparece como "Jogo (Disco N)".
+- **Identificação:** pelo código do disco (ex.: SLUS-00594), lido do `SYSTEM.CNF` da imagem ou do
+  `PARAM.SFO` do `.pbp`, sem calcular o CRC de CDs de 700 MB. O banco tem 10.102 discos do DAT
+  Redump do libretro-database, 90% com capa. O `.chd` é compactado e é identificado pelo nome do
+  arquivo. As trilhas `.bin` citadas por um `.cue` não aparecem como jogos à parte.
+- **BIOS (recomendada):** `scph5501.bin` (ou `scph5500`, `scph5502`, `scph1001`, `scph7001`,
+  `scph101`) em `Jogos/BIOS`. O app reconhece pelo CRC, mesmo com outro nome, e a coloca onde o
+  núcleo procura. Sem BIOS, o núcleo usa uma imitação embutida e alguns jogos podem falhar; o card
+  do console mostra "Sem BIOS (recomendada)". Também dá para importar em Configurações → BIOS.
+- **Controle:** ✕ ○ □ △, L1/R1, L2/R2, Select e Start. No gamepad, a posição é a do controle original
+  (✕ embaixo). No celular, o controle virtual tem o losango e os quatro gatilhos.
+- **Pelo celular:** envie o `.chd`/`.pbp`, ou o `.cue` e as trilhas `.bin`; trilhas grandes vão
+  direto para a pasta PlayStation, junto do `.cue`.
+- **Populares:** 89 jogos de PS1 na lista de populares (Gran Turismo, Crash, Resident Evil, Winning
+  Eleven, Tekken 3...).
+- **Pendrive e pasta da rede:** o núcleo precisa de um arquivo local; o disco (e as trilhas/discos
+  citados) é copiado para o cache antes de abrir, então a primeira abertura de um CD de 700 MB
+  pelo pendrive demora. Na pasta Jogos da TV, abre direto.
 
 ## Como compilar (linha de comando)
 

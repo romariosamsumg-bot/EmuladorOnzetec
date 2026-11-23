@@ -72,6 +72,9 @@ data class GameMenuState(
     val showFps: Boolean = false,
     val slotCount: Int = 9,
     val coreOptions: List<CoreOption> = emptyList(),
+    /** Jogos de vários discos (.m3u): quantidade e disco atual (0 = primeiro). */
+    val discs: Int = 1,
+    val currentDisc: Int = 0,
 )
 
 /** Ações do menu (implementadas pela GameActivity). */
@@ -91,6 +94,8 @@ interface GameMenuActions {
     fun screenshot()
     fun exit()
     fun setCoreOption(key: String, value: String) {}
+    /** Troca para o próximo disco (como abrir a tampa e trocar o CD). */
+    fun nextDisc() {}
 }
 
 /** Menu rápido sobre o jogo pausado. Voltar fecha a página atual ou o menu. */
@@ -135,6 +140,9 @@ private fun MainPage(state: GameMenuState, a: GameMenuActions) {
         add(Item("menu_load", R.string.menu_load, null, enabled = state.slots.isNotEmpty()) { a.openPage(MenuPage.LOAD) })
         add(Item("menu_rewind", R.string.menu_rewind, if (state.rewindEnabled) on else off) { a.toggleRewind() })
         if (state.rewindEnabled) add(Item("menu_rewind_back", R.string.menu_rewind_back, null, enabled = state.rewindAvailable) { a.rewindSeconds() })
+        if (state.discs > 1) {
+            add(Item("menu_disc", R.string.menu_disc, "${state.currentDisc + 1}/${state.discs}") { a.nextDisc() })
+        }
         add(Item("menu_reset", R.string.menu_reset, null) { a.reset() })
         if (state.system.identification == IdentificationStrategy.ARCADE_ROMSET) {
             add(Item("menu_coin", R.string.menu_coin, null) { a.insertCoin() })

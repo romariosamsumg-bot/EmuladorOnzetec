@@ -124,6 +124,21 @@ class FileAccess(private val resolver: ContentResolver, private val smb: SmbAcce
 
     private data class Row(val id: String, val name: String, val mime: String?, val size: Long, val modified: Long)
 
+    /**
+     * Endereço de outro arquivo na mesma pasta (a trilha .bin de um .cue, os discos de um .m3u).
+     * Pastas do seletor (SAF): os ids de documento do armazenamento são caminhos ("primary:Jogos/x.cue").
+     */
+    fun sibling(uri: String, name: String): String = when {
+        SmbLocation.isSmb(uri) || !isDocument(uri) -> uri.substringBeforeLast('/') + "/" + name
+        else -> {
+            val u = Uri.parse(uri)
+            val docId = DocumentsContract.getDocumentId(u)
+            val parent = docId.substringBeforeLast('/', docId.substringBefore(':') + ":")
+            val sep = if (parent.endsWith(":")) "" else "/"
+            DocumentsContract.buildDocumentUriUsingTree(u, parent + sep + name).toString()
+        }
+    }
+
     companion object {
         fun isDocument(uri: String) = uri.startsWith("content://")
 

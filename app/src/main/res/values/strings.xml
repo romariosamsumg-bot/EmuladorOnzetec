@@ -289,4 +289,10 @@
     <string name="row_popular">Mais populares</string>
     <string name="filter_popular">Populares</string>
     <string name="console_no_popular">Nenhum jogo da lista de populares deste console está na sua biblioteca.</string>
+    <string name="menu_disc">Trocar disco</string>
+    <string name="disc_changed">Disco %1$d de %2$d inserido</string>
+    <string name="disc_change_failed">Não foi possível trocar o disco</string>
+    <string name="console_bios_recommended">Sem BIOS (recomendada)</string>
+    <string name="bios_psx_header">BIOS do PlayStation</string>
+    <string name="bios_psx_missing_desc">Coloque scph5501.bin (ou outra BIOS do PlayStation) em Jogos/BIOS. Sem ela, o núcleo usa uma imitação embutida e alguns jogos podem falhar.</string>
 </resources>

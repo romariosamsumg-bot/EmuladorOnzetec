@@ -11,6 +11,7 @@ object SystemIcons {
         "pad_16bit_crescent" -> R.drawable.ic_sys_pad_crescent
         "pad_8bit" -> R.drawable.ic_sys_pad_8bit
         "arcade_stick" -> R.drawable.ic_sys_arcade
+        "pad_dual_grip" -> R.drawable.ic_sys_pad_dual
         else -> R.drawable.ic_nav_consoles
     }
 }

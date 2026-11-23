@@ -118,7 +118,7 @@
     <string name="bios_incomplete">Encontrada, pero incompleta o de otra versión</string>
     <string name="bios_missing">No encontrada</string>
     <string name="bios_missing_desc">Pon neogeo.zip en la carpeta Jogos/BIOS o impórtala abajo.</string>
-    <string name="bios_import">Importar neogeo.zip</string>
+    <string name="bios_import">Importar BIOS (neogeo.zip ou scph5501.bin)</string>
     <string name="bios_import_desc">Elige el archivo en un pendrive o una carpeta.</string>
     <string name="bios_imported">BIOS copiada. Verificando…</string>
     <string name="bios_modes_note">MVS, AES y UniBIOS se eligen en las opciones del núcleo FBNeo (categoría Emulación).</string>

@@ -5,6 +5,7 @@ import com.retroplay.data.scan.FileScanTarget
 import com.retroplay.data.scan.FoundFile
 import com.retroplay.domain.library.IdentifyOutcome
 import com.retroplay.domain.library.RomIdentifier
+import com.retroplay.domain.system.IdentificationStrategy
 import com.retroplay.domain.system.SystemCatalog
 import com.retroplay.domain.system.SystemId
 import java.io.File
@@ -42,6 +43,12 @@ class TransferDestination(
     fun freeBytes(): Long = freeSpace(root().apply { mkdirs() })
 
     fun accept(temp: File, name: String, requested: SystemId?): Placement {
+        // Trilha .bin de CD (centenas de MB; ROM de Mega Drive tem poucos MB): vai para a pasta do
+        // PlayStation, junto do .cue, sem calcular o CRC do arquivo inteiro.
+        val disc = catalog.all.firstOrNull { it.identification == IdentificationStrategy.DISC_SERIAL }
+        if (disc != null && name.lowercase().endsWith(".bin") && (temp.length() > DISC_TRACK_MIN_BYTES || requested == disc.id)) {
+            return move(temp, File(root(), folderFor(disc.id)), name).let { Placement.Game(it, disc.id) }
+        }
         val target = FileScanTarget(FoundFile(temp.absolutePath, name, temp.length(), temp.lastModified(), emptyList()), files)
         val outcome = runCatching { identifier.identify(target, requested?.takeIf { catalog.byId(it) != null }) }.getOrNull()
         val placement: Pair<File, Placement> = when (outcome) {
@@ -62,17 +69,22 @@ class TransferDestination(
                 dir to Placement.Game(dir, requested)
             }
         }
-        val dir = placement.first.apply { mkdirs() }
-        val dest = uniqueName(dir, name)
-        if (!temp.renameTo(dest)) {
-            temp.copyTo(dest, overwrite = false)
-            temp.delete()
-        }
+        val dest = move(temp, placement.first, name)
         return when (val p = placement.second) {
             is Placement.Bios -> Placement.Bios(dest)
             is Placement.Game -> Placement.Game(dest, p.system)
             Placement.NotAGame -> p
         }
+    }
+
+    private fun move(temp: File, dir: File, name: String): File {
+        dir.mkdirs()
+        val dest = uniqueName(dir, name)
+        if (!temp.renameTo(dest)) {
+            temp.copyTo(dest, overwrite = false)
+            temp.delete()
+        }
+        return dest
     }
 
     /** "jogo.sfc" → "jogo (2).sfc" se já existir. */
@@ -90,5 +102,7 @@ class TransferDestination(
 
     companion object {
         const val TEMP_DIR = ".recebendo"
+        /** Acima disso, um .bin é trilha de CD (o maior cartucho de Mega Drive tem 5 MB). */
+        const val DISC_TRACK_MIN_BYTES = 32L * 1024 * 1024
     }
 }

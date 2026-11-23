@@ -27,6 +27,7 @@ object SystemRegistry : SystemCatalog {
         val MASTER_SYSTEM = SystemId("mastersystem")
         /** Fliperama (MAME/FBNeo), inclusive Neo Geo. Antes da versão 1.2 era "neogeo". */
         val ARCADE = SystemId("arcade")
+        val PLAYSTATION = SystemId("psx")
     }
 
     private val genesisPlusGx = CoreDescriptor(
@@ -143,5 +144,39 @@ object SystemRegistry : SystemCatalog {
             "neogeo", "neo", "mvs", "aes", "cps1", "cps2", "cps3"),
     )
 
-    override val all: List<GameSystem> = listOf(SNES, MEGA_DRIVE, MASTER_SYSTEM, ARCADE)
+    /** BIOS que o PCSX ReARMed procura na pasta do sistema (qualquer uma serve; a 5501 é a mais compatível). */
+    val PLAYSTATION_BIOS = listOf("scph5501.bin", "scph5500.bin", "scph5502.bin", "scph1001.bin", "scph7001.bin", "scph101.bin")
+
+    val PLAYSTATION = GameSystem(
+        id = Ids.PLAYSTATION,
+        displayName = "PlayStation",
+        shortName = "PS1",
+        releaseYear = 1994,
+        // .bin fica de fora: é a trilha do .cue (e a extensão das ROMs de Mega Drive).
+        extensions = setOf("cue", "chd", "pbp", "m3u", "iso"),
+        cores = listOf(
+            // O mais leve: feito para processadores ARM (TVs e celulares), com recompilador dinâmico.
+            CoreDescriptor("pcsx_rearmed", "PCSX ReARMed", "Leve e rápido, ideal para TVs e celulares. Recomendado."),
+        ),
+        // Opcional: sem BIOS o núcleo usa uma imitação embutida; com ela, a compatibilidade é maior.
+        bios = PLAYSTATION_BIOS.map { BiosRequirement(it, "BIOS do PlayStation (recomendada)", required = false) },
+        identification = IdentificationStrategy.DISC_SERIAL,
+        controllerLayout = ControllerLayout(
+            listOf(
+                ConsoleButton("✕", B), ConsoleButton("○", A),
+                ConsoleButton("□", Y), ConsoleButton("△", X),
+                ConsoleButton("L1", L), ConsoleButton("R1", R),
+                ConsoleButton("L2", RetroPadButton.L2), ConsoleButton("R2", RetroPadButton.R2),
+                ConsoleButton("Select", SELECT), ConsoleButton("Start", START),
+            ),
+        ),
+        accentColor = 0xFF3E64B8,
+        iconKey = "pad_dual_grip",
+        // Capas de CD são quase quadradas.
+        coverAspect = 1.0f,
+        libretroDatabaseName = "Sony - PlayStation",
+        folderAliases = setOf("playstation", "psx", "ps1", "psone", "playstation1", "sonyplaystation", "ps"),
+    )
+
+    override val all: List<GameSystem> = listOf(SNES, MEGA_DRIVE, MASTER_SYSTEM, ARCADE, PLAYSTATION)
 }
