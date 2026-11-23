@@ -42,6 +42,8 @@ fun GameCover(
     title: String,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
+    /** Recebe a proporção (largura/altura) da capa carregada. */
+    onAspect: ((Float) -> Unit)? = null,
 ) {
     val url = game?.let { CoverUrls.url(system, it) }
     // O card gerado só é desenhado até a capa chegar (antes ficava sempre por baixo dela).
@@ -54,7 +56,11 @@ fun GameCover(
                 contentDescription = null,
                 // Inteira, sem cortar: o card já tem a proporção do console; sobras ficam escuras.
                 contentScale = ContentScale.Fit,
-                onSuccess = { loaded = true },
+                onSuccess = { state ->
+                    loaded = true
+                    val size = state.painter.intrinsicSize
+                    if (onAspect != null && size.width > 0f && size.height > 0f) onAspect(size.width / size.height)
+                },
                 modifier = Modifier.fillMaxSize(),
             )
         }

@@ -1,5 +1,6 @@
 package com.retroplay.ui.components
 
+import com.retroplay.domain.library.CoverUrls
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
@@ -48,9 +49,18 @@ import kotlinx.coroutines.delay
 
 private val CardShape = RoundedCornerShape(10.dp)
 
+/** Proporções (largura/altura) das capas já carregadas, por endereço. Só em memória. */
+object CoverAspects {
+    private val map = java.util.concurrent.ConcurrentHashMap<String, Float>()
+    fun get(url: String): Float? = map[url]
+    fun put(url: String, ratio: Float) { map[url] = ratio }
+    /** Evita cards absurdos com imagens estranhas (faixas muito finas ou muito largas). */
+    fun clamp(ratio: Float): Float = ratio.coerceIn(0.5f, 2.0f)
+}
+
 /**
- * Card de jogo na proporção das capas do console (SNES deitado; Mega Drive, Master System e
- * Arcade em pé), então a capa aparece inteira. Nas fileiras todos os cards têm a mesma altura
+ * Card de jogo que se ajusta à capa encontrada: começa na proporção típica do console (SNES
+ * deitado; Mega Drive, Master System e Arcade em pé) e assume a da imagem quando ela carrega. Nas fileiras todos os cards têm a mesma altura
  * ([fillWidth] = false); nas grades o card ocupa a largura da célula.
  * Ao receber foco: cresce ~1.1x, ganha borda e mostra o nome numa etiqueta destacada.
  */
@@ -68,16 +78,42 @@ fun GameCard(
     mixedGrid: Boolean = false,
     testTag: String? = null,
 ) {
+    // Proporção da capa: a típica do console até a imagem chegar; depois, a da imagem encontrada
+    // (guardada em memória, então ao rolar de volta o card já nasce no tamanho certo).
+    val url = game?.let { CoverUrls.url(system, it) }
+    var ratio by remember(url) { mutableStateOf(url?.let(CoverAspects::get) ?: system.coverAspect) }
+    val onAspect: (Float) -> Unit = { r ->
+        val clamped = CoverAspects.clamp(r)
+        if (url != null) CoverAspects.put(url, clamped)
+        ratio = clamped
+    }
     if (mixedGrid) {
         BoxWithConstraints(modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
             val boxH = maxWidth * 1.3f
-            val w = if (maxWidth / boxH > system.coverAspect) boxH * system.coverAspect else maxWidth
+            val w = if (maxWidth / boxH > ratio) boxH * ratio else maxWidth
             Box(Modifier.fillMaxWidth().height(boxH + 58.dp), contentAlignment = Alignment.BottomCenter) {
-                GameCard(system, game, title, onClick, Modifier.width(w), cardModifier, width, fillWidth = true, mixedGrid = false, testTag = testTag)
+                GameCardBody(system, game, title, onClick, Modifier.width(w), cardModifier, width, true, ratio, onAspect, testTag)
             }
         }
-        return
+    } else {
+        GameCardBody(system, game, title, onClick, modifier, cardModifier, width, fillWidth, ratio, onAspect, testTag)
     }
+}
+
+@Composable
+private fun GameCardBody(
+    system: GameSystem,
+    game: Game?,
+    title: String,
+    onClick: () -> Unit,
+    modifier: Modifier,
+    cardModifier: Modifier,
+    width: Dp,
+    fillWidth: Boolean,
+    ratio: Float,
+    onAspect: (Float) -> Unit,
+    testTag: String?,
+) {
     val animations = LocalRetroUiPrefs.current.animations
     val scale = LocalRetroUiPrefs.current.cardScale
     var focused by remember { mutableStateOf(false) }
@@ -89,7 +125,6 @@ fun GameCard(
             showTitle = true
         }
     }
-    val ratio = system.coverAspect
     // Altura comum das fileiras: a de um card em pé de [width] de largura (3:4) × 0,9.
     val rowHeight = width * scale * 1.2f
     val outer = if (fillWidth) modifier.fillMaxWidth() else modifier.width(rowHeight * ratio)
@@ -107,7 +142,7 @@ fun GameCard(
             ),
             colors = CardDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         ) {
-            GameCover(system, game, title, Modifier.fillMaxSize())
+            GameCover(system, game, title, Modifier.fillMaxSize(), onAspect = onAspect)
         }
         // Espaço fixo (o card crescido não cobre a etiqueta) e etiqueta só com foco.
         Box(Modifier.fillMaxWidth().height(58.dp).padding(top = 16.dp), contentAlignment = Alignment.TopCenter) {

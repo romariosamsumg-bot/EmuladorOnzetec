@@ -231,9 +231,11 @@ A senha fica só na TV, fora do backup. Para tirar a pasta, use **Transferir jog
   console**; a escolha é lembrada nas próximas verificações.
 - Capas vêm do projeto **libretro-thumbnails** (boxart, tela de título e snap). Sem capa, o app
   gera um card com o nome do jogo e a cor do console. Cache em disco limitado a 200 MB.
-- Os cards seguem o formato das caixas da época, e a capa aparece **inteira**, sem cortes:
-  Super Nintendo deitado (1,38:1); Mega Drive, Master System e Arcade (flyer) em pé (~0,7:1).
-  Nas fileiras todos têm a mesma altura; com foco, o nome aparece numa etiqueta na cor de destaque.
+- Os cards se ajustam à capa encontrada e ela aparece **inteira**, sem cortes. Enquanto a imagem
+  carrega, o card usa o formato típico do console (Super Nintendo deitado, 1,38:1; Mega Drive,
+  Master System e Arcade em pé, ~0,7:1); quando ela chega, assume a proporção exata da imagem
+  (limitada entre 1:2 e 2:1). Nas fileiras todos têm a mesma altura e muda a largura; nas grades
+  muda a altura. Com foco, o nome aparece numa etiqueta na cor de destaque.
 
 ### Arcade: romsets e BIOS do Neo Geo
 
