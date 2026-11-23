@@ -4,6 +4,8 @@ import androidx.compose.ui.graphics.Color
 
 /** Cores de destaque selecionáveis nas configurações (Interface → Cor de destaque). */
 enum class AccentColor(val color: Color, val onColor: Color) {
+    /** Laranja da marca Onzetec Games (cor padrão). */
+    LARANJA(Color(0xFFFF7A1A), Color(0xFF1F0A00)),
     VIOLETA(Color(0xFF8B6CFF), Color(0xFF12082E)),
     CIANO(Color(0xFF3FD0E0), Color(0xFF00262B)),
     AMBAR(Color(0xFFFFB547), Color(0xFF2B1A00)),

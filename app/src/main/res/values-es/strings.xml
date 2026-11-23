@@ -267,4 +267,10 @@
         <item quantity="many">%1$d juegos · carpeta de red</item>
         <item quantity="other">%1$d juegos · carpeta de red</item>
     </plurals>
+    <string name="all_files_title">Permitir acceso a los archivos</string>
+    <string name="all_files_steps">En la pantalla que se abra, activa \"Permitir acceso para administrar todos los archivos\" para Onzetec Games y vuelve con Atrás: la carpeta Jogos se crea al momento.\n\nSi la opción no aparece, en los Ajustes de la TV ve a: Aplicaciones → Acceso especial de apps → Acceso a todos los archivos → Onzetec Games → Permitir. En algunas TV: Aplicaciones → Onzetec Games → Permisos → Archivos y multimedia.</string>
+    <string name="all_files_open_app">Abrir el permiso de Onzetec Games</string>
+    <string name="all_files_open_list">Abrir \"Acceso a todos los archivos\"</string>
+    <string name="all_files_open_details">Abrir la información de la app</string>
+    <string name="all_files_open_settings">Abrir los Ajustes de la TV</string>
 </resources>

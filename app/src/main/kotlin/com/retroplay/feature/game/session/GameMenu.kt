@@ -128,6 +128,8 @@ private fun MainPage(state: GameMenuState, a: GameMenuActions) {
     val off = stringResource(R.string.off)
     data class Item(val tag: String, val label: Int, val value: String?, val enabled: Boolean = true, val action: () -> Unit)
     val items = buildList {
+        // Sair fica em primeiro; o foco começa em Continuar (evita sair sem querer).
+        add(Item("menu_exit", R.string.menu_exit, null) { a.exit() })
         add(Item("menu_resume", R.string.menu_resume, null) { a.resume() })
         add(Item("menu_save", R.string.menu_save, null) { a.openPage(MenuPage.SAVE) })
         add(Item("menu_load", R.string.menu_load, null, enabled = state.slots.isNotEmpty()) { a.openPage(MenuPage.LOAD) })
@@ -144,7 +146,6 @@ private fun MainPage(state: GameMenuState, a: GameMenuActions) {
         add(Item("menu_core", R.string.menu_core_options, null) { a.openPage(MenuPage.CORE_OPTIONS) })
         add(Item("menu_fps", R.string.menu_fps, if (state.showFps) on else off) { a.toggleFps() })
         add(Item("menu_screenshot", R.string.menu_screenshot, null) { a.screenshot() })
-        add(Item("menu_exit", R.string.menu_exit, null) { a.exit() })
     }
     LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp), contentPadding = PaddingValues(vertical = 4.dp)) {
         items(items, key = { it.tag }) { item ->

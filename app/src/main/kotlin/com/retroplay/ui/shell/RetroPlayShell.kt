@@ -78,7 +78,19 @@ private val CollapsedDrawerWidth = 88.dp
  * - Voltar com foco no menu no Início → sai do app.
  */
 @Composable
-fun RetroPlayShell(navController: NavHostController = rememberNavController()) {
+fun RetroPlayShell(
+    navController: NavHostController = rememberNavController(),
+    goHomeRequests: kotlinx.coroutines.flow.Flow<Unit> = kotlinx.coroutines.flow.emptyFlow(),
+) {
+    // Volta à Início limpando as telas abertas por cima (ex.: detalhes do jogo).
+    androidx.compose.runtime.LaunchedEffect(navController, goHomeRequests) {
+        goHomeRequests.collect {
+            navController.navigate(HomeRoute) {
+                popUpTo(navController.graph.findStartDestination().id)
+                launchSingleTop = true
+            }
+        }
+    }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val topLevelMatch = TopLevelDestination.entries.firstOrNull { dest ->
         backStackEntry?.destination?.hierarchy?.any { it.hasRoute(dest.route::class) } == true

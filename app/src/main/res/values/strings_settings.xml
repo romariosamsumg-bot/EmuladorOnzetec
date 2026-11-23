@@ -185,6 +185,7 @@
     <string name="theme_oled">Preto OLED</string>
     <string name="set_accent">Cor de destaque</string>
     <string name="set_accent_desc">Cor do foco e dos botões.</string>
+    <string name="accent_LARANJA">Laranja Onzetec</string>
     <string name="accent_VIOLETA">Violeta</string>
     <string name="accent_CIANO">Ciano</string>
     <string name="accent_AMBAR">Âmbar</string>

@@ -51,7 +51,6 @@ fun SystemCard(
         border = CardDefaults.border(
             focusedBorder = Border(BorderStroke(3.dp, MaterialTheme.colorScheme.primary), shape = CardShape),
         ),
-        glow = CardDefaults.glow(focusedGlow = Glow(elevationColor = MaterialTheme.colorScheme.primary, elevation = 12.dp)),
         colors = CardDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Box(

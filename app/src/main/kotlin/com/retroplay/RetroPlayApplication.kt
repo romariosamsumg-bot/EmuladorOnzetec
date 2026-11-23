@@ -79,7 +79,7 @@ class RetroPlayApplication : Application(), Configuration.Provider, SingletonIma
                         .maxSizeBytes(COVER_CACHE_BYTES)
                         .build()
                 }
-                .crossfade(150)
+                .crossfade(false) // sem transição por capa: rolar as fileiras fica mais leve
                 .build()
     }
 }

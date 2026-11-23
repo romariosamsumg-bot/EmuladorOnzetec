@@ -78,6 +78,14 @@ class MainActivity : ComponentActivity() {
 
     @Volatile private var settingsReady = false
 
+    /** Pedidos para voltar à tela Início (ex.: "Sair" no menu do jogo). */
+    private val goHome = kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        if (intent.getBooleanExtra(EXTRA_GO_HOME, false)) goHome.tryEmit(Unit)
+    }
+
     /** Mesmo sinal, observável pela composição. */
     private var ready by mutableStateOf(false)
 
@@ -100,7 +108,7 @@ class MainActivity : ComponentActivity() {
                     shape = RectangleShape,
                     colors = SurfaceDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
                 ) {
-                    TvCanvas { ProfileGate(snap) { RetroPlayShell() } }
+                    TvCanvas { ProfileGate(snap) { RetroPlayShell(goHomeRequests = goHome) } }
                 }
             }
         }
@@ -146,8 +154,10 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
+        const val EXTRA_GO_HOME = "go_home"
+
         fun uiPrefs(snap: SettingsSnapshot) = RetroUiPrefs(
-            accent = runCatching { AccentColor.valueOf(snap.value(AppSettings.ACCENT)) }.getOrDefault(AccentColor.VIOLETA),
+            accent = runCatching { AccentColor.valueOf(snap.value(AppSettings.ACCENT)) }.getOrDefault(AccentColor.LARANJA),
             oledBlack = snap.value(AppSettings.THEME) == "oled",
             animations = runCatching { AnimationLevel.valueOf(snap.value(AppSettings.ANIMATIONS)) }.getOrDefault(AnimationLevel.COMPLETAS),
             heroAnimated = snap.value(AppSettings.HERO_ANIMATED),

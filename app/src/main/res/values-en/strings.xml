@@ -259,4 +259,10 @@
         <item quantity="one">%1$d game · network folder</item>
         <item quantity="other">%1$d games · network folder</item>
     </plurals>
+    <string name="all_files_title">Allow file access</string>
+    <string name="all_files_steps">On the screen that opens, turn on \"Allow access to manage all files\" for Onzetec Games and come back with Back: the Jogos folder is created right away.\n\nIf the option is missing, in the TV Settings go to: Apps → Special app access → All files access → Onzetec Games → Allow. On some TVs: Apps → Onzetec Games → Permissions → Files and media.</string>
+    <string name="all_files_open_app">Open Onzetec Games permission</string>
+    <string name="all_files_open_list">Open \"All files access\"</string>
+    <string name="all_files_open_details">Open app info</string>
+    <string name="all_files_open_settings">Open TV Settings</string>
 </resources>

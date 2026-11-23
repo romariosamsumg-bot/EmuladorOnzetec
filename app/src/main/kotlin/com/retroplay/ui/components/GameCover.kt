@@ -6,6 +6,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -39,14 +43,17 @@ fun GameCover(
     modifier: Modifier = Modifier,
     compact: Boolean = false,
 ) {
+    val url = game?.let { CoverUrls.url(system, it) }
+    // O card gerado só é desenhado até a capa chegar (antes ficava sempre por baixo dela).
+    var loaded by remember(url) { mutableStateOf(false) }
     Box(modifier) {
-        GeneratedCover(system, title, compact, Modifier.fillMaxSize())
-        val url = game?.let { CoverUrls.url(system, it) }
+        if (!loaded) GeneratedCover(system, title, compact, Modifier.fillMaxSize())
         if (url != null) {
             AsyncImage(
                 model = url,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
+                onSuccess = { loaded = true },
                 modifier = Modifier.fillMaxSize(),
             )
         }

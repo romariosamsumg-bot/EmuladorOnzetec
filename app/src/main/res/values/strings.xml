@@ -278,4 +278,10 @@
         <item quantity="many">%1$d jogos · pasta da rede</item>
         <item quantity="other">%1$d jogos · pasta da rede</item>
     </plurals>
+    <string name="all_files_title">Permitir acesso aos arquivos</string>
+    <string name="all_files_steps">Na tela que abrir, ative \"Permitir acesso para gerenciar todos os arquivos\" para o Onzetec Games e volte com o botão Voltar: a pasta Jogos é criada na hora.\n\nSe a opção não aparecer, nas Configurações da TV vá em: Apps → Acesso especial a apps → Acesso a todos os arquivos → Onzetec Games → Permitir. Em algumas TVs: Apps → Onzetec Games → Permissões → Arquivos e mídia.</string>
+    <string name="all_files_open_app">Abrir a permissão do Onzetec Games</string>
+    <string name="all_files_open_list">Abrir \"Acesso a todos os arquivos\"</string>
+    <string name="all_files_open_details">Abrir as informações do app</string>
+    <string name="all_files_open_settings">Abrir as Configurações da TV</string>
 </resources>

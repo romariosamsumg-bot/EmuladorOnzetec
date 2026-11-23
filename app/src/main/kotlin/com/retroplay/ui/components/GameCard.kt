@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.testTag
@@ -78,7 +79,6 @@ fun GameCard(
             border = CardDefaults.border(
                 focusedBorder = Border(BorderStroke(3.dp, MaterialTheme.colorScheme.primary), shape = CardShape),
             ),
-            glow = CardDefaults.glow(focusedGlow = Glow(elevationColor = MaterialTheme.colorScheme.primary, elevation = 12.dp)),
             colors = CardDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         ) {
             GameCover(system, game, title, Modifier.fillMaxSize())
@@ -89,13 +89,14 @@ fun GameCard(
                 animationSpec = tween(if (animations == AnimationLevel.COMPLETAS) 150 else 0),
                 label = "title",
             )
-            if (alpha > 0f) {
+            if (showTitle || alpha > 0f) {
                 Text(
                     title,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().alpha(alpha).let { if (testTag != null) it.testTag("${testTag}_title") else it },
+                    // Transparência aplicada no desenho: o fade não recompõe o texto a cada quadro.
+                    modifier = Modifier.fillMaxWidth().graphicsLayer { this.alpha = alpha }.let { if (testTag != null) it.testTag("${testTag}_title") else it },
                 )
             }
         }

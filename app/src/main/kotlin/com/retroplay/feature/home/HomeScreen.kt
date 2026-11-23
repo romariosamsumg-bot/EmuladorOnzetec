@@ -151,15 +151,21 @@ private fun Hero(
         val art = listOf(CoverType.SNAP, CoverType.TITLE, CoverType.BOXART).firstOrNull { it in game.availableCovers }
         Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color(system.accentColor), background))))
         if (art != null) {
+            // O valor animado é lido só no desenho (graphicsLayer), nunca na composição: a
+            // animação contínua não recompõe a tela a cada quadro enquanto o usuário navega.
             val scale = if (kenBurns) {
                 val t = rememberInfiniteTransition(label = "kenburns")
-                t.animateFloat(1f, 1.08f, infiniteRepeatable(tween(18_000, easing = LinearEasing), RepeatMode.Reverse), label = "scale").value
-            } else 1f
+                t.animateFloat(1f, 1.08f, infiniteRepeatable(tween(18_000, easing = LinearEasing), RepeatMode.Reverse), label = "scale")
+            } else null
             AsyncImage(
                 model = CoverUrls.url(system, game, art),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().graphicsLayer { scaleX = scale; scaleY = scale },
+                modifier = Modifier.fillMaxSize().graphicsLayer {
+                    val s = scale?.value ?: 1f
+                    scaleX = s
+                    scaleY = s
+                },
             )
         }
         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to background, 0.55f to background.copy(alpha = 0.6f), 1f to Color.Transparent)))
@@ -222,7 +228,7 @@ private fun GameRow(
             contentPadding = PaddingValues(horizontal = 48.dp, vertical = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            items(row.games, key = { it.id }) { game ->
+            items(row.games, key = { it.id }, contentType = { "game" }) { game ->
                 val system = game.systemId?.let { catalog.byId(it) } ?: return@items
                 val key = "${row.type.key}/${game.id}"
                 if (row.type == RowType.ContinuePlaying) {
@@ -362,7 +368,6 @@ private fun ContinueCard(system: GameSystem, game: Game, thumbnail: String?, onC
             border = androidx.tv.material3.CardDefaults.border(
                 focusedBorder = androidx.tv.material3.Border(androidx.compose.foundation.BorderStroke(3.dp, MaterialTheme.colorScheme.primary), shape = shape),
             ),
-            glow = androidx.tv.material3.CardDefaults.glow(focusedGlow = androidx.tv.material3.Glow(MaterialTheme.colorScheme.primary, 12.dp)),
         ) {
             if (thumbnail != null) {
                 AsyncImage(model = java.io.File(thumbnail), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())

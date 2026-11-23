@@ -106,15 +106,8 @@ fun TransferScreen(viewModel: TransferViewModel = hiltViewModel()) {
         showAdbHelp = showAdbHelp,
         onGrantAccess = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val pkg = Uri.parse("package:${context.packageName}")
-                val opened = listOf(
-                    Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, pkg),
-                    Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION),
-                ).any { intent ->
-                    try { context.startActivity(intent); true } catch (e: ActivityNotFoundException) { false }
-                }
-                // Algumas TVs não têm essa tela: mostra o comando adb equivalente.
-                if (!opened) showAdbHelp = true
+                // Cada TV leva a permissão para uma tela diferente: guia com o caminho e as opções.
+                showAdbHelp = true
             } else {
                 legacyPermissions.launch(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE))
             }
@@ -131,6 +124,9 @@ fun TransferScreen(viewModel: TransferViewModel = hiltViewModel()) {
         onScan = viewModel::scanNow,
         onChooseSystem = { choosing = it },
     )
+
+    // Guia da permissão; fecha sozinho quando a pasta Jogos fica pronta (ao voltar das Configurações).
+    if (showAdbHelp && defaults?.gamesFolderReady != true) AllFilesAccessGuide(onDismiss = { showAdbHelp = false })
 
     choosing?.let { game ->
         ChooseSystemDialog(
@@ -199,14 +195,6 @@ fun TransferContent(
                     Text(stringResource(R.string.games_folder_needs_access, defaults?.gamesPath ?: "Jogos"), style = MaterialTheme.typography.bodyLarge)
                     Button(onClick = onGrantAccess, modifier = Modifier.focusRequester(firstFocus).testTag("grant_access")) {
                         Text(stringResource(R.string.grant_all_files_access))
-                    }
-                    if (showAdbHelp) {
-                        Text(
-                            stringResource(R.string.all_files_access_adb, "adb shell appops set --uid com.retroplay.tv MANAGE_EXTERNAL_STORAGE allow"),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.testTag("adb_help"),
-                        )
                     }
                 }
             }

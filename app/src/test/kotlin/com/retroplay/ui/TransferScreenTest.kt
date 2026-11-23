@@ -82,13 +82,32 @@ class TransferScreenTest {
     @Test
     fun sem_permissao_pede_acesso_aos_arquivos() {
         library.gamesFolderReady = false
+        // A TV tem a tela da permissão do app e as Configurações gerais.
+        val pm = shadowOf(compose.activity.packageManager)
+        fun screen(intent: android.content.Intent) = pm.addResolveInfoForIntent(
+            intent,
+            android.content.pm.ResolveInfo().apply {
+                activityInfo = android.content.pm.ActivityInfo().apply { packageName = "com.android.tv.settings"; name = "S" + intent.action }
+            },
+        )
+        val pkg = android.net.Uri.parse("package:" + compose.activity.packageName)
+        screen(android.content.Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, pkg))
+        screen(android.content.Intent(android.provider.Settings.ACTION_SETTINGS))
         openTransfer()
         node("grant_access").assertIsFocused()
         screenshot("20_transfer_sem_permissao")
         press(Key.DirectionCenter)
-        // Abre a tela "acesso a todos os arquivos" do sistema.
+        // Guia com o caminho na TV e só as telas que existem no aparelho.
+        node("all_files_guide").assertExists()
+        node("access_app").assertIsFocused()
+        node("access_settings").assertExists()
+        node("access_list").assertDoesNotExist()
+        node("adb_help").assertExists()
+        screenshot("21_transfer_guia_permissao")
+        press(Key.DirectionCenter)
         val intent = shadowOf(compose.activity).nextStartedActivity
         assertEquals(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, intent.action)
+        assertEquals(pkg, intent.data)
     }
 
     @Test

@@ -61,7 +61,7 @@ object AppSettings {
     // ---- Interface
     val LANGUAGE = Choice("ui.language", "system", listOf("system", "pt-BR", "en", "es"))
     val THEME = Choice("ui.theme", "dark", listOf("dark", "oled"))
-    val ACCENT = Choice("ui.accent", "VIOLETA", listOf("VIOLETA", "CIANO", "AMBAR", "VERDE", "CORAL"))
+    val ACCENT = Choice("ui.accent", "LARANJA", listOf("LARANJA", "VIOLETA", "CIANO", "AMBAR", "VERDE", "CORAL"))
     val ANIMATIONS = Choice("ui.animations", "COMPLETAS", listOf("COMPLETAS", "REDUZIDAS", "DESLIGADAS"))
     val HERO_ANIMATED = Bool("ui.hero_animated", true)
     val NAV_SOUND = Bool("ui.nav_sound", false)

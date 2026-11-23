@@ -873,7 +873,7 @@ fun optionLabels(def: SettingDef.Choice): Map<String, String> {
         AppSettings.CORE_CHANNEL -> { v -> if (v == "nightly") R.string.channel_nightly else R.string.channel_stable }
         AppSettings.THEME -> { v -> if (v == "oled") R.string.theme_oled else R.string.theme_dark }
         AppSettings.CARD_SIZE -> { v -> mapOf("small" to R.string.size_small, "medium" to R.string.size_medium, "large" to R.string.size_large)[v] }
-        AppSettings.ACCENT -> { v -> mapOf("VIOLETA" to R.string.accent_VIOLETA, "CIANO" to R.string.accent_CIANO, "AMBAR" to R.string.accent_AMBAR, "VERDE" to R.string.accent_VERDE, "CORAL" to R.string.accent_CORAL)[v] }
+        AppSettings.ACCENT -> { v -> mapOf("LARANJA" to R.string.accent_LARANJA, "VIOLETA" to R.string.accent_VIOLETA, "CIANO" to R.string.accent_CIANO, "AMBAR" to R.string.accent_AMBAR, "VERDE" to R.string.accent_VERDE, "CORAL" to R.string.accent_CORAL)[v] }
         AppSettings.ANIMATIONS -> { v -> mapOf("COMPLETAS" to R.string.anim_COMPLETAS, "REDUZIDAS" to R.string.anim_REDUZIDAS, "DESLIGADAS" to R.string.anim_DESLIGADAS)[v] }
         AppSettings.LANGUAGE -> { v -> if (v == "system") R.string.lang_system else null }
         ConsoleSettings.NEOGEO_MODE -> { v -> mapOf("mvs" to R.string.neogeo_mode_mvs, "aes" to R.string.neogeo_mode_aes, "unibios" to R.string.neogeo_mode_unibios)[v] }

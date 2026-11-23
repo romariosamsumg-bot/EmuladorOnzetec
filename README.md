@@ -149,8 +149,12 @@ Para atualizar, repita: o app novo instala por cima, mantendo jogos, saves e con
 
 ### Pasta **Jogos** (recomendado)
 
-Na primeira vez, abra **Transferir jogos → Permitir acesso aos arquivos** e ative a permissão
-"Acesso a todos os arquivos" para o Onzetec Games. O app cria esta estrutura no armazenamento da TV:
+Na primeira vez, abra **Transferir jogos → Permitir acesso aos arquivos**. Abre um guia com o
+caminho exato e botões só para as telas que a sua TV tem (a permissão do app, a lista "Acesso a
+todos os arquivos", as informações do app ou as Configurações da TV). Ative a permissão e volte
+com **Voltar**: o app percebe na hora e cria a pasta. Se a TV não tiver nenhuma dessas telas, o
+caminho manual é **Configurações → Apps → Acesso especial a apps → Acesso a todos os arquivos →
+Onzetec Games → Permitir**. O app cria esta estrutura no armazenamento da TV:
 
 ```
 Jogos/
@@ -282,11 +286,12 @@ O banco de identificação (`data/src/main/assets/db/retroplay-dat.sqlite`) é g
 ## Durante o jogo
 
 - **Menu rápido**: botão **Voltar** do controle remoto, **Guide** do gamepad ou **Select+Start**.
-  O jogo fica congelado e mudo enquanto o menu está aberto. Opções: Continuar · Salvar estado
+  O jogo fica congelado e mudo enquanto o menu está aberto. Opções: **Sair** (primeira da lista:
+  salva o automático e volta direto para o Início) · Continuar · Salvar estado
   (espaços 1–9, com miniatura e data) · Carregar estado (inclui o automático) · Rewind ·
   Voltar 5 segundos · Reiniciar · Inserir ficha (Arcade) · Acelerar (2x/4x/8x) · Shader (CRT,
   LCD, Nítido) · Proporção (original ou pixel perfeito, no SNES e Mega Drive/Master System) ·
-  Controles · Opções do núcleo · Mostrar FPS · Screenshot (vai para Imagens/Onzetec Games) · Sair.
+  Controles · Opções do núcleo · Mostrar FPS · Screenshot (vai para Imagens/Onzetec Games).
 - **Save automático** ao sair pelo menu e ao apertar Home na TV; ao voltar, o menu aparece.
   Nos detalhes do jogo, **Continuar do save** abre direto no último save; "Continuar jogando"
   na tela inicial mostra a miniatura do último save e o tempo jogado.
@@ -319,7 +324,7 @@ Categorias à esquerda, opções à direita (nome, descrição e valor atual). T
 - **Núcleos**: versão e tamanho de cada núcleo, baixar/atualizar/remover, voltar à versão
   anterior, baixar todos e canal (Estável: só quando você pede; Nightly: verifica 1× por dia).
 - **Interface**: perfis, perguntar o perfil ao abrir, idioma (Português, English, Español), tema escuro ou preto OLED, cor de
-  destaque, animações, destaque animado, som de navegação, tamanho das capas e fileiras da Início
+  destaque (padrão: Laranja Onzetec), animações, destaque animado, som de navegação, tamanho das capas e fileiras da Início
   (mostrar/ocultar/ordenar).
 - **Rede**: porta e PIN fixo da transferência pelo celular; pasta da rede (SMB); baixar capas e
   capas só no Wi-Fi.
@@ -356,7 +361,7 @@ run-ahead.
 3. Com o gamepad: o D-pad (ou o analógico) move o quadrado; B, A, Y e X mudam a cor de fundo e
    tocam tons diferentes; L, R, Start e Select só mudam a cor. Pelo controle remoto da TV, as
    setas movem o quadrado e o OK equivale ao B.
-4. **Voltar** abre o menu rápido (Sair fica no fim da lista).
+4. **Voltar** abre o menu rápido (Sair é a primeira opção e leva para o Início).
 
 Para testar outros jogos, coloque-os na pasta **Jogos** (veja acima) ou use **Escolher
 arquivo…** na página do console. `.zip`/`.7z` de consoles domésticos são extraídos para um

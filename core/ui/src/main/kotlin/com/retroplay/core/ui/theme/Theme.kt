@@ -11,7 +11,7 @@ enum class AnimationLevel { COMPLETAS, REDUZIDAS, DESLIGADAS }
 
 @Immutable
 data class RetroUiPrefs(
-    val accent: AccentColor = AccentColor.VIOLETA,
+    val accent: AccentColor = AccentColor.LARANJA,
     val oledBlack: Boolean = false,
     val animations: AnimationLevel = AnimationLevel.COMPLETAS,
     /** Movimento lento (Ken Burns) no destaque da Início. */

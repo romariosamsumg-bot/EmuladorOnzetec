@@ -660,7 +660,15 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         val thumb = lastThumbnail
         ioScope.launch {
             if (autoSave) writeState(SaveSlot.AUTO, thumb, onEmulationThread = true)
-            withContext(Dispatchers.Main) { finish() }
+            withContext(Dispatchers.Main) {
+                // "Sair" leva direto à tela Início (não à página de onde o jogo foi aberto).
+                startActivity(
+                    android.content.Intent(this@GameActivity, com.retroplay.MainActivity::class.java)
+                        .putExtra(com.retroplay.MainActivity.EXTRA_GO_HOME, true)
+                        .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                )
+                finish()
+            }
         }
     }
 
