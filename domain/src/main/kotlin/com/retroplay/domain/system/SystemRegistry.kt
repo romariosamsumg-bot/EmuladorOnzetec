@@ -60,6 +60,7 @@ object SystemRegistry : SystemCatalog {
         ),
         accentColor = 0xFF7E6BD6,
         iconKey = "pad_16bit_rounded",
+        coverAspect = 1.38f,
         libretroDatabaseName = "Nintendo - Super Nintendo Entertainment System",
         folderAliases = setOf("snes", "sfc", "supernintendo", "superfamicom", "supernes", "supernintendoentertainmentsystem"),
     )
@@ -81,6 +82,7 @@ object SystemRegistry : SystemCatalog {
         ),
         accentColor = 0xFF2F6FDE,
         iconKey = "pad_16bit_crescent",
+        coverAspect = 0.70f,
         libretroDatabaseName = "Sega - Mega Drive - Genesis",
         folderAliases = setOf("megadrive", "genesis", "md", "segagenesis", "segamegadrive", "megadrivegenesis"),
     )
@@ -101,6 +103,7 @@ object SystemRegistry : SystemCatalog {
         ),
         accentColor = 0xFFD9413B,
         iconKey = "pad_8bit",
+        coverAspect = 0.70f,
         libretroDatabaseName = "Sega - Master System - Mark III",
         folderAliases = setOf("mastersystem", "sms", "segamastersystem", "markiii", "mark3"),
     )
@@ -134,6 +137,7 @@ object SystemRegistry : SystemCatalog {
         ),
         accentColor = 0xFFE2A93B,
         iconKey = "arcade_stick",
+        coverAspect = 0.72f,
         libretroDatabaseName = "MAME",
         folderAliases = setOf("arcade", "arcades", "fliperama", "mame", "mame2000", "mame037", "mame037b11", "fbneo", "fba", "finalburn",
             "neogeo", "neo", "mvs", "aes", "cps1", "cps2", "cps3"),

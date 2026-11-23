@@ -46,13 +46,14 @@ fun GameCover(
     val url = game?.let { CoverUrls.url(system, it) }
     // O card gerado só é desenhado até a capa chegar (antes ficava sempre por baixo dela).
     var loaded by remember(url) { mutableStateOf(false) }
-    Box(modifier) {
+    Box(modifier.background(Color(0xFF0E0E14))) {
         if (!loaded) GeneratedCover(system, title, compact, Modifier.fillMaxSize())
         if (url != null) {
             AsyncImage(
                 model = url,
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
+                // Inteira, sem cortar: o card já tem a proporção do console; sobras ficam escuras.
+                contentScale = ContentScale.Fit,
                 onSuccess = { loaded = true },
                 modifier = Modifier.fillMaxSize(),
             )

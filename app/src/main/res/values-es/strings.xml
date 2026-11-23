@@ -274,4 +274,5 @@
     <string name="all_files_open_settings">Abrir los Ajustes de la TV</string>
     <string name="phone_steps_short">Móvil en la misma red Wi-Fi que la TV: apunta la cámara al código QR o abre la dirección en el navegador.</string>
     <string name="all_files_adb_hint">Si nada funciona: en el ordenador, con la depuración ADB activada, ejecuta %1$s, o usa “Añadir carpeta o memoria USB” en la pantalla Transferir.</string>
+    <string name="made_by">Hecho por Romário Marcelino</string>
 </resources>

@@ -160,7 +160,7 @@ fun SearchContent(
                 items(results, key = { it.id }) { game ->
                     val system = game.systemId?.let { SystemRegistry.byId(it) } ?: return@items
                     GameCard(
-                        system = system, game = game, title = game.title, width = 140.dp,
+                        system = system, game = game, title = game.title, width = 140.dp, mixedGrid = true,
                         onClick = { onOpenGame(game) },
                         cardModifier = Modifier.rememberFocus(memory, "result_${game.id}"),
                         testTag = "result_${game.id}",

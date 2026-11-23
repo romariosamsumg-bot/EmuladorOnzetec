@@ -285,4 +285,5 @@
     <string name="all_files_open_settings">Abrir as Configurações da TV</string>
     <string name="phone_steps_short">Celular na mesma rede Wi-Fi da TV: aponte a câmera para o QR code ou abra o endereço no navegador.</string>
     <string name="all_files_adb_hint">Se nada funcionar: no computador, com a depuração ADB ativada, rode %1$s, ou use “Adicionar pasta ou pendrive” na tela Transferir.</string>
+    <string name="made_by">Feito por Romário Marcelino</string>
 </resources>

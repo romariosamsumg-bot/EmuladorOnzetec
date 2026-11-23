@@ -80,6 +80,7 @@ fun FavoritesScreen(onOpenGame: (Game) -> Unit, onBrowse: () -> Unit, viewModel:
                 GameCard(
                     system = system, game = game, title = game.title, onClick = { onOpenGame(game) },
                     cardModifier = (if (i == 0) Modifier.focusRequester(first) else Modifier).rememberFocus(memory, "fav_${game.id}"),
+                    mixedGrid = true,
                     testTag = "fav_${game.id}",
                 )
             }

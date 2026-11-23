@@ -125,7 +125,7 @@ fun ConsoleScreen(
     val list = games.orEmpty()
 
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(150.dp * LocalRetroUiPrefs.current.cardScale),
+        columns = GridCells.Adaptive((if (system.coverAspect > 1f) 220.dp else 150.dp) * LocalRetroUiPrefs.current.cardScale),
         modifier = Modifier.fillMaxSize().testTag("screen_console_${system.id.value}"),
         contentPadding = PaddingValues(start = 48.dp, end = 48.dp, top = 36.dp, bottom = 40.dp),
         horizontalArrangement = Arrangement.spacedBy(24.dp),
@@ -157,6 +157,7 @@ fun ConsoleScreen(
                 GameCard(
                     system = system, game = null, title = stringResource(R.string.test_rom_title), onClick = onPlayTestRom,
                     cardModifier = Modifier.focusRequester(firstItem).rememberFocus(memory, "testrom"),
+                    fillWidth = true,
                     testTag = "game_testrom",
                 )
             }
@@ -166,6 +167,7 @@ fun ConsoleScreen(
             GameCard(
                 system = system, game = game, title = game.title, onClick = { onOpenGame(game) },
                 cardModifier = (if (first) Modifier.focusRequester(firstItem) else Modifier).rememberFocus(memory, "g${game.id}"),
+                fillWidth = true,
                 testTag = "game_${game.id}",
             )
         }

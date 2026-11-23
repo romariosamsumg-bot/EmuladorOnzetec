@@ -61,6 +61,11 @@ data class GameSystem(
     val accentColor: Long,
     /** Chave do ícone genérico desenhado pelo app (não usa logos oficiais). */
     val iconKey: String,
+    /**
+     * Proporção (largura/altura) das capas da época: caixas de SNES são deitadas, de Mega
+     * Drive/Master System e flyers de arcade são em pé. Os cards seguem essa proporção.
+     */
+    val coverAspect: Float = 3f / 4f,
     /** Nome do sistema no libretro-database / libretro-thumbnails. */
     val libretroDatabaseName: String,
     /**

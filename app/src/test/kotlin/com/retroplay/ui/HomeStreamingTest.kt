@@ -107,7 +107,7 @@ class HomeStreamingTest {
     }
 
     @Test
-    fun fileiras_por_dpad_nome_apos_600ms_e_foco_restaurado_ao_voltar() {
+    fun fileiras_por_dpad_nome_no_foco_e_foco_restaurado_ao_voltar() {
         waitFor("hero_play")
         press(Key.DirectionDown)
         // 1ª fileira: Continuar jogando → Super Mario World
@@ -118,11 +118,9 @@ class HomeStreamingTest {
         node("card_recent/6").assertIsFocused()
         press(Key.DirectionRight)
         node("card_recent/5").assertIsFocused()
-        // O nome aparece abaixo do card só depois de 600 ms de foco.
-        node("card_recent/5_title").assertDoesNotExist()
-        compose.mainClock.advanceTimeBy(700)
-        compose.waitForIdle()
+        // O nome aparece numa etiqueta logo abaixo do card focado (200 ms); o do anterior some.
         node("card_recent/5_title").assertExists()
+        node("card_recent/6_title").assertDoesNotExist()
         screenshot("31_home_fileiras")
         press(Key.DirectionCenter)
         waitFor("screen_details")

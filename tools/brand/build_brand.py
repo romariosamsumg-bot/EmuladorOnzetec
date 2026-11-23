@@ -98,6 +98,16 @@ def main():
     # Logo para dentro do app (tela inicial vazia, Sobre).
     lw = 900
     out("drawable-nodpi", "logo_onzetec.png", logo.resize((lw, int(logo.height * lw / logo.width)), Image.LANCZOS))
+
+    # Só o símbolo (sem o texto ONZETEC GAMES): topo do menu lateral recolhido. O texto é a
+    # última faixa opaca do logo, separada do símbolo por uma linha transparente.
+    alpha = logo.getchannel("A")
+    rows = [alpha.crop((0, y, logo.width, y + 1)).getextrema()[1] > 20 for y in range(logo.height)]
+    gap = max((y for y in range(1, logo.height) if rows[y - 1] and not rows[y]), default=logo.height)
+    mark = logo.crop((0, 0, logo.width, gap))
+    mark = mark.crop(mark.getchannel("A").point(lambda v: 255 if v > 20 else 0).getbbox())
+    mw = 256
+    out("drawable-nodpi", "logo_mark.png", mark.resize((mw, int(mark.height * mw / mark.width)), Image.LANCZOS))
     print("ok")
 
 

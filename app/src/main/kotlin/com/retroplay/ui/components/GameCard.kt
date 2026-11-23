@@ -1,5 +1,13 @@
 package com.retroplay.ui.components
 
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -41,9 +49,10 @@ import kotlinx.coroutines.delay
 private val CardShape = RoundedCornerShape(10.dp)
 
 /**
- * Card de jogo em proporção de capa. Ao receber foco: cresce ~1.1x, ganha borda luminosa e
- * sombra; depois de 600 ms mostra o nome abaixo. Animações curtas (150 ms) ou nenhuma,
- * conforme a preferência de animações.
+ * Card de jogo na proporção das capas do console (SNES deitado; Mega Drive, Master System e
+ * Arcade em pé), então a capa aparece inteira. Nas fileiras todos os cards têm a mesma altura
+ * ([fillWidth] = false); nas grades o card ocupa a largura da célula.
+ * Ao receber foco: cresce ~1.1x, ganha borda e mostra o nome numa etiqueta destacada.
  */
 @Composable
 fun GameCard(
@@ -54,24 +63,41 @@ fun GameCard(
     modifier: Modifier = Modifier,
     cardModifier: Modifier = Modifier,
     width: Dp = 150.dp,
+    fillWidth: Boolean = false,
+    /** Grade com consoles misturados: a capa cabe numa caixa de célula × 1,3 (altura igual). */
+    mixedGrid: Boolean = false,
     testTag: String? = null,
 ) {
+    if (mixedGrid) {
+        BoxWithConstraints(modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
+            val boxH = maxWidth * 1.3f
+            val w = if (maxWidth / boxH > system.coverAspect) boxH * system.coverAspect else maxWidth
+            Box(Modifier.fillMaxWidth().height(boxH + 58.dp), contentAlignment = Alignment.BottomCenter) {
+                GameCard(system, game, title, onClick, Modifier.width(w), cardModifier, width, fillWidth = true, mixedGrid = false, testTag = testTag)
+            }
+        }
+        return
+    }
     val animations = LocalRetroUiPrefs.current.animations
+    val scale = LocalRetroUiPrefs.current.cardScale
     var focused by remember { mutableStateOf(false) }
     var showTitle by remember { mutableStateOf(false) }
     LaunchedEffect(focused) {
         showTitle = false
         if (focused) {
-            if (animations != AnimationLevel.DESLIGADAS) delay(600)
+            if (animations != AnimationLevel.DESLIGADAS) delay(200)
             showTitle = true
         }
     }
-    Column(modifier.width(width * LocalRetroUiPrefs.current.cardScale)) {
+    val ratio = system.coverAspect
+    // Altura comum das fileiras: a de um card em pé de [width] de largura (3:4) × 0,9.
+    val rowHeight = width * scale * 1.2f
+    val outer = if (fillWidth) modifier.fillMaxWidth() else modifier.width(rowHeight * ratio)
+    Column(outer, horizontalAlignment = Alignment.CenterHorizontally) {
         Card(
             onClick = onClick,
             modifier = cardModifier
-                .fillMaxWidth()
-                .aspectRatio(3f / 4f)
+                .let { if (fillWidth) it.fillMaxWidth().aspectRatio(ratio) else it.size(rowHeight * ratio, rowHeight) }
                 .onFocusChanged { focused = it.isFocused }
                 .let { if (testTag != null) it.testTag(testTag) else it },
             shape = CardDefaults.shape(CardShape),
@@ -83,7 +109,8 @@ fun GameCard(
         ) {
             GameCover(system, game, title, Modifier.fillMaxSize())
         }
-        Box(Modifier.fillMaxWidth().height(44.dp).padding(top = 10.dp)) {
+        // Espaço fixo (o card crescido não cobre a etiqueta) e etiqueta só com foco.
+        Box(Modifier.fillMaxWidth().height(58.dp).padding(top = 16.dp), contentAlignment = Alignment.TopCenter) {
             val alpha by animateFloatAsState(
                 targetValue = if (showTitle) 1f else 0f,
                 animationSpec = tween(if (animations == AnimationLevel.COMPLETAS) 150 else 0),
@@ -92,11 +119,20 @@ fun GameCard(
             if (showTitle || alpha > 0f) {
                 Text(
                     title,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center,
                     // Transparência aplicada no desenho: o fade não recompõe o texto a cada quadro.
-                    modifier = Modifier.fillMaxWidth().graphicsLayer { this.alpha = alpha }.let { if (testTag != null) it.testTag("${testTag}_title") else it },
+                    modifier = Modifier
+                        .widthIn(min = 96.dp)
+                        .graphicsLayer { this.alpha = alpha }
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.primary)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                        .let { if (testTag != null) it.testTag("${testTag}_title") else it },
                 )
             }
         }

@@ -231,6 +231,9 @@ A senha fica só na TV, fora do backup. Para tirar a pasta, use **Transferir jog
   console**; a escolha é lembrada nas próximas verificações.
 - Capas vêm do projeto **libretro-thumbnails** (boxart, tela de título e snap). Sem capa, o app
   gera um card com o nome do jogo e a cor do console. Cache em disco limitado a 200 MB.
+- Os cards seguem o formato das caixas da época, e a capa aparece **inteira**, sem cortes:
+  Super Nintendo deitado (1,38:1); Mega Drive, Master System e Arcade (flyer) em pé (~0,7:1).
+  Nas fileiras todos têm a mesma altura; com foco, o nome aparece numa etiqueta na cor de destaque.
 
 ### Arcade: romsets e BIOS do Neo Geo
 
@@ -268,6 +271,9 @@ O banco de identificação (`data/src/main/assets/db/retroplay-dat.sqlite`) é g
 `python3 tools/dat/build_database.py <saida.sqlite>` a partir dos DATs públicos.
 
 ## Usando o app
+
+O menu lateral mostra o símbolo do Onzetec Games; aberto, mostra o logo completo e, no rodapé,
+"Feito por Romário Marcelino".
 
 - **Início**: jogo em destaque (o último jogado ou um aleatório) com ▶ Jogar e ＋ Favoritos, e
   fileiras: Continuar jogando, Favoritos, Adicionados recentemente, uma por console, Mais jogados

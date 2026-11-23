@@ -1,5 +1,11 @@
 package com.retroplay.ui.shell
 
+import com.retroplay.R
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.Image
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -122,8 +128,26 @@ fun RetroPlayShell(
                     .focusProperties { onEnter = { itemRequesters.getValue(current).requestFocus() } }
                     .focusGroup()
                     .testTag("drawer"),
-                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
+                // Marca: só o símbolo com o menu recolhido; logo completo com ele aberto.
+                // Larguras fixas (sem fillMaxWidth): o menu recolhido não pode crescer sobre o conteúdo.
+                Box(Modifier.width(if (open) 220.dp else 64.dp).height(64.dp), contentAlignment = if (open) Alignment.CenterStart else Alignment.Center) {
+                    if (open) {
+                        Image(
+                            painterResource(R.drawable.logo_onzetec),
+                            contentDescription = stringResource(R.string.app_name),
+                            modifier = Modifier.height(64.dp).padding(start = 8.dp).testTag("drawer_logo"),
+                        )
+                    } else {
+                        Image(
+                            painterResource(R.drawable.logo_mark),
+                            contentDescription = stringResource(R.string.app_name),
+                            modifier = Modifier.width(52.dp).testTag("drawer_mark"),
+                        )
+                    }
+                }
+                Spacer(Modifier.weight(1f))
                 TopLevelDestination.entries.forEach { dest ->
                     NavigationDrawerItem(
                         selected = dest == current,
@@ -137,6 +161,18 @@ fun RetroPlayShell(
                             .testTag(dest.testTag),
                     ) {
                         Text(stringResource(dest.labelRes))
+                    }
+                }
+                Spacer(Modifier.weight(1f))
+                Box(Modifier.height(40.dp), contentAlignment = Alignment.BottomStart) {
+                    if (open) {
+                        Text(
+                            stringResource(R.string.made_by),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            modifier = Modifier.padding(start = 12.dp).testTag("drawer_credit"),
+                        )
                     }
                 }
             }
