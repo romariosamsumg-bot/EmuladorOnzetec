@@ -35,11 +35,22 @@ class RoomProfileRepository(
 
     override suspend fun activeId(): Long = active.first().id
 
-    override suspend fun create(name: String): Profile {
+    override suspend fun create(name: String, avatar: String?, accent: String?): Profile {
         val count = db.profiles().all().size
-        val entity = ProfileEntity(name = name.trim().ifEmpty { "Jogador ${count + 1}" }.take(MAX_NAME), color = Profile.colorFor(count), createdAt = clock())
+        val entity = ProfileEntity(
+            name = name.trim().ifEmpty { "Jogador ${count + 1}" }.take(MAX_NAME),
+            color = Profile.colorFor(count),
+            createdAt = clock(),
+            avatar = avatar,
+            accent = accent ?: Profile.DEFAULT_ACCENT,
+        )
         val id = db.profiles().insert(entity)
         return toProfile(entity.copy(id = id))
+    }
+
+    override suspend fun update(id: Long, name: String, avatar: String, accent: String) {
+        val clean = name.trim().take(MAX_NAME).ifEmpty { db.profiles().all().firstOrNull { it.id == id }?.name ?: "Jogador" }
+        db.profiles().update(id, clean, avatar, accent)
     }
 
     override suspend fun rename(id: Long, name: String) {
@@ -63,8 +74,8 @@ class RoomProfileRepository(
     }
 
     companion object {
-        const val MAX_NAME = 20
+        const val MAX_NAME = Profile.MAX_NAME
         val DEFAULT = Profile(Profile.DEFAULT_ID, "Jogador 1", Profile.colorFor(0))
-        fun toProfile(e: ProfileEntity) = Profile(e.id, e.name, e.color)
+        fun toProfile(e: ProfileEntity) = Profile(e.id, e.name, e.color, e.avatar, e.accent)
     }
 }

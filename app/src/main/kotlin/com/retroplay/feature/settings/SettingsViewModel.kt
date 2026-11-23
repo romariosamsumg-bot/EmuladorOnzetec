@@ -165,6 +165,15 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { profileRepo.switchTo(profileRepo.create(name).id) }
     }
 
+    /** Novo perfil completo (avatar, nome e cor) e já o ativa. */
+    fun createProfile(name: String, avatar: String, accent: String) {
+        viewModelScope.launch { profileRepo.switchTo(profileRepo.create(name, avatar, accent).id) }
+    }
+
+    fun updateActiveProfile(name: String, avatar: String, accent: String) {
+        viewModelScope.launch { profileRepo.update(profileRepo.activeId(), name, avatar, accent) }
+    }
+
     fun renameActiveProfile(name: String) { viewModelScope.launch { profileRepo.rename(profileRepo.activeId(), name) } }
 
     fun deleteActiveProfile() { viewModelScope.launch { profileRepo.delete(profileRepo.activeId()) } }

@@ -364,4 +364,21 @@
     <string name="combo_l3_r3">L3 + R3 (apertar os dois analógicos)</string>
     <string name="combo_l1_r1_start">L1 + R1 + Start</string>
     <string name="combo_off">Desligado (só o Voltar)</string>
+    <string name="profile_add">Adicionar perfil</string>
+    <string name="profile_manage">Gerenciar perfis</string>
+    <string name="profile_manage_done">Concluir</string>
+    <string name="profile_manage_title">Gerenciar perfis</string>
+    <string name="profile_create_title">Crie seu perfil</string>
+    <string name="profile_edit_title">Editar perfil</string>
+    <string name="profile_first_run_hint">Escolha um avatar, um nome e a cor do tema. Cada perfil tem seus favoritos, histórico e saves.</string>
+    <string name="profile_avatar">Avatar</string>
+    <string name="profile_name">Nome</string>
+    <string name="profile_color">Cor do tema</string>
+    <string name="profile_start">Começar</string>
+    <string name="profile_delete_this">Excluir perfil</string>
+    <string name="profile_default_name">Jogador %1$d</string>
+    <string name="welcome_hello">Olá, %1$s!</string>
+    <string name="nav_switch_profile">Trocar perfil</string>
+    <string name="profile_edit_row">Editar perfil</string>
+    <string name="profile_edit_row_desc">Avatar, nome e cor do tema do perfil atual.</string>
 </resources>

@@ -94,7 +94,13 @@ class ConsoleScreenTest {
         // Espera a Início carregar e pôr o foco no conteúdo (senão o ← pode se perder).
         compose.waitUntil(5_000) { compose.onAllNodes(androidx.compose.ui.test.isFocused()).fetchSemanticsNodes().isNotEmpty() }
         compose.waitForIdle()
-        press(Key.DirectionLeft)
+        // A Início pode trocar de conteúdo quando a biblioteca chega: insiste no ← até o menu.
+        repeat(5) {
+            if (compose.onAllNodes(androidx.compose.ui.test.hasTestTag("nav_home") and androidx.compose.ui.test.isFocused(), useUnmergedTree = true).fetchSemanticsNodes().isEmpty()) {
+                press(Key.DirectionLeft)
+            }
+        }
+        node("nav_home").assertIsFocused()
         press(Key.DirectionDown)
         press(Key.DirectionDown)
         node("nav_consoles").assertIsFocused()

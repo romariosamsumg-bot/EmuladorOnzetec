@@ -32,7 +32,9 @@ import com.retroplay.ui.shell.RetroPlayShell
 import com.retroplay.ui.components.TvCanvas
 import com.retroplay.ui.components.applyPhoneWindow
 import com.retroplay.domain.profile.ProfileRepository
-import com.retroplay.feature.profiles.ProfilePickerScreen
+import com.retroplay.feature.profiles.StartupActions
+import com.retroplay.feature.profiles.StartupFlow
+import com.retroplay.feature.profiles.StartupOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -54,26 +56,14 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var coreUpdater: CoreAutoUpdater
     @Inject lateinit var profiles: ProfileRepository
 
-    /**
-     * "Quem vai jogar?": com mais de um perfil e a opção ligada, pergunta uma vez ao abrir o app.
-     */
-    @Composable
-    private fun ProfileGate(snap: SettingsSnapshot, content: @Composable () -> Unit) {
-        // Decidido uma única vez, ao abrir: criar um perfil depois não mostra a pergunta no meio do uso.
-        var ask by rememberSaveable { mutableStateOf<Boolean?>(null) }
-        val list by profiles.profiles.collectAsStateWithLifecycle(null)
-        val all = list
-        if (ask == null && ready && all != null) ask = snap.value(AppSettings.PROFILE_ASK) && all.size > 1
-        if (ask == true && all != null) {
-            val activeId = snap.value(AppSettings.ACTIVE_PROFILE).toLongOrNull() ?: 1L
-            ProfilePickerScreen(all, activeId) { p ->
-                lifecycleScope.launch { profiles.switchTo(p.id) }
-                ask = false
-            }
-        } else {
-            // Enquanto decide (fração de segundo, coberta pela splash), a interface já aparece.
-            content()
-        }
+    @Inject lateinit var startupOptions: StartupOptions
+
+    /** Ações de perfil da trilha de inicialização. */
+    private val startupActions = object : StartupActions {
+        override suspend fun switchTo(id: Long) = profiles.switchTo(id)
+        override suspend fun create(name: String, avatar: String, accent: String) = profiles.create(name, avatar, accent)
+        override suspend fun update(id: Long, name: String, avatar: String, accent: String) = profiles.update(id, name, avatar, accent)
+        override suspend fun delete(id: Long) { profiles.delete(id) }
     }
 
     @Volatile private var settingsReady = false
@@ -101,14 +91,27 @@ class MainActivity : ComponentActivity() {
         applyPhoneWindow()
         setContent {
             val snap by settings.snapshots.collectAsStateWithLifecycle(SettingsSnapshot())
-            RetroPlayTheme(prefs = uiPrefs(snap)) {
+            val list by profiles.profiles.collectAsStateWithLifecycle(null)
+            val active by profiles.active.collectAsStateWithLifecycle(null)
+            // A cor do tema é a do perfil ativo.
+            RetroPlayTheme(prefs = uiPrefs(snap, active?.accent)) {
                 // Surface raiz: define fundo e cor de conteúdo padrão (texto/ícones claros).
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     shape = RectangleShape,
                     colors = SurfaceDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
                 ) {
-                    TvCanvas { ProfileGate(snap) { RetroPlayShell(goHomeRequests = goHome) } }
+                    TvCanvas {
+                        StartupFlow(
+                            options = startupOptions,
+                            profiles = list.takeIf { ready },
+                            activeId = active?.id ?: snap.value(AppSettings.ACTIVE_PROFILE).toLongOrNull() ?: 1L,
+                            ask = snap.value(AppSettings.PROFILE_ASK),
+                            actions = startupActions,
+                        ) { switchProfile ->
+                            RetroPlayShell(goHomeRequests = goHome, profile = active, onSwitchProfile = switchProfile)
+                        }
+                    }
                 }
             }
         }
@@ -156,8 +159,8 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val EXTRA_GO_HOME = "go_home"
 
-        fun uiPrefs(snap: SettingsSnapshot) = RetroUiPrefs(
-            accent = runCatching { AccentColor.valueOf(snap.value(AppSettings.ACCENT)) }.getOrDefault(AccentColor.LARANJA),
+        fun uiPrefs(snap: SettingsSnapshot, profileAccent: String? = null) = RetroUiPrefs(
+            accent = runCatching { AccentColor.valueOf(profileAccent ?: snap.value(AppSettings.ACCENT)) }.getOrDefault(AccentColor.LARANJA),
             oledBlack = snap.value(AppSettings.THEME) == "oled",
             animations = runCatching { AnimationLevel.valueOf(snap.value(AppSettings.ANIMATIONS)) }.getOrDefault(AnimationLevel.COMPLETAS),
             heroAnimated = snap.value(AppSettings.HERO_ANIMATED),

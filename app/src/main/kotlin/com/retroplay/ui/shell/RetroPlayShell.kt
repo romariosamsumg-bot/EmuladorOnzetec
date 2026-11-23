@@ -87,6 +87,10 @@ private val CollapsedDrawerWidth = 88.dp
 fun RetroPlayShell(
     navController: NavHostController = rememberNavController(),
     goHomeRequests: kotlinx.coroutines.flow.Flow<Unit> = kotlinx.coroutines.flow.emptyFlow(),
+    /** Perfil ativo (avatar e nome no menu lateral). */
+    profile: com.retroplay.domain.profile.Profile? = null,
+    /** "Trocar perfil" no menu lateral: volta para "Quem vai jogar?". */
+    onSwitchProfile: (() -> Unit)? = null,
 ) {
     // Volta à Início limpando as telas abertas por cima (ex.: detalhes do jogo).
     androidx.compose.runtime.LaunchedEffect(navController, goHomeRequests) {
@@ -145,6 +149,17 @@ fun RetroPlayShell(
                             contentDescription = stringResource(R.string.app_name),
                             modifier = Modifier.width(52.dp).testTag("drawer_mark"),
                         )
+                    }
+                }
+                // Perfil ativo: avatar (menu recolhido) ou avatar + nome; abre "Quem vai jogar?".
+                if (profile != null && onSwitchProfile != null) {
+                    NavigationDrawerItem(
+                        selected = false,
+                        onClick = onSwitchProfile,
+                        leadingContent = { com.retroplay.feature.profiles.ProfileAvatar(profile, 24.dp) },
+                        modifier = Modifier.testTag("nav_profile"),
+                    ) {
+                        Text(profile.name, maxLines = 1)
                     }
                 }
                 Spacer(Modifier.weight(1f))

@@ -42,7 +42,7 @@ class BackupManager(
     data class SettingsFile(val format: Int = FORMAT, val settings: Map<String, String>)
 
     @Serializable
-    data class ProfileJson(val id: Long, val name: String, val color: Int, val createdAt: Long)
+    data class ProfileJson(val id: Long, val name: String, val color: Int, val createdAt: Long, val avatar: String? = null, val accent: String? = null)
 
     @Serializable
     data class StatsJson(val profileId: Long, val gameKey: String, val favorite: Boolean, val playCount: Int, val lastPlayedAt: Long?, val playTimeMs: Long)
@@ -56,7 +56,7 @@ class BackupManager(
     suspend fun export(out: OutputStream): BackupSummary {
         val raw = settings.current().raw
         val library = LibraryJson(
-            profiles = db.profiles().all().map { ProfileJson(it.id, it.name, it.color, it.createdAt) },
+            profiles = db.profiles().all().map { ProfileJson(it.id, it.name, it.color, it.createdAt, it.avatar, it.accent) },
             stats = db.stats().all().map { StatsJson(it.profileId, it.gameKey, it.favorite, it.playCount, it.lastPlayedAt, it.playTimeMs) },
             customizations = db.games().customizations().map { CustomJson(it.gameKey, it.customTitle, it.coverOverride) },
         )
@@ -130,7 +130,7 @@ class BackupManager(
         settingsFile?.let { settings.importRaw(it.settings, replace = true) }
         library?.let { lib ->
             db.withTransaction {
-                db.profiles().upsert(lib.profiles.map { ProfileEntity(it.id, it.name, it.color, it.createdAt) })
+                db.profiles().upsert(lib.profiles.map { ProfileEntity(it.id, it.name, it.color, it.createdAt, it.avatar, it.accent ?: "LARANJA") })
                 db.stats().upsert(lib.stats.map { PlayStatsEntity(it.profileId, it.gameKey, it.favorite, it.playCount, it.lastPlayedAt, it.playTimeMs) })
                 lib.customizations.forEach { db.games().applyCustomization(it.gameKey, it.customTitle, it.coverOverride) }
             }

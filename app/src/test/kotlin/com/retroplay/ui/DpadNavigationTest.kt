@@ -59,6 +59,17 @@ class DpadNavigationTest {
         compose.waitForIdle()
     }
 
+    /** Leva o foco ao menu (item Início), insistindo enquanto a Início termina de montar. */
+    private fun toMenu() {
+        compose.waitUntil(5_000) { compose.onAllNodes(androidx.compose.ui.test.isFocused()).fetchSemanticsNodes().isNotEmpty() }
+        repeat(5) {
+            if (compose.onAllNodes(androidx.compose.ui.test.hasTestTag("nav_home") and androidx.compose.ui.test.isFocused(), useUnmergedTree = true).fetchSemanticsNodes().isEmpty()) {
+                press(Key.DirectionLeft)
+            }
+        }
+        node("nav_home").assertIsFocused()
+    }
+
     private fun node(tag: String): SemanticsNodeInteraction = compose.onNodeWithTag(tag, useUnmergedTree = true)
 
     @Test
@@ -73,7 +84,7 @@ class DpadNavigationTest {
         node("home_transfer").assertIsFocused()
 
         // Esquerda → menu lateral (item Início selecionado)
-        press(Key.DirectionLeft)
+        toMenu()
         node("nav_home").assertIsFocused()
         screenshot("02_drawer_open")
 
@@ -103,7 +114,7 @@ class DpadNavigationTest {
     @Test
     fun voltar_no_conteudo_vai_ao_menu_e_depois_ao_inicio() {
         // Vai para Consoles pelo D-pad.
-        press(Key.DirectionLeft)
+        toMenu()
         press(Key.DirectionDown)
         press(Key.DirectionDown)
         node("nav_consoles").assertIsFocused()

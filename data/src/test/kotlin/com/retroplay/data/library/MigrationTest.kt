@@ -86,4 +86,21 @@ class MigrationTest {
             db.query("SELECT system FROM bios").use { c -> assertTrue(c.moveToFirst()); assertEquals("arcade", c.getString(0)) }
         }
     }
+
+    @Test
+    fun `v4 para v5 mantem os perfis e os marca como nao configurados`() {
+        helper.createDatabase("migracao5.db", 4).use { db ->
+            db.execSQL("INSERT INTO profile(id, name, color, created_at) VALUES (1, 'Pai', 1, 0), (2, 'Ana', 2, 0)")
+        }
+        helper.runMigrationsAndValidate("migracao5.db", 5, true, MIGRATION_4_5).use { db ->
+            db.query("SELECT name, avatar, accent FROM profile ORDER BY id").use { c ->
+                c.moveToFirst()
+                assertEquals("Pai", c.getString(0))
+                assertTrue(c.isNull(1))
+                assertEquals("LARANJA", c.getString(2))
+                c.moveToNext()
+                assertEquals("Ana", c.getString(0))
+            }
+        }
+    }
 }

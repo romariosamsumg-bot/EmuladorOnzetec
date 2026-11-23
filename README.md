@@ -286,11 +286,19 @@ O menu lateral mostra o símbolo do Onzetec Games; aberto, mostra o logo complet
 - **Detalhes do jogo** (OK num card): Jogar, Favoritar, Opções do jogo (Configurações deste jogo,
   Renomear, escolher a capa: caixa, tela de título ou cena) e Apagar (pede confirmação; o foco
   começa em "Cancelar").
-- **Perfis**: cada pessoa da casa tem seus favoritos, "Continuar jogando", mais jogados, tempo de
-  jogo e saves. Crie e troque em **Configurações → Interface → Perfis**; com mais de um perfil o app
-  pergunta **"Quem vai jogar?"** ao abrir (dá para desligar). Os jogos e as configurações são
-  comuns a todos. Favoritos e histórico ficam ligados ao arquivo do jogo e sobrevivem a uma nova
-  varredura ou a "reconstruir a biblioteca".
+- **Abertura e perfis**: o app abre com o logo do Onzetec Games e, em seguida:
+  - **na primeira vez**, "Crie seu perfil": escolha um **avatar** (14 ilustrações próprias), um
+    **nome** e a **cor do tema** (Laranja Onzetec, Violeta, Ciano, Âmbar, Verde ou Coral). O tema do
+    app inteiro passa a usar a cor do perfil;
+  - **nas próximas**, **"Quem vai jogar?"**: escolha o perfil, **Adicionar perfil** (até 8) ou
+    **Gerenciar perfis** (editar avatar, nome e cor, ou excluir);
+  - uma tela de **boas-vindas** ("Olá, Nome!") com o avatar faz a transição para a Início.
+  No **menu lateral**, o perfil ativo aparece acima do Início: escolha-o para trocar de perfil
+  (Voltar retorna sem trocar). Também dá para editar em **Configurações → Interface → Editar
+  perfil**, e desligar a pergunta ao abrir em "Perguntar o perfil ao abrir". Cada perfil tem seus
+  favoritos, "Continuar jogando", mais jogados, tempo de jogo e saves; jogos e configurações são
+  comuns a todos. Quem já usava o app continua com o mesmo perfil (e seus saves): ele só pede o
+  avatar e a cor na primeira abertura da versão 1.8.
 - **Buscar**: teclado em grade pelo D-pad (ou busca por voz, se a TV tiver); resultados enquanto
   digita, sem diferenciar acentos.
 - **Consoles**: grade de capas por console com filtros A–Z, **Populares**, Recentes, Mais jogados e
@@ -347,8 +355,8 @@ Categorias à esquerda, opções à direita (nome, descrição e valor atual). T
   identificados, duplicados (apagar o arquivo repetido) e reconstruir a biblioteca.
 - **Núcleos**: versão e tamanho de cada núcleo, baixar/atualizar/remover, voltar à versão
   anterior, baixar todos e canal (Estável: só quando você pede; Nightly: verifica 1× por dia).
-- **Interface**: perfis, perguntar o perfil ao abrir, idioma (Português, English, Español), tema escuro ou preto OLED, cor de
-  destaque (padrão: Laranja Onzetec), animações, destaque animado, som de navegação, tamanho das capas e fileiras da Início
+- **Interface**: perfis, editar perfil (avatar, nome e cor do tema), perguntar o perfil ao abrir, idioma (Português,
+  English, Español), tema escuro ou preto OLED, animações, destaque animado, som de navegação, tamanho das capas e fileiras da Início
   (mostrar/ocultar/ordenar).
 - **Rede**: porta e PIN fixo da transferência pelo celular; pasta da rede (SMB); baixar capas e
   capas só no Wi-Fi.

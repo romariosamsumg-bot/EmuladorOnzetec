@@ -139,13 +139,41 @@ class SettingsDialogsTest {
     fun quem_vai_jogar_comeca_no_perfil_ativo() {
         val list = listOf(com.retroplay.domain.profile.Profile(1, "Pai", 0), com.retroplay.domain.profile.Profile(2, "Ana", 0), com.retroplay.domain.profile.Profile(3, "Leo", 0))
         var picked: Long? = null
-        compose.setContent { RetroPlayTheme { com.retroplay.feature.profiles.ProfilePickerScreen(list, activeId = 2) { picked = it.id } } }
+        compose.setContent { RetroPlayTheme { com.retroplay.feature.profiles.ProfilePickerScreen(list, activeId = 2, onPick = { picked = it.id }) } }
         compose.waitForIdle()
         node("profile_2").assertIsFocused()
         press(Key.DirectionRight)
         node("profile_3").assertIsFocused()
         press(Key.DirectionCenter)
         assertEquals(3L, picked)
+    }
+
+    @Test
+    fun quem_vai_jogar_adiciona_e_gerencia_perfis() {
+        val list = listOf(com.retroplay.domain.profile.Profile(1, "Pai", 0, "coroa", "VIOLETA"), com.retroplay.domain.profile.Profile(2, "Ana", 0, "gato", "VERDE"))
+        var added = false
+        var edited: Long? = null
+        var picked: Long? = null
+        compose.setContent {
+            RetroPlayTheme {
+                com.retroplay.feature.profiles.ProfilePickerScreen(list, activeId = 1, onPick = { picked = it.id }, onAdd = { added = true }, onEdit = { edited = it.id })
+            }
+        }
+        compose.waitForIdle()
+        node("profile_1").assertIsFocused()
+        press(Key.DirectionRight, 2)
+        node("profile_add").assertIsFocused()
+        press(Key.DirectionCenter)
+        assertTrue(added)
+        // Gerenciar: escolher um perfil abre o editor (não entra no perfil).
+        press(Key.DirectionDown)
+        node("profile_manage").assertIsFocused()
+        press(Key.DirectionCenter)
+        press(Key.DirectionUp)
+        repeat(3) { if (compose.onAllNodes(hasTestTag("profile_2") and androidx.compose.ui.test.isFocused()).fetchSemanticsNodes().isEmpty()) press(Key.DirectionRight) }
+        press(Key.DirectionCenter)
+        assertEquals(2L, edited)
+        assertEquals(null, picked)
     }
 
     @Test

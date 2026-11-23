@@ -284,7 +284,12 @@ class SettingsScreenTest {
         press(Key.DirectionDown)
         node("profile_new").assertIsFocused()
         press(Key.DirectionCenter)
+        // Editor de perfil: o foco começa no nome.
+        waitFor("screen_profile_editor")
+        node("profile_name").assertIsFocused()
+        press(Key.DirectionCenter)
         waitFor("text_dialog_input")
+        // Perfil novo: a caixa do nome começa vazia; digita ANA.
         node("tkey_A").assertIsFocused()
         press(Key.DirectionCenter) // A
         press(Key.DirectionDown); press(Key.DirectionRight, 4); press(Key.DirectionCenter) // N
@@ -292,14 +297,34 @@ class SettingsScreenTest {
         repeat(8) { if (compose.onAllNodes(hasTestTag("text_input_save") and androidx.compose.ui.test.isFocused()).fetchSemanticsNodes().isEmpty()) press(Key.DirectionDown) }
         node("text_input_save").assertIsFocused()
         press(Key.DirectionCenter)
+        // De volta ao editor: escolhe o avatar "gato" (2ª fileira, 1º) e a cor verde, e salva.
+        compose.onNodeWithTag("profile_preview", useUnmergedTree = true).assertExists()
+        node("profile_name").assertIsFocused()
+        press(Key.DirectionDown)
+        node("avatar_controle").assertIsFocused()
+        press(Key.DirectionDown)
+        node("avatar_gato").assertIsFocused()
+        press(Key.DirectionCenter)
+        press(Key.DirectionDown)
+        node("color_LARANJA").assertIsFocused()
+        press(Key.DirectionRight, 4)
+        node("color_VERDE").assertIsFocused()
+        press(Key.DirectionCenter)
+        screenshot("06_profile_editor")
+        press(Key.DirectionDown)
+        repeat(3) { if (compose.onAllNodes(hasTestTag("profile_save") and androidx.compose.ui.test.isFocused()).fetchSemanticsNodes().isEmpty()) press(Key.DirectionLeft) }
+        node("profile_save").assertIsFocused()
+        press(Key.DirectionCenter)
         compose.waitUntil(5_000) { runBlocking { profiles.profiles.first() }.size == 2 }
         val ana = runBlocking { profiles.profiles.first() }.last()
         assertEquals("Ana", ana.name)
+        assertEquals("gato", ana.avatar)
+        assertEquals("VERDE", ana.accent)
         waitSetting { runBlocking { profiles.activeId() } == ana.id }
         compose.waitUntil(5_000) {
             compose.onAllNodes(hasTestTag("profile_${ana.id}") and androidx.compose.ui.test.isSelected().not()).fetchSemanticsNodes().isNotEmpty()
         }
-        screenshot("06_profiles")
+        screenshot("07_profiles")
     }
 
     private fun screenshot(name: String) {

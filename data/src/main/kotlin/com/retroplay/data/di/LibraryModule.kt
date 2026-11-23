@@ -31,7 +31,7 @@ object LibraryModule {
         Room.databaseBuilder(context, LibraryDatabase::class.java, "library.db")
             // O jogo roda no processo ":game": mantém os dois processos sincronizados.
             .enableMultiInstanceInvalidation()
-            .addMigrations(com.retroplay.data.library.MIGRATION_1_2, com.retroplay.data.library.MIGRATION_2_3, com.retroplay.data.library.MIGRATION_3_4)
+            .addMigrations(com.retroplay.data.library.MIGRATION_1_2, com.retroplay.data.library.MIGRATION_2_3, com.retroplay.data.library.MIGRATION_3_4, com.retroplay.data.library.MIGRATION_4_5)
             .addCallback(com.retroplay.data.library.CREATE_DEFAULT_PROFILE)
             .build()
 

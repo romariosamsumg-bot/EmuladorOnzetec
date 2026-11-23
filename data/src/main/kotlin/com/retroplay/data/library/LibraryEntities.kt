@@ -87,6 +87,10 @@ data class ProfileEntity(
     val name: String,
     val color: Int,
     @ColumnInfo(name = "created_at") val createdAt: Long,
+    /** Avatar escolhido; null = perfil ainda não configurado. */
+    val avatar: String? = null,
+    /** Cor do tema do perfil. */
+    @ColumnInfo(defaultValue = "LARANJA") val accent: String = "LARANJA",
 )
 
 /**
@@ -279,6 +283,9 @@ interface ProfileDao {
     @Query("UPDATE profile SET name = :name WHERE id = :id")
     suspend fun rename(id: Long, name: String)
 
+    @Query("UPDATE profile SET name = :name, avatar = :avatar, accent = :accent WHERE id = :id")
+    suspend fun update(id: Long, name: String, avatar: String, accent: String)
+
     @Query("DELETE FROM profile WHERE id = :id")
     suspend fun delete(id: Long)
 }
@@ -306,7 +313,7 @@ interface BiosDao {
 
 @Database(
     entities = [FolderEntity::class, GameEntity::class, BiosEntity::class, ProfileEntity::class, PlayStatsEntity::class],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class LibraryDatabase : RoomDatabase() {
@@ -386,5 +393,13 @@ val MIGRATION_3_4 = object : androidx.room.migration.Migration(3, 4) {
         db.execSQL("UPDATE game SET game_key = 'arcade/' || SUBSTR(game_key, 8) WHERE game_key LIKE 'neogeo/%'")
         db.execSQL("UPDATE OR REPLACE play_stats SET game_key = 'arcade/' || SUBSTR(game_key, 8) WHERE game_key LIKE 'neogeo/%'")
         db.execSQL("UPDATE bios SET system = 'arcade' WHERE system = 'neogeo'")
+    }
+}
+
+/** v4 → v5 (app 1.8): perfis com avatar e cor do tema. Perfis antigos ficam "não configurados". */
+val MIGRATION_4_5 = object : androidx.room.migration.Migration(4, 5) {
+    override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE profile ADD COLUMN avatar TEXT")
+        db.execSQL("ALTER TABLE profile ADD COLUMN accent TEXT NOT NULL DEFAULT 'LARANJA'")
     }
 }

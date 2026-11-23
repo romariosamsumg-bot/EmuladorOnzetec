@@ -1,5 +1,7 @@
 package com.retroplay.feature.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import android.app.ActivityManager
 import android.content.Context
 import android.hardware.input.InputManager
@@ -263,10 +265,14 @@ class SettingsPane(
                 openDialog { ProfilesHost() }
             }
         }
+        item(key = "edit_profile") {
+            SettingRow(stringResource(R.string.profile_edit_row), stringResource(R.string.profile_edit_row_desc), null, "ui_edit_profile") {
+                openDialog { ProfileEditorDialog(editActive = true) }
+            }
+        }
         bool(AppSettings.PROFILE_ASK, R.string.set_profile_ask, R.string.set_profile_ask_desc)
         choice(AppSettings.LANGUAGE, R.string.set_language, R.string.set_language_desc)
         choice(AppSettings.THEME, R.string.set_theme, R.string.set_theme_desc)
-        choice(AppSettings.ACCENT, R.string.set_accent, R.string.set_accent_desc)
         choice(AppSettings.ANIMATIONS, R.string.set_animations, R.string.set_animations_desc)
         bool(AppSettings.HERO_ANIMATED, R.string.set_hero, R.string.set_hero_desc)
         bool(AppSettings.NAV_SOUND, R.string.set_nav_sound, R.string.set_nav_sound_desc)
@@ -742,7 +748,34 @@ class SettingsPane(
 
     // ------------------------------------------------------------------ perfis
 
-    private enum class ProfileStep { LIST, NEW, RENAME, DELETE }
+    private enum class ProfileStep { LIST, NEW, EDIT, DELETE }
+
+    /** Editor de perfil (avatar, nome e cor) em tela cheia, sobre as Configurações. */
+    @Composable
+    private fun ProfileEditorDialog(editActive: Boolean, onDone: () -> Unit = closeDialog) {
+        val profiles by vm.profiles.collectAsStateWithLifecycle()
+        val active by vm.activeProfile.collectAsStateWithLifecycle()
+        val current = if (editActive) active ?: return else null
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = onDone,
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            androidx.compose.foundation.layout.Box(Modifier.fillMaxSize().background(androidx.tv.material3.MaterialTheme.colorScheme.background)) {
+                com.retroplay.feature.profiles.ProfileEditorScreen(
+                    initial = current,
+                    suggestedIndex = if (current == null) profiles.size else profiles.indexOf(current).coerceAtLeast(0),
+                    firstRun = false,
+                    canDelete = profiles.size > 1,
+                    onSave = { name, avatar, accent ->
+                        if (current == null) vm.createProfile(name, avatar, accent) else vm.updateActiveProfile(name, avatar, accent)
+                        onDone()
+                    },
+                    onCancel = onDone,
+                    onDelete = { vm.deleteActiveProfile(); onDone() },
+                )
+            }
+        }
+    }
 
     @Composable
     private fun ProfilesHost() {
@@ -751,8 +784,8 @@ class SettingsPane(
         var step by remember { mutableStateOf(ProfileStep.LIST) }
         val current = active ?: return
         when (step) {
-            ProfileStep.NEW -> TextInputDialog(stringResource(R.string.profile_name_title), "", onSave = { vm.createProfile(it); step = ProfileStep.LIST }, onDismiss = { step = ProfileStep.LIST }, maxLength = 20)
-            ProfileStep.RENAME -> TextInputDialog(stringResource(R.string.profile_name_title), current.name, onSave = { vm.renameActiveProfile(it); step = ProfileStep.LIST }, onDismiss = { step = ProfileStep.LIST }, maxLength = 20)
+            ProfileStep.NEW -> ProfileEditorDialog(editActive = false) { step = ProfileStep.LIST }
+            ProfileStep.EDIT -> ProfileEditorDialog(editActive = true) { step = ProfileStep.LIST }
             ProfileStep.DELETE -> ConfirmDialog(
                 stringResource(R.string.profile_delete), stringResource(R.string.profile_delete_confirm, current.name),
                 onConfirm = { vm.deleteActiveProfile(); step = ProfileStep.LIST }, onDismiss = { step = ProfileStep.LIST },
@@ -768,7 +801,7 @@ class SettingsPane(
                         }
                     }
                     item(key = "new") { DialogOption(stringResource(R.string.profile_new), "profile_new") { step = ProfileStep.NEW } }
-                    item(key = "rename") { DialogOption(stringResource(R.string.profile_rename), "profile_rename") { step = ProfileStep.RENAME } }
+                    item(key = "edit") { DialogOption(stringResource(R.string.profile_edit_row), "profile_edit") { step = ProfileStep.EDIT } }
                     if (profiles.size > 1) item(key = "delete") { DialogOption(stringResource(R.string.profile_delete), "profile_delete") { step = ProfileStep.DELETE } }
                 }
             }
