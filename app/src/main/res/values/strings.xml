@@ -76,7 +76,6 @@
     <string name="games_folder_layout">Use as subpastas %1$s. A BIOS do Neo Geo (neogeo.zip) vai em %2$s.</string>
     <string name="games_folder_needs_access">Para o Onzetec Games criar e ler a pasta %1$s (onde você coloca os jogos pelo pendrive, gerenciador de arquivos ou app Downloader), permita o acesso aos arquivos.</string>
     <string name="grant_all_files_access">Permitir acesso aos arquivos</string>
-    <string name="all_files_access_adb">Esta TV não tem a tela dessa permissão. No computador, com a depuração ADB ativada, rode: %1$s — ou use “Adicionar pasta ou pendrive” abaixo.</string>
     <string name="library_title">Biblioteca</string>
     <string name="library_scanning">Verificando %1$d de %2$d: %3$s</string>
     <string name="library_scanning_short">Procurando jogos novos…</string>
@@ -279,9 +278,11 @@
         <item quantity="other">%1$d jogos · pasta da rede</item>
     </plurals>
     <string name="all_files_title">Permitir acesso aos arquivos</string>
-    <string name="all_files_steps">Na tela que abrir, ative \"Permitir acesso para gerenciar todos os arquivos\" para o Onzetec Games e volte com o botão Voltar: a pasta Jogos é criada na hora.\n\nSe a opção não aparecer, nas Configurações da TV vá em: Apps → Acesso especial a apps → Acesso a todos os arquivos → Onzetec Games → Permitir. Em algumas TVs: Apps → Onzetec Games → Permissões → Arquivos e mídia.</string>
+    <string name="all_files_steps">No Onzetec Games, entre em Permissões → Arquivos e mídia e escolha \"Permitir tudo\" (gerenciar todos os arquivos). A opção \"apenas mídia\" não basta para ler os jogos. Depois volte com o botão Voltar: a pasta Jogos é criada na hora.\n\nCaminho manual nas Configurações da TV: Apps → Onzetec Games → Permissões → Arquivos e mídia → Permitir tudo. Em outras TVs: Apps → Acesso especial a apps → Acesso a todos os arquivos → Onzetec Games.</string>
     <string name="all_files_open_app">Abrir a permissão do Onzetec Games</string>
     <string name="all_files_open_list">Abrir \"Acesso a todos os arquivos\"</string>
-    <string name="all_files_open_details">Abrir as informações do app</string>
+    <string name="all_files_open_details">Abrir Onzetec Games (Permissões)</string>
     <string name="all_files_open_settings">Abrir as Configurações da TV</string>
+    <string name="phone_steps_short">Celular na mesma rede Wi-Fi da TV: aponte a câmera para o QR code ou abra o endereço no navegador.</string>
+    <string name="all_files_adb_hint">Se nada funcionar: no computador, com a depuração ADB ativada, rode %1$s, ou use “Adicionar pasta ou pendrive” na tela Transferir.</string>
 </resources>

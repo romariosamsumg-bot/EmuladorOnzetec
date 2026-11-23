@@ -3,6 +3,8 @@ package com.retroplay.feature.transfer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -17,6 +19,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -26,6 +30,36 @@ import com.retroplay.domain.transfer.IncomingFile
 import com.retroplay.domain.transfer.PhoneTransferState
 import com.retroplay.domain.transfer.TransferError
 import com.retroplay.ui.components.QrCode
+
+/**
+ * Versão em coluna para a tela Transferir: o QR ocupa o espaço que sobrar (até 240 dp), então
+ * nunca é cortado, qualquer que seja o tamanho de fonte da TV.
+ */
+@Composable
+fun ColumnScope.PhoneTransferColumn(state: PhoneTransferState, incoming: List<IncomingFile>) {
+    when (state) {
+        is PhoneTransferState.Running -> {
+            Text(stringResource(R.string.phone_steps_short), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                QrCode(state.qrUrl, min(min(maxWidth, maxHeight), 240.dp), Modifier.testTag("transfer_qr"))
+            }
+            Text(state.url, style = MaterialTheme.typography.bodyMedium, maxLines = 1, modifier = Modifier.testTag("transfer_url"))
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.phone_pin), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    state.pin,
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 8.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.testTag("transfer_pin"),
+                )
+            }
+            incoming.take(3).forEach { IncomingRow(it) }
+        }
+        else -> PhoneTransferPanel(state, incoming)
+    }
+}
 
 /** QR code + endereço + PIN, e os arquivos chegando ao vivo. */
 @Composable

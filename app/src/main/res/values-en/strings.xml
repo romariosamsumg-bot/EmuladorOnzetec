@@ -65,7 +65,6 @@
     <string name="games_folder_layout">Use the subfolders %1$s. The Neo Geo BIOS (neogeo.zip) goes in %2$s.</string>
     <string name="games_folder_needs_access">To let Onzetec Games create and read the %1$s folder (where you put games via USB drive, file manager or the Downloader app), allow file access.</string>
     <string name="grant_all_files_access">Allow file access</string>
-    <string name="all_files_access_adb">This TV has no screen for this permission. On a computer with ADB debugging enabled, run: %1$s — or use “Add folder or USB drive” below.</string>
     <string name="library_title">Library</string>
     <string name="library_scanning">Checking %1$d of %2$d: %3$s</string>
     <string name="library_scanning_short">Looking for new games…</string>
@@ -260,9 +259,11 @@
         <item quantity="other">%1$d games · network folder</item>
     </plurals>
     <string name="all_files_title">Allow file access</string>
-    <string name="all_files_steps">On the screen that opens, turn on \"Allow access to manage all files\" for Onzetec Games and come back with Back: the Jogos folder is created right away.\n\nIf the option is missing, in the TV Settings go to: Apps → Special app access → All files access → Onzetec Games → Allow. On some TVs: Apps → Onzetec Games → Permissions → Files and media.</string>
+    <string name="all_files_steps">In Onzetec Games, go to Permissions → Files and media and choose \"Allow all\" (manage all files). \"Media only\" is not enough to read the games. Then come back with Back: the Jogos folder is created right away.\n\nManual path in the TV Settings: Apps → Onzetec Games → Permissions → Files and media → Allow all. On other TVs: Apps → Special app access → All files access → Onzetec Games.</string>
     <string name="all_files_open_app">Open Onzetec Games permission</string>
     <string name="all_files_open_list">Open \"All files access\"</string>
-    <string name="all_files_open_details">Open app info</string>
+    <string name="all_files_open_details">Open Onzetec Games (Permissions)</string>
     <string name="all_files_open_settings">Open TV Settings</string>
+    <string name="phone_steps_short">Phone on the same Wi-Fi as the TV: point the camera at the QR code or open the address in the browser.</string>
+    <string name="all_files_adb_hint">If nothing works: on a computer with ADB debugging on, run %1$s, or use “Add folder or USB drive” on the Transfer screen.</string>
 </resources>

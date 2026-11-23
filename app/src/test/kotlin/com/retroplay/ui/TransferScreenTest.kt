@@ -79,6 +79,13 @@ class TransferScreenTest {
         node("screen_transfer").assertExists()
     }
 
+    private fun assertQrInteiro() {
+        val qr = node("transfer_qr").fetchSemanticsNode().boundsInRoot
+        val root = compose.onRoot().fetchSemanticsNode().boundsInRoot
+        assert(qr.top >= root.top && qr.bottom <= root.bottom && qr.width > 0f) { "QR cortado: $qr em $root" }
+        assertEquals("QR quadrado", qr.width, qr.height, 1f)
+    }
+
     @Test
     fun sem_permissao_pede_acesso_aos_arquivos() {
         library.gamesFolderReady = false
@@ -91,22 +98,26 @@ class TransferScreenTest {
             },
         )
         val pkg = android.net.Uri.parse("package:" + compose.activity.packageName)
+        screen(android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pkg))
         screen(android.content.Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, pkg))
         screen(android.content.Intent(android.provider.Settings.ACTION_SETTINGS))
         openTransfer()
         node("grant_access").assertIsFocused()
+        assertQrInteiro()
         screenshot("20_transfer_sem_permissao")
         press(Key.DirectionCenter)
         // Guia com o caminho na TV e só as telas que existem no aparelho.
         node("all_files_guide").assertExists()
-        node("access_app").assertIsFocused()
+        // Primeiro: Apps → Onzetec Games (Permissões → Arquivos e mídia).
+        node("access_details").assertIsFocused()
+        node("access_app").assertExists()
         node("access_settings").assertExists()
         node("access_list").assertDoesNotExist()
         node("adb_help").assertExists()
         screenshot("21_transfer_guia_permissao")
         press(Key.DirectionCenter)
         val intent = shadowOf(compose.activity).nextStartedActivity
-        assertEquals(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, intent.action)
+        assertEquals(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, intent.action)
         assertEquals(pkg, intent.data)
     }
 
@@ -122,8 +133,10 @@ class TransferScreenTest {
         openTransfer()
         node("scan_now").assertIsFocused()
         compose.onNode(hasText("/storage/emulated/0/Jogos", substring = true)).assertExists()
-        compose.onNodeWithTag("screen_transfer").performScrollToNode(hasTestTag("scan_status"))
+        compose.onNodeWithTag("transfer_list").performScrollToNode(hasTestTag("scan_status"))
         node("scan_status").assertTextContains("Verificando 12 de 340: kof98.zip")
+        // A lista rolou, mas o QR do celular fica inteiro na tela (coluna fixa).
+        assertQrInteiro()
         screenshot("21_transfer_pronta")
         val before = library.scanRequests
         press(Key.DirectionCenter)

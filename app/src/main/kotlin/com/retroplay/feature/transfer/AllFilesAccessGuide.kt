@@ -30,11 +30,14 @@ data class AccessScreen(val tag: String, val label: Int, val intent: Intent)
 fun allFilesAccessScreens(context: Context): List<AccessScreen> {
     val pkg = Uri.parse("package:${context.packageName}")
     val candidates = buildList {
+        // Primeiro a tela do app (Apps → Onzetec Games): é por ela que as TVs Google chegam em
+        // Permissões → Arquivos e mídia. As telas diretas vêm depois porque algumas TVs abrem
+        // uma lista vazia ou sem efeito.
+        add(AccessScreen("access_details", R.string.all_files_open_details, Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pkg)))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             add(AccessScreen("access_app", R.string.all_files_open_app, Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, pkg)))
             add(AccessScreen("access_list", R.string.all_files_open_list, Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)))
         }
-        add(AccessScreen("access_details", R.string.all_files_open_details, Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pkg)))
         add(AccessScreen("access_settings", R.string.all_files_open_settings, Intent(Settings.ACTION_SETTINGS)))
     }
     return candidates.filter { runCatching { context.packageManager.resolveActivity(it.intent, 0) != null }.getOrDefault(false) }
@@ -62,7 +65,7 @@ fun AllFilesAccessGuide(onDismiss: () -> Unit) {
         }
         item(key = "adb") {
             Text(
-                stringResource(R.string.all_files_access_adb, "adb shell appops set --uid com.retroplay.tv MANAGE_EXTERNAL_STORAGE allow"),
+                stringResource(R.string.all_files_adb_hint, "adb shell appops set --uid com.retroplay.tv MANAGE_EXTERNAL_STORAGE allow"),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.testTag("adb_help"),

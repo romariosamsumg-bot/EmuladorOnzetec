@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -160,19 +161,25 @@ fun TransferContent(
 ) {
     val firstFocus = rememberInitialFocus(ready = defaults != null)
     val ready = defaults?.gamesFolderReady == true
+    // Celular à esquerda, fixo (não rola: o QR fica sempre inteiro na tela); o resto rola à direita.
+    Row(
+        Modifier.fillMaxSize().padding(start = 40.dp, top = 24.dp, bottom = 24.dp).testTag("screen_transfer"),
+        horizontalArrangement = Arrangement.spacedBy(24.dp),
+    ) {
+        Column(
+            Modifier.width(320.dp).fillMaxHeight().clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant).padding(20.dp).testTag("phone_section"),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(stringResource(R.string.phone_transfer_title), style = MaterialTheme.typography.titleLarge)
+            PhoneTransferColumn(phoneState, incoming)
+        }
     LazyColumn(
-        modifier = Modifier.fillMaxSize().testTag("screen_transfer"),
-        contentPadding = PaddingValues(horizontal = 48.dp, vertical = 40.dp),
+        modifier = Modifier.weight(1f).fillMaxHeight().testTag("transfer_list"),
+        contentPadding = PaddingValues(end = 40.dp, top = 0.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item { Text(stringResource(R.string.transfer_title), style = MaterialTheme.typography.displaySmall) }
-
-        // ---------------------------------------------------------- celular (principal)
-        item {
-            Section(stringResource(R.string.phone_transfer_title)) {
-                PhoneTransferPanel(phoneState, incoming)
-            }
-        }
+        item { Text(stringResource(R.string.transfer_title), style = MaterialTheme.typography.headlineMedium) }
 
         // ---------------------------------------------------------- pasta Jogos
         item {
@@ -273,6 +280,7 @@ fun TransferContent(
         }
         items(folders, key = { "f${it.id}" }) { folder -> FolderRow(folder, onRemoveFolder, onCopyFolder) }
 
+    }
     }
 }
 

@@ -149,12 +149,14 @@ Para atualizar, repita: o app novo instala por cima, mantendo jogos, saves e con
 
 ### Pasta **Jogos** (recomendado)
 
-Na primeira vez, abra **Transferir jogos → Permitir acesso aos arquivos**. Abre um guia com o
-caminho exato e botões só para as telas que a sua TV tem (a permissão do app, a lista "Acesso a
-todos os arquivos", as informações do app ou as Configurações da TV). Ative a permissão e volte
-com **Voltar**: o app percebe na hora e cria a pasta. Se a TV não tiver nenhuma dessas telas, o
-caminho manual é **Configurações → Apps → Acesso especial a apps → Acesso a todos os arquivos →
-Onzetec Games → Permitir**. O app cria esta estrutura no armazenamento da TV:
+Na primeira vez, abra **Transferir jogos → Permitir acesso aos arquivos**. O guia abre primeiro
+a tela do app nas Configurações: entre em **Permissões → Arquivos e mídia** e escolha **Permitir
+tudo** (gerenciar todos os arquivos; "apenas mídia" não basta para ler os jogos). Volte com
+**Voltar**: o app percebe na hora e cria a pasta. Caminho manual: **Configurações → Apps →
+Onzetec Games → Permissões → Arquivos e mídia → Permitir tudo** (em outras TVs: Apps → Acesso
+especial a apps → Acesso a todos os arquivos → Onzetec Games).
+
+O app cria esta estrutura no armazenamento da TV:
 
 ```
 Jogos/
