@@ -110,7 +110,23 @@ sealed interface ScanState {
 enum class DeleteResult { DELETED, NO_PERMISSION, NOT_FOUND }
 
 /** BIOS encontrada numa pasta monitorada (ex.: neogeo.zip). */
-data class BiosStatus(val system: SystemId, val setName: String, val uri: String, val complete: Boolean)
+data class BiosStatus(
+    val system: SystemId,
+    val setName: String,
+    val uri: String,
+    val complete: Boolean,
+    /** Núcleo → serve para ele (vazio = não se sabe; vale [complete]). */
+    val byCore: Map<String, Boolean> = emptyMap(),
+) {
+    /** Serve para o [core]? null = o app não sabe (BIOS sem versão no DAT desse núcleo). */
+    fun completeFor(core: String?): Boolean? = core?.let { byCore[it] }
+
+    /** Serve para todos os núcleos conhecidos? (card do console: "BIOS ok"). */
+    val completeForAll: Boolean get() = if (byCore.isEmpty()) complete else byCore.values.all { it }
+
+    /** Núcleos para os quais NÃO serve. */
+    val failingCores: List<String> get() = byCore.filterValues { !it }.keys.sorted()
+}
 
 /** Situação das pastas padrão (Jogos e a pasta privada do app). */
 data class DefaultFolders(

@@ -107,6 +107,7 @@ fun SystemCard(
                     com.retroplay.feature.consoles.BiosBadge.INCOMPLETE -> stringResource(R.string.console_bios_incomplete) to MaterialTheme.colorScheme.error
                     com.retroplay.feature.consoles.BiosBadge.MISSING_REQUIRED -> stringResource(R.string.console_needs_bios) to MaterialTheme.colorScheme.primary
                     com.retroplay.feature.consoles.BiosBadge.MISSING_OPTIONAL -> stringResource(R.string.console_bios_missing_neo) to MaterialTheme.colorScheme.onSurfaceVariant
+                    com.retroplay.feature.consoles.BiosBadge.WRONG_VERSION -> stringResource(R.string.console_bios_wrong_version) to MaterialTheme.colorScheme.error
                     com.retroplay.feature.consoles.BiosBadge.MISSING_RECOMMENDED -> stringResource(R.string.console_bios_recommended) to MaterialTheme.colorScheme.onSurfaceVariant
                 }
                 if (label != null) {

@@ -179,7 +179,7 @@ class SettingsPane(
     private fun LazyListScope.bios() {
         item(key = "bios_status") {
             val bios by vm.bios.collectAsStateWithLifecycle()
-            val status = bios.firstOrNull { it.setName == "neogeo" }
+            val status = bios.filter { it.setName == "neogeo" }.maxByOrNull { if (it.completeForAll) 2 else if (it.complete) 1 else 0 }
             val first = rememberInitialFocus(false)
             SettingRow(
                 title = stringResource(R.string.bios_header),
@@ -187,7 +187,8 @@ class SettingsPane(
                 value = stringResource(
                     when {
                         status == null -> R.string.bios_missing
-                        status.complete -> R.string.bios_ok
+                        status.completeForAll -> R.string.bios_ok
+                        status.complete -> R.string.bios_old_version
                         else -> R.string.bios_incomplete
                     },
                 ),

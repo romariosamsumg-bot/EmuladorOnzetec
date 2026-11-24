@@ -70,6 +70,22 @@ class ArcadeLaunchTest {
     }
 
     @Test
+    fun bios_do_mame_037_nao_serve_para_o_fbneo() {
+        // neogeo.zip antiga: completa para o MAME 2000, mas o FBNeo pede arquivos que ela não tem.
+        val old = bios.copy(byCore = mapOf("mame2000" to true, "fbneo" to false))
+        assertEquals(ArcadeCheck.BiosWrongVersion("fbneo", "neogeo.zip"), ArcadeLaunch.check(neo, "kof98.zip", dat, listOf(kof98), listOf(old), "fbneo"))
+        // No MAME 2000 abre normalmente.
+        assertTrue(ArcadeLaunch.check(neo, "kof98.zip", dat, listOf(kof98), listOf(old), "mame2000") is ArcadeCheck.Ready)
+        // Com a nova também no disco, usa a que serve.
+        val new = bios.copy(uri = "/y/neogeo.zip", byCore = mapOf("mame2000" to false, "fbneo" to true))
+        val r = ArcadeLaunch.check(neo, "kof98.zip", dat, listOf(kof98), listOf(old, new), "fbneo") as ArcadeCheck.Ready
+        assertEquals(new, r.bios)
+        // BiosStatus: "ok" para todos os núcleos só se serve para todos.
+        assertTrue(!old.completeForAll && !new.completeForAll && bios.completeForAll)
+        assertEquals(listOf("fbneo"), old.failingCores)
+    }
+
+    @Test
     fun consoles_domesticos_nao_passam_pela_verificacao() {
         val r = ArcadeLaunch.check(SystemRegistry.SNES, "mario.sfc", dat, emptyList(), emptyList()) as ArcadeCheck.Ready
         assertTrue(r.companions.isEmpty())

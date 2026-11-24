@@ -18,6 +18,9 @@ sealed interface ArcadeCheck {
         val neoGeo: Boolean = false,
     ) : ArcadeCheck
     data object BiosMissing : ArcadeCheck
+
+    /** Há uma BIOS, mas de uma versão que o [core] não aceita (ex.: neogeo.zip do MAME 0.37 no FBNeo). */
+    data class BiosWrongVersion(val core: String, val biosFile: String) : ArcadeCheck
     data class ParentMissing(val parent: String) : ArcadeCheck
 }
 
@@ -45,8 +48,12 @@ object ArcadeLaunch {
         var found: BiosStatus? = null
         if (needed != null) {
             // Prefere uma BIOS completa se houver mais de uma.
-            found = bios.filter { it.system == system.id && it.setName == needed }.sortedByDescending { it.complete }.firstOrNull()
+            // Prefere a que serve para o núcleo em uso; depois a completa.
+            found = bios.filter { it.system == system.id && it.setName == needed }
+                .sortedByDescending { it.completeFor(coreId) ?: it.complete }.firstOrNull()
                 ?: return ArcadeCheck.BiosMissing
+            // O núcleo vai recusar uma BIOS de outra versão: avisa antes, em português.
+            if (coreId != null && found.completeFor(coreId) == false) return ArcadeCheck.BiosWrongVersion(coreId, "$needed.zip")
             if (!found.complete) warnings += ArcadeWarning.BIOS_INCOMPLETE
             // MAME procura a BIOS na pasta do jogo; o FBNeo também (e em system/fbneo).
             if (library.none { it.uri == found.uri }) companions += RomCompanion(found.uri, "$needed.zip")

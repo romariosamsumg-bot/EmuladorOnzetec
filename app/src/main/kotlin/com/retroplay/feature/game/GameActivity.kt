@@ -236,6 +236,16 @@ class GameActivity : ComponentActivity(), GameMenuActions {
                 }
                 when (check) {
                     ArcadeCheck.BiosMissing -> { showErrorAndExit(getString(R.string.neogeo_bios_missing)); return }
+                    is ArcadeCheck.BiosWrongVersion -> {
+                        val name = system.cores.firstOrNull { it.id == check.core }?.displayName ?: check.core
+                        showErrorAndExit(
+                            getString(
+                                if (check.core == "fbneo") R.string.neogeo_bios_wrong_fbneo else R.string.neogeo_bios_wrong_version,
+                                check.biosFile, name,
+                            ),
+                        )
+                        return
+                    }
                     is ArcadeCheck.ParentMissing -> { showErrorAndExit(getString(R.string.neogeo_parent_missing, check.parent + ".zip")); return }
                     is ArcadeCheck.Ready -> withContext(Dispatchers.IO) {
                         warnings += check.warnings

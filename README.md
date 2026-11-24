@@ -246,8 +246,13 @@ A senha fica só na TV, fora do backup. Para tirar a pasta, use **Transferir jog
    do **FBNeo**; o app identifica cada um e escolhe o núcleo.
 2. Só os jogos **de Neo Geo** (Metal Slug, KOF, Samurai Shodown…) precisam da **`neogeo.zip`**
    (a BIOS, que você precisa ter). Coloque-a em `Jogos/BIOS` ou importe em **Configurações →
-   BIOS**; ela deve ser da mesma versão dos romsets (MAME 0.37 ou FBNeo). O cartão do Arcade, em
-   Consoles, mostra se a BIOS foi encontrada. Jogos de outras placas (Street Fighter II, Final
+   BIOS**; ela deve ser da mesma versão dos romsets (MAME 0.37 ou FBNeo). **Atenção:** a
+   `neogeo.zip` do MAME 0.37 é pequena (3 arquivos) e o FBNeo recusa: ele pede a do conjunto
+   FBNeo (38 arquivos, com `sp-s3.sp1`, `sm1.sm1` e `sfix.sfix`). Jogos que só o FBNeo roda
+   (ex.: Metal Slug 3) precisam da do FBNeo. O app confere a BIOS contra o núcleo que vai abrir o
+   jogo: se ela não serve, avisa em português qual trocar (em vez do erro do núcleo), e o cartão do
+   Arcade, em Consoles, mostra "BIOS de outra versão". Ele mostra "BIOS ok" quando a `neogeo.zip`
+   serve para os dois núcleos. Jogos de outras placas (Street Fighter II, Final
    Fight, Cadillacs and Dinosaurs…) não precisam dela.
 3. Se um jogo não abrir, a mensagem diz o motivo: BIOS faltando, romset principal faltando, ou
    romset incompleto/de outra versão.

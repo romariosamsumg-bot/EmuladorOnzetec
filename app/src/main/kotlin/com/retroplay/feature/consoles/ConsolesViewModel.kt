@@ -22,20 +22,22 @@ class ConsolesViewModel @Inject constructor(catalog: SystemCatalog, library: Lib
 }
 
 /** Situação da BIOS de um console no cartão. */
-enum class BiosBadge { NONE, OK, INCOMPLETE, MISSING_REQUIRED, MISSING_OPTIONAL, MISSING_RECOMMENDED }
+enum class BiosBadge { NONE, OK, INCOMPLETE, MISSING_REQUIRED, MISSING_OPTIONAL, MISSING_RECOMMENDED, WRONG_VERSION }
 
 /** Qualquer uma das BIOS aceitas pelo console serve (ex.: PlayStation: scph5501, scph1001...). */
 fun biosBadge(system: GameSystem, found: List<BiosStatus>): BiosBadge {
     val req = system.bios.firstOrNull() ?: return BiosBadge.NONE
     val names = system.bios.map { it.fileName.substringBeforeLast('.') }.toSet()
-    val status = found.filter { it.system == system.id && it.setName in names }.maxByOrNull { it.complete }
+    val status = found.filter { it.system == system.id && it.setName in names }.maxByOrNull { if (it.completeForAll) 2 else if (it.complete) 1 else 0 }
     return when {
         status == null -> when {
             req.required -> BiosBadge.MISSING_REQUIRED
             system.identification == IdentificationStrategy.DISC_SERIAL -> BiosBadge.MISSING_RECOMMENDED
             else -> BiosBadge.MISSING_OPTIONAL
         }
-        status.complete -> BiosBadge.OK
+        status.completeForAll -> BiosBadge.OK
+        // Serve para um núcleo mas não para outro (ex.: neogeo.zip do MAME 0.37, que o FBNeo recusa).
+        status.complete -> BiosBadge.WRONG_VERSION
         else -> BiosBadge.INCOMPLETE
     }
 }

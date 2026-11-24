@@ -103,7 +103,12 @@ class RomIdentifier(private val catalog: SystemCatalog, private val dat: DatLook
                 val best = biosVersions
                     .map { (game, roms) -> game to validate(roms, entries, needParent = false, siblings = emptySet(), biosCrcs = emptySet()).second }
                     .minWith(compareBy({ it.second }, { coreOrder(system, it.first.core) }))
-                return IdentifyOutcome.Bios(BiosFound(system.id, setName, complete = best.second == 0, core = best.first.core))
+                // Serve para cada núcleo? Cada DAT pede arquivos diferentes (a neogeo.zip do MAME 0.37 é
+                // bem menor que a do FBNeo).
+                val byCore = biosVersions.mapNotNull { (game, roms) ->
+                    game.core?.let { c -> c to (validate(roms, entries, needParent = false, siblings = emptySet(), biosCrcs = emptySet()).second == 0) }
+                }.toMap()
+                return IdentifyOutcome.Bios(BiosFound(system.id, setName, complete = best.second == 0, core = best.first.core, byCore = byCore))
             }
             val results = versions.map { (game, roms) ->
                 val biosCrcs = game.bios?.let { b -> dat.romsets(system.id, b).firstOrNull { it.first.core == game.core }?.second }

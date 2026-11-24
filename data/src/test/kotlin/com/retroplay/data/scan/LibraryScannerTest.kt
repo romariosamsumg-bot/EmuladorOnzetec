@@ -166,6 +166,21 @@ class LibraryScannerTest {
     }
 
     @Test
+    fun `neogeo zip antiga e boa para o mame 2000 mas o fbneo e marcado como sem os arquivos`() = runTest {
+        // Só o que o DAT do MAME 0.37 pede (poucos arquivos), como no pacote do MAME 0.37.
+        val oldRoms = dat.romsets(SystemRegistry.Ids.ARCADE, "neogeo").first { it.first.core == "mame2000" }.second
+        zip("BIOS/neogeo.zip", oldRoms.filter { !it.merge }.associate { it.name to CrcForge.fake(it.name, it.crc) })
+        scanner.scan()
+        val bios = db.bios().byFolder(folderId).single()
+        assertEquals("fbneo=0;mame2000=1", bios.coreStatus)
+        // Agora com a do FBNeo: serve para o FBNeo.
+        val newRoms = dat.romsets(SystemRegistry.Ids.ARCADE, "neogeo").first { it.first.core == "fbneo" }.second
+        zip("BIOS/neogeo.zip", newRoms.filter { !it.merge }.associate { it.name to CrcForge.fake(it.name, it.crc) })
+        scanner.scan()
+        assertEquals("fbneo=1", db.bios().byFolder(folderId).single().coreStatus.split(";").first { it.startsWith("fbneo") })
+    }
+
+    @Test
     fun `rom dentro de 7z e identificada`() = runTest {
         val f = File(root, "Super Nintendo/mario.7z").apply { parentFile!!.mkdirs() }
         val rom = CrcForge.fake("smw7z", 0xB19ED489L)

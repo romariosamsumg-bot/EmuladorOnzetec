@@ -277,4 +277,8 @@
     <string name="bios_psx_header">PlayStation BIOS</string>
     <string name="bios_psx_missing_desc">Put scph5501.bin (or another PlayStation BIOS) in Jogos/BIOS. Without it the core uses a built-in replacement and some games may fail.</string>
     <string name="disc_extracting">Extracting the game… %1$d%% (first time only)</string>
+    <string name="neogeo_bios_wrong_version">Your %1$s does not work with %2$s (different version than it requires). Replace it with a %1$s from the %2$s set in Jogos/BIOS and rescan in Settings → Library.</string>
+    <string name="neogeo_bios_wrong_fbneo">Your %1$s does not work with FinalBurn Neo: it is an old version (probably the MAME 0.37 one, which lacks sp-s3.sp1, sm1.sm1 and sfix.sfix). Replace it with the %1$s from the FinalBurn Neo set in Jogos/BIOS and rescan in Settings → Library.</string>
+    <string name="console_bios_wrong_version">BIOS: other version</string>
+    <string name="bios_old_version">Old BIOS version (FBNeo needs its own)</string>
 </resources>

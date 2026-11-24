@@ -62,4 +62,11 @@ data class Identification(
 )
 
 /** Resultado especial: o arquivo é uma BIOS (ex.: neogeo.zip), não um jogo. */
-data class BiosFound(val system: SystemId, val setName: String, val complete: Boolean, val core: String? = null)
+data class BiosFound(
+    val system: SystemId,
+    val setName: String,
+    val complete: Boolean,
+    val core: String? = null,
+    /** Núcleo → este arquivo tem tudo que o DAT desse núcleo pede (MAME 0.37 e FBNeo têm versões diferentes). */
+    val byCore: Map<String, Boolean> = emptyMap(),
+)

@@ -79,7 +79,8 @@ class LibraryScanner(
                 when (outcome) {
                     is IdentifyOutcome.Bios -> {
                         db.bios().upsert(
-                            BiosEntity(existingBios[file.uri]?.id ?: 0, outcome.bios.system.value, outcome.bios.setName, file.uri, folder.id, outcome.bios.complete),
+                            BiosEntity(existingBios[file.uri]?.id ?: 0, outcome.bios.system.value, outcome.bios.setName, file.uri, folder.id, outcome.bios.complete,
+                                com.retroplay.data.library.RoomLibraryRepository.formatCoreStatus(outcome.bios.byCore)),
                         )
                         old?.let { toDelete += it.id }
                     }

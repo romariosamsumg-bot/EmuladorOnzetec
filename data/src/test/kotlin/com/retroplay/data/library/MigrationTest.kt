@@ -103,4 +103,19 @@ class MigrationTest {
             }
         }
     }
+
+    @Test
+    fun `v5 para v6 mantem a bios e deixa o status por nucleo vazio`() {
+        helper.createDatabase("migracao6.db", 5).use { db ->
+            db.execSQL("INSERT INTO bios(system, set_name, uri, folder_id, complete) VALUES ('arcade', 'neogeo', '/x/neogeo.zip', 1, 1)")
+        }
+        helper.runMigrationsAndValidate("migracao6.db", 6, true, MIGRATION_5_6).use { db ->
+            db.query("SELECT set_name, complete, core_status FROM bios").use { c ->
+                c.moveToFirst()
+                assertEquals("neogeo", c.getString(0))
+                assertEquals(1, c.getInt(1))
+                assertEquals("", c.getString(2))
+            }
+        }
+    }
 }

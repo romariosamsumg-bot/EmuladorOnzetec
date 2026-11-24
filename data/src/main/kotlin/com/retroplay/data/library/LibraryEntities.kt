@@ -130,6 +130,8 @@ data class BiosEntity(
     val uri: String,
     @ColumnInfo(name = "folder_id") val folderId: Long,
     val complete: Boolean,
+    /** "mame2000=1;fbneo=0": para quais núcleos o arquivo serve. Vazio = não se sabe. */
+    @ColumnInfo(name = "core_status", defaultValue = "") val coreStatus: String = "",
 )
 
 @Dao
@@ -313,7 +315,7 @@ interface BiosDao {
 
 @Database(
     entities = [FolderEntity::class, GameEntity::class, BiosEntity::class, ProfileEntity::class, PlayStatsEntity::class],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 abstract class LibraryDatabase : RoomDatabase() {
@@ -401,5 +403,12 @@ val MIGRATION_4_5 = object : androidx.room.migration.Migration(4, 5) {
     override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE profile ADD COLUMN avatar TEXT")
         db.execSQL("ALTER TABLE profile ADD COLUMN accent TEXT NOT NULL DEFAULT 'LARANJA'")
+    }
+}
+
+/** v5 → v6 (app 1.8.1): a BIOS passa a lembrar para quais núcleos serve (preenchido na próxima varredura). */
+val MIGRATION_5_6 = object : androidx.room.migration.Migration(5, 6) {
+    override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE bios ADD COLUMN core_status TEXT NOT NULL DEFAULT ''")
     }
 }

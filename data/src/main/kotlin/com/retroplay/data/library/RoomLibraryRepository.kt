@@ -86,7 +86,7 @@ class RoomLibraryRepository(
     override suspend fun rename(id: Long, title: String?) = db.games().rename(id, title?.trim()?.takeIf { it.isNotEmpty() })
     override fun observeDuplicates(): Flow<List<Game>> = withProfile { p -> db.games().observeDuplicates(p) }.map { it.map(::toGame) }
     override fun observeBios(): Flow<List<BiosStatus>> = db.bios().observe().map { list ->
-        list.map { BiosStatus(SystemId(it.system), it.setName, it.uri, it.complete) }
+        list.map { BiosStatus(SystemId(it.system), it.setName, it.uri, it.complete, parseCoreStatus(it.coreStatus)) }
     }
     override suspend fun rebuild() {
         db.games().deleteAll()
@@ -169,6 +169,12 @@ class RoomLibraryRepository(
     }
 
     companion object {
+        /** "mame2000=1;fbneo=0" → {mame2000: true, fbneo: false}. */
+        fun parseCoreStatus(raw: String): Map<String, Boolean> =
+            raw.split(';').mapNotNull { it.split('=').takeIf { p -> p.size == 2 && p[0].isNotBlank() }?.let { p -> p[0] to (p[1] == "1") } }.toMap()
+
+        fun formatCoreStatus(m: Map<String, Boolean>): String = m.entries.sortedBy { it.key }.joinToString(";") { "${it.key}=${if (it.value) 1 else 0}" }
+
         const val APP_FOLDER_LABEL = "app"
 
         fun toGame(w: GameWithStats) = toGame(w.game).copy(
