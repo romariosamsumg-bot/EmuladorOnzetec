@@ -12,23 +12,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * ROM de teste embutida e importação de um arquivo avulso (seletor do sistema) para a
- * pasta privada do app — que é uma das pastas monitoradas pela biblioteca.
+ * Importação de um arquivo avulso (seletor do sistema) para a pasta privada do app — que é uma das pastas monitoradas pela biblioteca.
  */
 @Singleton
 class LocalRomSource @Inject constructor(
     @ApplicationContext private val context: Context,
     private val library: LibraryRepository,
 ) {
-
-    fun testRom(): File {
-        val out = File(context.filesDir, "testrom/$TEST_ROM")
-        if (!out.isFile) {
-            out.parentFile?.mkdirs()
-            context.assets.open("testrom/$TEST_ROM").use { input -> out.outputStream().use { input.copyTo(it) } }
-        }
-        return out
-    }
 
     suspend fun import(system: GameSystem, uri: Uri): ImportResult {
         val name = displayName(uri) ?: return ImportResult.Failed
@@ -51,8 +41,4 @@ class LocalRomSource @Inject constructor(
         } ?: uri.lastPathSegment
 
     enum class ImportResult { Ok, WrongType, NoSpace, Failed }
-
-    companion object {
-        const val TEST_ROM = "retroplay-teste.sfc"
-    }
 }

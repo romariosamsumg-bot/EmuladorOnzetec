@@ -16,8 +16,6 @@ import com.retroplay.domain.library.applyFilter
 import com.retroplay.domain.system.GameSystem
 import com.retroplay.domain.system.SystemCatalog
 import com.retroplay.domain.system.SystemId
-import com.retroplay.domain.system.SystemRegistry
-import com.retroplay.feature.play.LaunchRequest
 import com.retroplay.feature.play.PlayLauncher
 import com.retroplay.navigation.ConsoleDetailRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -59,7 +57,6 @@ class ConsoleViewModel @Inject constructor(
     val core: CoreDescriptor get() = selectedCore.value
     private val hideUnidentified = settings.snapshots.map { it.value(AppSettings.HIDE_UNIDENTIFIED) }.distinctUntilChanged()
     val launcher = launcherFactory.create(viewModelScope)
-    val hasTestRom = system.id == SystemRegistry.Ids.SNES
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val coreState: StateFlow<CoreInstallState> = selectedCore.flatMapLatest { cores.observe(it) }
@@ -80,13 +77,6 @@ class ConsoleViewModel @Inject constructor(
     fun setFilter(f: GameFilter) { handle[KEY_FILTER] = f }
 
     fun downloadCore() = cores.install(core)
-
-    fun playTestRom(title: String) {
-        viewModelScope.launch {
-            val f = withContext(Dispatchers.IO) { roms.testRom() }
-            launcher.play(LaunchRequest(system, core, f.absolutePath, f.name, title, gameId = null))
-        }
-    }
 
     fun import(uri: Uri) {
         viewModelScope.launch {

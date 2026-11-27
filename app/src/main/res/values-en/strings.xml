@@ -40,8 +40,6 @@
     <string name="core_error_abi">This device is not compatible with the available cores.</string>
     <string name="core_error_unknown">Could not download the core.</string>
     <string name="error_no_space">Not enough space on the TV. Free some space (delete games or apps) and try again.</string>
-    <string name="test_rom_title">Onzetec Games test ROM</string>
-    <string name="test_rom_subtitle">Free homebrew: the D-pad moves the square; buttons change the color and play sounds</string>
     <string name="pick_file">Choose file…</string>
     <string name="pick_file_subtitle">Open a ROM from a USB drive or the TV storage</string>
     <string name="no_picker">This TV has no file picker. Copy ROMs to the folder shown below (via USB or adb).</string>

@@ -40,8 +40,6 @@
     <string name="core_error_abi">Este dispositivo no es compatible con los núcleos disponibles.</string>
     <string name="core_error_unknown">No se pudo descargar el núcleo.</string>
     <string name="error_no_space">No hay espacio suficiente en la TV. Libera espacio (borra juegos o apps) y vuelve a intentarlo.</string>
-    <string name="test_rom_title">ROM de prueba de Onzetec Games</string>
-    <string name="test_rom_subtitle">Homebrew libre: la cruceta mueve el cuadrado; los botones cambian el color y suenan</string>
     <string name="pick_file">Elegir archivo…</string>
     <string name="pick_file_subtitle">Abrir una ROM desde una memoria USB o la TV</string>
     <string name="no_picker">Esta TV no tiene selector de archivos. Copia las ROMs a la carpeta indicada abajo (por USB o adb).</string>

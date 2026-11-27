@@ -76,7 +76,6 @@ fun ConsoleEntry(onOpenGame: (Game) -> Unit, viewModel: ConsoleViewModel = hiltV
     val filter by viewModel.filter.collectAsStateWithLifecycle()
     val scan by viewModel.scan.collectAsStateWithLifecycle()
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(viewModel::import) }
-    val testRomTitle = stringResource(R.string.test_rom_title)
     LaunchGamesEffect(viewModel.launcher)
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
@@ -87,12 +86,10 @@ fun ConsoleEntry(onOpenGame: (Game) -> Unit, viewModel: ConsoleViewModel = hiltV
         coreState = coreState,
         games = games,
         filter = filter,
-        hasTestRom = viewModel.hasTestRom,
         scanning = scan is ScanState.Scanning,
         onFilter = viewModel::setFilter,
         onDownloadCore = viewModel::downloadCore,
         onOpenGame = onOpenGame,
-        onPlayTestRom = { viewModel.playTestRom(testRomTitle) },
         onPickFile = {
             try {
                 picker.launch(arrayOf("*/*"))
@@ -111,12 +108,10 @@ fun ConsoleScreen(
     coreState: CoreInstallState,
     games: List<Game>?,
     filter: GameFilter,
-    hasTestRom: Boolean,
     scanning: Boolean,
     onFilter: (GameFilter) -> Unit,
     onDownloadCore: () -> Unit,
     onOpenGame: (Game) -> Unit,
-    onPlayTestRom: () -> Unit,
     onPickFile: () -> Unit,
 ) {
     val memory = rememberFocusMemory()
@@ -152,18 +147,8 @@ fun ConsoleScreen(
                 }
             }
         }
-        if (hasTestRom && filter !in TEST_ROM_HIDDEN) {
-            item(key = "testrom") {
-                GameCard(
-                    system = system, game = null, title = stringResource(R.string.test_rom_title), onClick = onPlayTestRom,
-                    cardModifier = Modifier.focusRequester(firstItem).rememberFocus(memory, "testrom"),
-                    fillWidth = true,
-                    testTag = "game_testrom",
-                )
-            }
-        }
         items(list, key = { it.id }) { game ->
-            val first = !(hasTestRom && filter !in TEST_ROM_HIDDEN) && game == list.first()
+            val first = game == list.first()
             GameCard(
                 system = system, game = game, title = game.title, onClick = { onOpenGame(game) },
                 cardModifier = (if (first) Modifier.focusRequester(firstItem) else Modifier).rememberFocus(memory, "g${game.id}"),
@@ -198,7 +183,7 @@ fun ConsoleScreen(
     }
     // Se não há nada para focar na grade (lista vazia), o foco vai para os filtros.
     LaunchedEffect(games) {
-        if (games != null && list.isEmpty() && !hasTestRom) memory.requester("filter_${filter.name}").requestFocusWhenReady()
+        if (games != null && list.isEmpty()) memory.requester("filter_${filter.name}").requestFocusWhenReady()
     }
 }
 
@@ -263,6 +248,3 @@ fun coreErrorMessage(error: CoreError): Int = when (error) {
     CoreError.UNSUPPORTED_ABI -> R.string.core_error_abi
     CoreError.UNKNOWN -> R.string.core_error_unknown
 }
-
-/** Filtros que listam só uma seleção de jogos: a ROM de teste não aparece neles. */
-private val TEST_ROM_HIDDEN = setOf(GameFilter.FAVORITES, GameFilter.POPULAR)

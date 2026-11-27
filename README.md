@@ -396,28 +396,23 @@ run-ahead.
 
 ## Testando a emulação
 
-1. Instale o APK na TV e abra **Consoles → Super Nintendo**.
-2. Escolha **ROM de teste do Onzetec Games** e aperte OK. Na primeira vez o núcleo `snes9x2010`
-   (~1,6 MB) é baixado do buildbot do libretro para o ABI da TV, com barra de progresso, e o
-   jogo abre em seguida.
-3. Com o gamepad: o D-pad (ou o analógico) move o quadrado; B, A, Y e X mudam a cor de fundo e
-   tocam tons diferentes; L, R, Start e Select só mudam a cor. Pelo controle remoto da TV, as
-   setas movem o quadrado e o OK equivale ao B.
+1. Coloque um jogo na pasta **Jogos** (veja acima) ou use **Escolher arquivo…** na página do
+   console. O app não vem com jogos.
+2. Abra o jogo e aperte **Jogar**. Na primeira vez o núcleo do console é baixado do buildbot do
+   libretro para o ABI da TV, com barra de progresso, e o jogo abre em seguida.
+3. Pelo controle remoto da TV, as setas são o direcional e o OK equivale ao B.
 4. **Voltar** abre o menu rápido (Sair é a primeira opção e leva para o Início).
    No gamepad (Bluetooth ou USB), **Start + Select juntos, em qualquer ordem**, também abrem o
    menu. O atalho é configurável em Configurações → Controles → "Abrir o menu pelo controle":
    Start + Select (padrão), L3 + R3, L1 + R1 + Start ou desligado. Controles que mandam o
    Select como "Voltar" também funcionam.
 
-Para testar outros jogos, coloque-os na pasta **Jogos** (veja acima) ou use **Escolher
-arquivo…** na página do console. `.zip`/`.7z` de consoles domésticos são extraídos para um
-cache temporário na hora de jogar.
+`.zip`/`.7z` de consoles domésticos são extraídos para um cache temporário na hora de jogar.
 
-### ROM de teste
+### ROM de teste (só para desenvolvimento)
 
-A ROM de teste é um homebrew **original deste projeto (GPL-3.0)**, gerado pelo script
-`tools/testrom/build_test_rom.py`, que monta o código 65816 e SPC700 byte a byte. Para conferir
-que ela funciona num núcleo real, no PC:
+O app não inclui mais a ROM de demonstração do Super Nintendo. Para conferir um núcleo real no
+PC, `tools/testrom/build_test_rom.py` gera um homebrew **original deste projeto (GPL-3.0)**:
 
 ```bash
 curl -LO https://buildbot.libretro.com/nightly/linux/x86_64/latest/snes9x2010_libretro.so.zip && unzip snes9x2010_libretro.so.zip

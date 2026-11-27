@@ -109,12 +109,22 @@ class ConsoleScreenTest {
         node("system_snes").assertIsFocused()
     }
 
+    /** Página do SNES com um jogo na biblioteca; o foco começa no 1º jogo. */
     private fun openSnesPage() {
+        library.games.value = listOf(FakeLibraryRepository.game(1, SystemRegistry.Ids.SNES, "Super Mario World"))
         openConsoles()
         press(Key.DirectionCenter)
         node("screen_console_snes").assertExists()
-        waitFor("game_testrom")
-        node("game_testrom").assertIsFocused()
+        waitFor("game_1")
+        node("game_1").assertIsFocused()
+    }
+
+    /** Abre os detalhes do jogo focado e aperta "Jogar". */
+    private fun playFocused() {
+        press(Key.DirectionCenter)
+        waitFor("details_play")
+        node("details_play").assertIsFocused()
+        press(Key.DirectionCenter)
     }
 
     @Test
@@ -123,11 +133,10 @@ class ConsoleScreenTest {
         node("core_status").assertTextContains("Ainda não baixado", substring = true)
         screenshot("10_console_sem_nucleo")
 
-        press(Key.DirectionCenter)
+        playFocused()
         eventually { fake.installRequests.isNotEmpty() }
         compose.waitForIdle()
         assertEquals(listOf("snes9x2010"), fake.installRequests)
-        node("core_status").assertTextContains("Baixando", substring = true)
         fake.state.value = CoreInstallState.Downloading(800_000, 1_600_000)
         compose.waitForIdle()
         screenshot("11_console_baixando")
@@ -135,15 +144,13 @@ class ConsoleScreenTest {
 
         fake.complete()
         compose.waitForIdle()
-        node("core_status").assertTextContains("Pronto", substring = true)
         eventually { shadowOf(compose.activity).peekNextStartedActivity() != null }
         val intent = shadowOf(compose.activity).nextStartedActivity
         assertNotNull("o jogo deveria abrir ao terminar o download", intent)
         assertEquals(GameActivity::class.java.name, intent.component!!.className)
         assertEquals("snes", intent.getStringExtra(GameLauncher.EXTRA_SYSTEM))
         assertEquals("snes9x2010", intent.getStringExtra(GameLauncher.EXTRA_CORE))
-        val rom = File(intent.getStringExtra(GameLauncher.EXTRA_ROM_PATH)!!)
-        assertTrue("ROM de teste copiada dos assets", rom.isFile && rom.length() == 131072L)
+        assertEquals("/storage/emulated/0/Jogos/Super Mario World.sfc", intent.getStringExtra(GameLauncher.EXTRA_ROM_PATH))
         screenshot("12_console_pronto")
     }
 
@@ -151,7 +158,7 @@ class ConsoleScreenTest {
     fun com_nucleo_instalado_abre_na_hora() {
         fake.complete()
         openSnesPage()
-        press(Key.DirectionCenter)
+        playFocused()
         eventually { shadowOf(compose.activity).peekNextStartedActivity() != null }
         assertTrue(fake.installRequests.isEmpty())
         assertEquals(GameActivity::class.java.name, shadowOf(compose.activity).nextStartedActivity.component!!.className)
@@ -199,8 +206,7 @@ class ConsoleScreenTest {
         compose.onNodeWithTag("count_snes", useUnmergedTree = true).assertTextContains("1 jogo", substring = true)
         compose.onNodeWithTag("count_arcade", useUnmergedTree = true).assertTextContains("nenhum jogo", substring = true)
         press(Key.DirectionCenter)
-        waitFor("screen_console_snes")
-        press(Key.DirectionRight)
+        waitFor("game_1")
         node("game_1").assertIsFocused()
         node("game_2").assertDoesNotExist() // é de outro console
         // O nome aparece abaixo do card depois de 600 ms de foco.
@@ -251,14 +257,13 @@ class ConsoleScreenTest {
     }
 
     @Test
-    fun outros_consoles_nao_mostram_a_rom_de_teste() {
+    fun console_sem_jogos_mostra_aviso_e_foca_os_filtros() {
         openConsoles()
         press(Key.DirectionRight)
         node("system_megadrive").assertIsFocused()
         press(Key.DirectionCenter)
         node("screen_console_megadrive").assertExists()
         waitFor("console_empty")
-        node("game_testrom").assertDoesNotExist()
         // Sem jogos: o foco vai para os filtros (nunca fica perdido).
         node("filter_AZ").assertIsFocused()
     }
