@@ -1,11 +1,11 @@
 {
-  "_leia": "Catálogo de jogos LIVRES (homebrew/freeware com licença que permite redistribuir). Cada jogo precisa de 'licenca' e 'fonte' (página oficial do autor). Não coloque jogos comerciais aqui. Veja o manual do site (Jogos livres) para o formato.",
+  "_leia": "Jogos LIVRES (homebrew/freeware cujo autor permite redistribuir). Para cada pacote ou jogo: url (https), licenca e fonte (página oficial do autor). Itens sem licença e fonte não aparecem no site.",
   "pacoteGeral": null,
   "consoles": {
+    "nes": { "nome": "Nintendinho", "pacote": null },
     "snes": { "nome": "Super Nintendo", "pacote": null },
     "megadrive": { "nome": "Mega Drive", "pacote": null },
     "mastersystem": { "nome": "Master System", "pacote": null },
-    "nes": { "nome": "Nintendinho", "pacote": null },
     "gb": { "nome": "Game Boy", "pacote": null },
     "gbc": { "nome": "Game Boy Color", "pacote": null },
     "gba": { "nome": "Game Boy Advance", "pacote": null },
@@ -13,5 +13,7 @@
     "psx": { "nome": "PlayStation", "pacote": null },
     "arcade": { "nome": "Arcade", "pacote": null }
   },
+  "_exemplo_pacote": { "url": "https://exemplo.com/pacote.zip", "tamanho": "12 MB", "licenca": "CC BY 4.0", "fonte": "https://exemplo.com/sobre" },
+  "_exemplo_jogo": { "titulo": "Nome do jogo", "console": "nes", "ano": "2024", "autor": "Estúdio", "tamanho": "40 KB", "licenca": "Freeware", "fonte": "https://site-do-autor", "url": "https://site-do-autor/jogo.zip", "capa": "https://site-do-autor/capa.png" },
   "jogos": []
 }

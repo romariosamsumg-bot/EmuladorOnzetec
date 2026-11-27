@@ -588,3 +588,4 @@ pre code { background: none; border: 0; padding: 0; word-break: normal; }
   .hero .logo { width: min(220px, 55%); }
   .hero .tv { padding: 16px; border-radius: 24px; }
 }
+.consoles figcaption small { white-space: nowrap; }
