@@ -12,6 +12,7 @@ import com.retroplay.core.ui.R as UiR
 @Serializable data object FavoritesRoute
 @Serializable data object TransferRoute
 @Serializable data object SettingsRoute
+@Serializable data object MediaRoute
 
 /** Destinos do menu lateral, na ordem em que aparecem. */
 enum class TopLevelDestination(
@@ -25,6 +26,7 @@ enum class TopLevelDestination(
     SEARCH(SearchRoute, R.string.nav_search, UiR.drawable.ic_nav_search, "nav_search"),
     CONSOLES(ConsolesRoute, R.string.nav_consoles, UiR.drawable.ic_nav_consoles, "nav_consoles"),
     FAVORITES(FavoritesRoute, R.string.nav_favorites, UiR.drawable.ic_nav_favorites, "nav_favorites"),
+    MEDIA(MediaRoute, R.string.nav_media, UiR.drawable.ic_nav_media, "nav_media"),
     TRANSFER(TransferRoute, R.string.nav_transfer, UiR.drawable.ic_nav_transfer, "nav_transfer"),
     SETTINGS(SettingsRoute, R.string.nav_settings, UiR.drawable.ic_nav_settings, "nav_settings"),
 }

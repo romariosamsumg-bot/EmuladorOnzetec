@@ -53,7 +53,13 @@ import com.retroplay.feature.settings.SettingsViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MobileSettings(nav: MobileNav, profile: Profile?, onSwitchProfile: (() -> Unit)?, viewModel: SettingsViewModel = hiltViewModel()) {
+fun MobileSettings(
+    nav: MobileNav,
+    profile: Profile?,
+    onSwitchProfile: (() -> Unit)?,
+    onExit: (() -> Unit)? = null,
+    viewModel: SettingsViewModel = hiltViewModel(),
+) {
     val context = LocalContext.current
     val resources = LocalResources.current
     val snapshot by viewModel.snapshot.collectAsStateWithLifecycle()
@@ -119,6 +125,13 @@ fun MobileSettings(nav: MobileNav, profile: Profile?, onSwitchProfile: (() -> Un
                             modifier = Modifier.testTag("settings_add_games").clickableRow(nav::library),
                         )
                     }
+                    item(key = "media") {
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.media_title)) },
+                            supportingContent = { Text(stringResource(R.string.media_prints) + " · " + stringResource(R.string.media_highlights)) },
+                            modifier = Modifier.testTag("settings_media").clickableRow(nav::media),
+                        )
+                    }
                     item(key = "div") { HorizontalDivider(Modifier.padding(vertical = 4.dp)) }
                 } else {
                     item(key = "game") { Caption(stringResource(R.string.scope_game, game!!.title), Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) }
@@ -132,6 +145,15 @@ fun MobileSettings(nav: MobileNav, profile: Profile?, onSwitchProfile: (() -> Un
                             open = c.name
                         },
                     )
+                }
+                if (game == null && onExit != null) {
+                    item(key = "exit") {
+                        HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.nav_exit), color = MaterialTheme.colorScheme.error) },
+                            modifier = Modifier.testTag("settings_exit").clickableRow(onExit),
+                        )
+                    }
                 }
             }
         } else {

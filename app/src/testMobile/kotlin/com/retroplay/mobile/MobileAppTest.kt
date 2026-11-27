@@ -182,4 +182,29 @@ class MobileAppTest {
         waitFor("bottom_bar")
         screenshot("11_inicio_deitado")
     }
+
+    @Test
+    fun voltar_na_inicio_pergunta_antes_de_sair() {
+        seed()
+        waitFor("hero")
+        compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        waitFor("exit_dialog")
+        screenshot("12_sair")
+        tap("exit_cancel")
+        org.junit.Assert.assertFalse(compose.activity.isFinishing)
+        compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        tap("exit_confirm")
+        org.junit.Assert.assertTrue(compose.activity.isFinishing)
+    }
+
+    @Test
+    fun midia_pela_inicio() {
+        seed()
+        tap("home_media")
+        waitFor("media_grid")
+        node("media_0").assertExists()
+        screenshot("13_midia")
+        tap("media_filter_HIGHLIGHTS")
+        node("media_1").assertDoesNotExist()
+    }
 }

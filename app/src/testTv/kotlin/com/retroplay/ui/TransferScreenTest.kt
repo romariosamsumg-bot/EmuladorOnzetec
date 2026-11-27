@@ -82,7 +82,7 @@ class TransferScreenTest {
             }
         }
         node("nav_home").assertIsFocused()
-        repeat(4) { press(Key.DirectionDown) }
+        repeat(5) { press(Key.DirectionDown) }
         node("nav_transfer").assertIsFocused()
         press(Key.DirectionCenter)
         node("screen_transfer").assertExists()

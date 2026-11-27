@@ -11,6 +11,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -94,13 +96,9 @@ fun RetroPlayShell(
 ) {
     // Volta à Início limpando as telas abertas por cima (ex.: detalhes do jogo).
     androidx.compose.runtime.LaunchedEffect(navController, goHomeRequests) {
-        goHomeRequests.collect {
-            navController.navigate(HomeRoute) {
-                popUpTo(navController.graph.findStartDestination().id)
-                launchSingleTop = true
-            }
-        }
+        goHomeRequests.collect { navController.navigateHomeFresh() }
     }
+    var confirmExit by rememberSaveable { mutableStateOf(false) }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val topLevelMatch = TopLevelDestination.entries.firstOrNull { dest ->
         backStackEntry?.destination?.hierarchy?.any { it.hasRoute(dest.route::class) } == true
@@ -125,29 +123,41 @@ fun RetroPlayShell(
                 modifier = Modifier
                     .fillMaxHeight()
                     .background(if (open) MaterialTheme.colorScheme.surface.copy(alpha = 0.6f) else Color.Transparent)
-                    .padding(horizontal = 12.dp, vertical = 24.dp)
+                    // Rola se não couber (TVs com tela menor); o item focado sempre aparece.
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 12.dp, vertical = 12.dp)
                     .selectableGroup()
                     .onFocusChanged { drawerHasFocus = it.hasFocus }
                     // Ao entrar no menu (D-pad ← ou Voltar), o foco vai sempre para o item da tela atual.
                     .focusProperties { onEnter = { itemRequesters.getValue(current).requestFocus() } }
                     .focusGroup()
                     .testTag("drawer"),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 // Marca: só o símbolo com o menu recolhido; logo completo com ele aberto.
                 // Larguras fixas (sem fillMaxWidth): o menu recolhido não pode crescer sobre o conteúdo.
-                Box(Modifier.width(if (open) 220.dp else 64.dp).height(64.dp), contentAlignment = if (open) Alignment.CenterStart else Alignment.Center) {
+                Box(Modifier.width(if (open) 240.dp else 64.dp).height(60.dp), contentAlignment = if (open) Alignment.CenterStart else Alignment.Center) {
                     if (open) {
-                        Image(
-                            painterResource(R.drawable.logo_onzetec),
-                            contentDescription = stringResource(R.string.app_name),
-                            modifier = Modifier.height(64.dp).padding(start = 8.dp).testTag("drawer_logo"),
-                        )
+                        // Logo + "Feito por Romário Marcelino" (no topo: sempre visível com o menu aberto).
+                        Column(Modifier.padding(start = 8.dp)) {
+                            Image(
+                                painterResource(R.drawable.logo_onzetec),
+                                contentDescription = stringResource(R.string.app_name),
+                                modifier = Modifier.height(40.dp).testTag("drawer_logo"),
+                            )
+                            Text(
+                                stringResource(R.string.made_by),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                modifier = Modifier.testTag("drawer_credit"),
+                            )
+                        }
                     } else {
                         Image(
                             painterResource(R.drawable.logo_mark),
                             contentDescription = stringResource(R.string.app_name),
-                            modifier = Modifier.width(52.dp).testTag("drawer_mark"),
+                            modifier = Modifier.width(44.dp).testTag("drawer_mark"),
                         )
                     }
                 }
@@ -162,13 +172,17 @@ fun RetroPlayShell(
                         Text(profile.name, maxLines = 1)
                     }
                 }
-                Spacer(Modifier.weight(1f))
+                Spacer(Modifier.height(10.dp))
                 TopLevelDestination.entries.forEach { dest ->
                     NavigationDrawerItem(
                         selected = dest == current,
                         onClick = {
-                            if (dest == current && isTopLevelScreen) contentRequester.requestFocus()
-                            else navController.navigateTopLevel(dest)
+                            when {
+                                // Início sempre abre do começo: topo da tela, foco no "Jogar" do destaque.
+                                dest == TopLevelDestination.HOME -> navController.navigateHomeFresh()
+                                dest == current && isTopLevelScreen -> contentRequester.requestFocus()
+                                else -> navController.navigateTopLevel(dest)
+                            }
                         },
                         leadingContent = { Icon(painterResource(dest.iconRes), contentDescription = null) },
                         modifier = Modifier
@@ -178,17 +192,15 @@ fun RetroPlayShell(
                         Text(stringResource(dest.labelRes))
                     }
                 }
-                Spacer(Modifier.weight(1f))
-                Box(Modifier.height(40.dp), contentAlignment = Alignment.BottomStart) {
-                    if (open) {
-                        Text(
-                            stringResource(R.string.made_by),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            modifier = Modifier.padding(start = 12.dp).testTag("drawer_credit"),
-                        )
-                    }
+                Spacer(Modifier.height(10.dp))
+                // Sair: pede confirmação antes de fechar o app.
+                NavigationDrawerItem(
+                    selected = false,
+                    onClick = { confirmExit = true },
+                    leadingContent = { Icon(painterResource(com.retroplay.core.ui.R.drawable.ic_nav_exit), contentDescription = null) },
+                    modifier = Modifier.testTag("nav_exit"),
+                ) {
+                    Text(stringResource(R.string.nav_exit))
                 }
             }
         },
@@ -234,19 +246,33 @@ fun RetroPlayShell(
                     )
                 }
                 composable<TransferRoute> { TransferScreen() }
+                composable<com.retroplay.navigation.MediaRoute> { com.retroplay.feature.media.MediaScreen() }
                 composable<SettingsRoute> { SettingsEntry(onOpenTransfer = { navController.navigateTopLevel(TopLevelDestination.TRANSFER) }) }
                 composable<GameSettingsRoute> { SettingsEntry(onOpenTransfer = { navController.navigateTopLevel(TopLevelDestination.TRANSFER) }) }
             }
             // Declarado DEPOIS do NavHost para ter prioridade sobre o "voltar" padrão dele.
             // Em telas internas o NavHost cuida do Voltar (volta para a tela anterior).
-            BackHandler(enabled = isTopLevelScreen && (!drawerHasFocus || current != TopLevelDestination.HOME)) {
-                if (!drawerHasFocus) {
-                    itemRequesters.getValue(current).requestFocus()
-                } else {
-                    navController.navigateTopLevel(TopLevelDestination.HOME)
+            BackHandler(enabled = isTopLevelScreen) {
+                when {
+                    !drawerHasFocus -> itemRequesters.getValue(current).requestFocus()
+                    current != TopLevelDestination.HOME -> navController.navigateHomeFresh()
+                    // No menu, já na Início: pergunta antes de fechar o app.
+                    else -> confirmExit = true
                 }
             }
         }
+    }
+    if (confirmExit) {
+        val activity = androidx.activity.compose.LocalActivity.current
+        com.retroplay.ui.components.ExitDialog(onConfirm = { confirmExit = false; activity?.finish() }, onDismiss = { confirmExit = false })
+    }
+}
+
+/** Início do começo: tira as telas abertas e recria a Início (topo, foco no destaque). */
+private fun NavHostController.navigateHomeFresh() {
+    navigate(HomeRoute) {
+        popUpTo(graph.findStartDestination().id) { inclusive = true }
+        launchSingleTop = false
     }
 }
 

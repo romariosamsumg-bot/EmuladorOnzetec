@@ -174,6 +174,11 @@ class GameActivity : ComponentActivity(), GameMenuActions {
 
     // ---- estado observado pela UI Compose sobre o jogo
     private var menu by mutableStateOf<GameMenuState?>(null)
+
+    /** Highlights: últimos segundos gravados continuamente (null = desligado ou sem codificador). */
+    private var highlights: HighlightRecorder? = null
+    private var highlightsOn = true
+    private val media by lazy { com.retroplay.feature.media.MediaLibrary(applicationContext) }
     private var fps by mutableIntStateOf(0)
     private var showFps by mutableStateOf(false)
     private var toast by mutableStateOf<String?>(null)
@@ -330,6 +335,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             view.getGLRetroEvents().filterIsInstance<GLRetroView.GLRetroEvents.FrameRendered>().first()
             gameRunning = true
             sessionStart = SystemClock.elapsedRealtime()
+            if (highlightsOn) highlights = HighlightRecorder(view).also { if (menu == null) it.start() }
             // Jogos de vários discos (.m3u): o menu ganha "Trocar disco".
             // (Consulta a thread de emulação: fora da thread da tela.)
             if (system.identification == IdentificationStrategy.DISC_SERIAL) ioScope.launch {
@@ -374,6 +380,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         aspect = if (CoreAspect.forCore(coreId) == null) null
         else if (snap.value(AppSettings.ASPECT, sys, gameKey) == "pixel") AspectChoice.PIXEL_PERFECT else AspectChoice.ORIGINAL
         showFps = snap.value(AppSettings.SHOW_FPS)
+        highlightsOn = snap.value(AppSettings.HIGHLIGHTS)
         audioOn = snap.value(AppSettings.AUDIO_ENABLED, sys, gameKey)
         muteInMenu = snap.value(AppSettings.MUTE_IN_MENU)
         val custom = MappingCodec.decode(snap.value(AppSettings.MAPPING, sys, gameKey))
@@ -600,6 +607,8 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             slotCount = slotCount,
             discs = discs,
             currentDisc = currentDisc,
+            highlightSeconds = highlights?.availableSeconds ?: 0,
+            highlightsOn = highlights != null,
             coreOptions = if ((page ?: current.page) == MenuPage.CORE_OPTIONS) {
                 runCatching { currentCoreOptions() }.getOrDefault(emptyList())
             } else current.coreOptions,
@@ -733,9 +742,27 @@ class GameActivity : ComponentActivity(), GameMenuActions {
                 return@capture
             }
             ioScope.launch {
-                val ok = runCatching { saveScreenshot(bitmap) }.getOrDefault(false)
+                val ok = runCatching { media.saveImage(mediaBaseName(), bitmap) }.getOrDefault(false)
                 withContext(Dispatchers.Main) { flash(getString(if (ok) R.string.screenshot_saved else R.string.screenshot_failed)) }
             }
+        }
+    }
+
+    /** Highlight: salva os últimos [seconds] segundos de jogo em Mídia (MP4, sem som). */
+    override fun saveHighlight(seconds: Int) {
+        val rec = highlights
+        if (rec == null) {
+            flash(getString(R.string.highlight_off))
+            return
+        }
+        if (rec.availableSeconds < 1) {
+            flash(getString(R.string.highlight_unavailable))
+            return
+        }
+        refreshMenu(MenuPage.MAIN)
+        ioScope.launch {
+            val ok = runCatching { media.saveVideo(mediaBaseName()) { fd -> rec.save(seconds, fd) != null } }.getOrDefault(false)
+            withContext(Dispatchers.Main) { flash(getString(if (ok) R.string.highlight_saved else R.string.highlight_failed)) }
         }
     }
 
@@ -768,6 +795,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         val view = retroView ?: return
         // Congela a emulação (o GL para de chamar step) e silencia o áudio.
         view.renderMode = if (paused) GLSurfaceView.RENDERMODE_WHEN_DIRTY else GLSurfaceView.RENDERMODE_CONTINUOUSLY
+        if (paused) highlights?.pause() else highlights?.start()
         view.audioEnabled = audioOn && !(paused && muteInMenu)
     }
 
@@ -825,13 +853,16 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         val view = retroView ?: return super.dispatchKeyEvent(event)
         // Botões de gamepad contam mesmo se o controle (alguns USB/Bluetooth) não se anuncia como gamepad.
+        // Alguns controles mandam o Select como "Voltar" sem marcar o evento como gamepad: vale o aparelho.
         val fromGamepad = event.isFromSource(InputDevice.SOURCE_GAMEPAD) || event.isFromSource(InputDevice.SOURCE_JOYSTICK) ||
-            KeyEvent.isGamepadButton(event.keyCode)
+            KeyEvent.isGamepadButton(event.keyCode) || isGamepadDevice(event.deviceId)
+        // Atalhos usam o botão já remapeado (ex.: controle genérico com Start em BUTTON_10).
+        val logical = logicalKey(event.keyCode)
         if (fromGamepad) onPhysicalInput()
         if (menu != null) return super.dispatchKeyEvent(translateForMenu(event))
         // Atalho do menu (padrão Start + Select, em qualquer ordem): vem antes dos outros atalhos.
         if (fromGamepad && event.repeatCount == 0) {
-            when (menuCombo.onKey(event.keyCode, event.action == KeyEvent.ACTION_DOWN)) {
+            when (menuCombo.onKey(logical, event.action == KeyEvent.ACTION_DOWN)) {
                 MenuCombo.Result.OPEN_MENU -> {
                     // Solta no núcleo os botões que já tinham chegado ao jogo (ex.: Start apertado primeiro).
                     val port = portFor(event.deviceId, true)
@@ -848,7 +879,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             }
         }
         if (fromGamepad && hotkeysEnabled && event.repeatCount == 0) {
-            val hotkey = hotkeys.onKey(event.keyCode, event.action == KeyEvent.ACTION_DOWN)
+            val hotkey = hotkeys.onKey(logical, event.action == KeyEvent.ACTION_DOWN)
             if (hotkey != null) {
                 // Solta Select e o botão do atalho no núcleo, para não ficarem "presos".
                 val port = ports.portFor(event.deviceId, true)
@@ -875,6 +906,19 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             InputAction.Ignore -> super.dispatchKeyEvent(event)
         }
     }
+
+    private val gamepadDevices = HashMap<Int, Boolean>()
+
+    /** O aparelho que mandou a tecla é um gamepad/joystick físico? (guardado por id) */
+    private fun isGamepadDevice(deviceId: Int): Boolean = gamepadDevices.getOrPut(deviceId) {
+        InputDevice.getDevice(deviceId)?.let { d ->
+            !d.isVirtual && (d.sources and InputDevice.SOURCE_GAMEPAD == InputDevice.SOURCE_GAMEPAD ||
+                d.sources and InputDevice.SOURCE_JOYSTICK == InputDevice.SOURCE_JOYSTICK)
+        } == true
+    }
+
+    /** Tecla "lógica" para os atalhos: o botão do RetroPad depois do remapeamento (Start, Select, L1...). */
+    private fun logicalKey(keyCode: Int): Int = MenuCombo.logicalKey(router, keyCode)
 
     /** Porta do jogador: a escolhida nas Configurações para este controle, ou a ordem de uso. */
     private fun portFor(deviceId: Int, isGamepad: Boolean): Int {
@@ -962,8 +1006,15 @@ class GameActivity : ComponentActivity(), GameMenuActions {
 
     private var wasPausedBySystem = false
 
+    override fun onDestroy() {
+        highlights?.release()
+        highlights = null
+        super.onDestroy()
+    }
+
     override fun onPause() {
         super.onPause()
+        highlights?.pause()
         rewindJob?.cancel()
         rewindJob = null
         saveSram()
@@ -1032,23 +1083,8 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         }
     }
 
-    /** Screenshot em Imagens/Onzetec Games (MediaStore, sem permissão no Android 10+). */
-    private fun saveScreenshot(bitmap: Bitmap): Boolean {
-        val name = "${fileName.substringBeforeLast('.')}_${System.currentTimeMillis()}.png"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val values = ContentValues().apply {
-                put(MediaStore.Images.Media.DISPLAY_NAME, name)
-                put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Onzetec Games")
-            }
-            val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: return false
-            contentResolver.openOutputStream(uri)?.use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) } ?: return false
-            return true
-        }
-        val dir = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "").apply { mkdirs() }
-        File(dir, name).outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-        return true
-    }
+    /** Nome dos prints e highlights: o nome do jogo. */
+    private fun mediaBaseName() = intent.getStringExtra(GameLauncher.EXTRA_TITLE) ?: fileName.substringBeforeLast('.')
 
     private fun hideSystemBars() {
         WindowCompat.setDecorFitsSystemWindows(window, false)

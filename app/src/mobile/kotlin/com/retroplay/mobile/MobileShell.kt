@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -72,14 +73,17 @@ fun MobileShell(
     onSwitchProfile: (() -> Unit)? = null,
 ) {
     LaunchedEffect(navController, goHomeRequests) {
-        goHomeRequests.collect {
-            navController.navigate(HomeRoute) {
-                popUpTo(navController.graph.findStartDestination().id)
-                launchSingleTop = true
-            }
-        }
+        goHomeRequests.collect { MobileNav(navController).home() }
     }
     val entry by navController.currentBackStackEntryAsState()
+    var confirmExit by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    // Voltar na Início (sem telas abertas por cima) pergunta antes de fechar o app.
+    val atHome = entry?.destination?.hasRoute(HomeRoute::class) == true && navController.previousBackStackEntry == null
+    androidx.activity.compose.BackHandler(enabled = atHome) { confirmExit = true }
+    if (confirmExit) {
+        val activity = androidx.activity.compose.LocalActivity.current
+        MobileExitDialog(onConfirm = { confirmExit = false; activity?.finish() }, onDismiss = { confirmExit = false })
+    }
     val nav = MobileNav(navController)
     fun selected(dest: TopLevelDestination) = entry?.destination?.hierarchy?.any { it.hasRoute(dest.route::class) } == true
     // Deitado (tela larga e baixa): barra de navegação na lateral, para sobrar altura ao conteúdo.
@@ -134,7 +138,8 @@ fun MobileShell(
             composable<GameDetailsRoute> { MobileDetails(nav) }
             composable<FavoritesRoute> { MobileFavorites(nav) }
             composable<TransferRoute> { MobileLibrary(nav) }
-            composable<SettingsRoute> { MobileSettings(nav, profile, onSwitchProfile) }
+            composable<com.retroplay.navigation.MediaRoute> { MobileMedia(nav) }
+            composable<SettingsRoute> { MobileSettings(nav, profile, onSwitchProfile, onExit = { confirmExit = true }) }
             composable<GameSettingsRoute> { MobileSettings(nav, profile, onSwitchProfile) }
         }
     }
@@ -148,16 +153,38 @@ private fun tabLabel(dest: TopLevelDestination): Int =
 
 /** Atalhos de navegação usados pelas telas do celular. */
 class MobileNav(private val controller: NavHostController) {
-    fun tab(dest: TopLevelDestination) = controller.navigate(dest.route) {
-        popUpTo(controller.graph.findStartDestination().id) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
+    fun tab(dest: TopLevelDestination) {
+        if (dest == TopLevelDestination.HOME) return home()
+        controller.navigate(dest.route) {
+            popUpTo(controller.graph.findStartDestination().id) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
+    /** Início do começo (topo da lista), tirando as telas abertas por cima. */
+    fun home() = controller.navigate(HomeRoute) {
+        popUpTo(controller.graph.findStartDestination().id) { inclusive = true }
     }
 
     fun game(id: Long) = controller.navigate(GameDetailsRoute(id))
     fun console(systemId: String) = controller.navigate(ConsoleDetailRoute(systemId))
     fun library() = controller.navigate(TransferRoute) { launchSingleTop = true }
+    fun media() = controller.navigate(com.retroplay.navigation.MediaRoute) { launchSingleTop = true }
     fun gameSettings(id: Long) = controller.navigate(GameSettingsRoute(id))
     fun back() = controller.popBackStack()
 }
 
+
+/** "Sair do Onzetec Games?" no celular. */
+@Composable
+fun MobileExitDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.exit_title)) },
+        text = { Text(stringResource(R.string.exit_body)) },
+        confirmButton = { androidx.compose.material3.TextButton(onClick = onConfirm, modifier = Modifier.testTag("exit_confirm")) { Text(stringResource(R.string.exit_confirm)) } },
+        dismissButton = { androidx.compose.material3.TextButton(onClick = onDismiss, modifier = Modifier.testTag("exit_cancel")) { Text(stringResource(R.string.cancel)) } },
+        modifier = Modifier.testTag("exit_dialog"),
+    )
+}

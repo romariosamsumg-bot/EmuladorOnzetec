@@ -308,8 +308,20 @@ O banco de identificação (`data/src/main/assets/db/retroplay-dat.sqlite`) é g
 
 ## Usando o app
 
-O menu lateral mostra o símbolo do Onzetec Games; aberto, mostra o logo completo e, no rodapé,
-"Feito por Romário Marcelino".
+O menu lateral mostra o símbolo do Onzetec Games; aberto, mostra o logo completo com "Feito por
+Romário Marcelino" logo abaixo. Itens: perfil, Início, Buscar, Consoles, Favoritos, **Mídia**,
+Transferir jogos, Configurações e **Sair**.
+
+- **Início** sempre abre do começo: topo da tela, foco no ▶ Jogar do destaque (mesmo vindo de
+  outra tela ou do "Sair" do jogo).
+- **Sair do app**: o item **Sair** do menu, ou **Voltar** com o foco no menu já na Início, abre
+  "Sair do Onzetec Games?" com o foco em **Cancelar** (para não fechar sem querer). No celular,
+  Voltar na Início faz a mesma pergunta, e há **Sair** no fim dos Ajustes.
+- **Mídia**: prints e highlights salvos durante os jogos, do mais novo para o mais antigo, com
+  filtros Tudo / Prints / Highlights. OK abre em tela cheia (o highlight toca em repetição) com
+  Fechar e Apagar; no celular também **Compartilhar**. No celular, a Mídia fica no ícone ▶ da
+  barra de cima da Início e em Ajustes. Os arquivos ficam também na galeria: Imagens/Onzetec
+  Games e Filmes/Onzetec Games (Android 10+; no 8 e 9, na pasta do app).
 
 - **Início**: jogo em destaque (o último jogado ou um aleatório) com ▶ Jogar e ＋ Favoritos, e
   fileiras: Continuar jogando, Favoritos, Adicionados recentemente, uma por console, Mais jogados
@@ -348,13 +360,20 @@ O menu lateral mostra o símbolo do Onzetec Games; aberto, mostra o logo complet
 
 ## Durante o jogo
 
-- **Menu rápido**: botão **Voltar** do controle remoto, **Guide** do gamepad ou **Select+Start**.
+- **Menu rápido**: botão **Voltar** do controle remoto, **Guide** do gamepad ou **Start + Select**
+  juntos (em qualquer ordem). O atalho segue o remapeamento dos botões (controles USB genéricos
+  remapeados em Configurações → Controles → Remapear botões também funcionam) e reconhece
+  controles que mandam o Select como "Voltar".
   O jogo fica congelado e mudo enquanto o menu está aberto. Opções: **Sair** (primeira da lista:
   salva o automático e volta direto para o Início) · Continuar · Salvar estado
   (espaços 1–9, com miniatura e data) · Carregar estado (inclui o automático) · Rewind ·
   Voltar 5 segundos · Reiniciar · Inserir ficha (Arcade) · Acelerar (2x/4x/8x) · Shader (CRT,
   LCD, Nítido) · Proporção (original ou pixel perfeito, no SNES e Mega Drive/Master System) ·
-  Controles · Opções do núcleo · Mostrar FPS · Screenshot (vai para Imagens/Onzetec Games).
+  Controles · Opções do núcleo · Mostrar FPS · **Tirar print** · **Highlight**.
+- **Highlight**: enquanto você joga, o app guarda continuamente os últimos 15 s de vídeo (360p,
+  24 quadros/s, sem som; ~5 MB de memória). No menu, **Highlight → 5, 10 ou 15 segundos** salva
+  esse trecho em MP4 na **Mídia**. O tempo com o menu aberto não entra no vídeo. Se o aparelho
+  for fraco e o jogo ficar lento, desligue em Configurações → Vídeo → Highlights.
 - **Save automático** ao sair pelo menu e ao apertar Home na TV; ao voltar, o menu aparece.
   Nos detalhes do jogo, **Continuar do save** abre direto no último save; "Continuar jogando"
   na tela inicial mostra a miniatura do último save e o tempo jogado.

@@ -104,7 +104,7 @@ class SettingsScreenTest {
             }
         }
         node("nav_home").assertIsFocused()
-        press(Key.DirectionDown, 5)
+        press(Key.DirectionDown, 6)
         node("nav_settings").assertIsFocused()
         press(Key.DirectionCenter)
         waitFor("cat_VIDEO")
@@ -224,7 +224,7 @@ class SettingsScreenTest {
             settings.set(AppSettings.PARENTAL_SETTINGS, ScopeRef.Global, true)
         }
         press(Key.DirectionLeft)
-        press(Key.DirectionDown, 5)
+        press(Key.DirectionDown, 6)
         press(Key.DirectionCenter)
         waitFor("pin_dialog")
         node("screen_settings_locked").assertExists()

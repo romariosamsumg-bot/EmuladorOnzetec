@@ -93,6 +93,7 @@ class SettingsPane(
         choice(AppSettings.ASPECT, R.string.set_aspect, R.string.set_aspect_desc)
         bool(AppSettings.SHOW_FPS, R.string.set_fps, R.string.set_fps_desc)
         bool(AppSettings.LOW_POWER, R.string.set_low_power, R.string.set_low_power_desc)
+        if (inGlobal) bool(AppSettings.HIGHLIGHTS, R.string.set_highlights, R.string.set_highlights_desc)
         scopeNote()
         noteRes(R.string.video_note, "video")
     }

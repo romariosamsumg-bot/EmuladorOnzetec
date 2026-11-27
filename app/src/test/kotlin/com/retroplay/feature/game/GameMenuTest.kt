@@ -19,6 +19,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.retroplay.core.ui.theme.RetroPlayTheme
 import com.retroplay.domain.saves.SaveSlot
@@ -68,11 +70,19 @@ class GameMenuTest {
         override fun toggleFps() { calls += "fps" }
         override fun screenshot() { calls += "shot" }
         override fun exit() { calls += "exit" }
+        override fun saveHighlight(seconds: Int) { calls += "highlight:$seconds" }
     }
 
-    private fun show(system: GameSystem, slots: List<SaveSlot> = emptyList(), aspect: AspectChoice? = AspectChoice.ORIGINAL) {
+    private fun show(
+        system: GameSystem,
+        slots: List<SaveSlot> = emptyList(),
+        aspect: AspectChoice? = AspectChoice.ORIGINAL,
+        highlightSeconds: Int = 0,
+    ) {
         compose.setContent {
-            var state by remember { mutableStateOf(GameMenuState("Super Mario World", system, slots = slots, aspect = aspect)) }
+            var state by remember {
+                mutableStateOf(GameMenuState("Super Mario World", system, slots = slots, aspect = aspect, highlightSeconds = highlightSeconds, highlightsOn = true))
+            }
             RetroPlayTheme { GameMenu(state, Actions { f -> state = state.f() }) }
         }
         compose.waitForIdle()
@@ -162,5 +172,30 @@ class GameMenuTest {
         val dir = File("build/screenshots").apply { mkdirs() }
         val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
         File(dir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
+    @Test
+    fun highlight_salva_os_ultimos_segundos_escolhidos() {
+        // 8 s gravados: 5 s salva inteiro; 10 e 15 s mostram quanto há e salvam o que tem.
+        show(SystemRegistry.SNES, highlightSeconds = 8)
+        compose.onNodeWithTag("menu_list").performScrollToNode(androidx.compose.ui.test.hasTestTag("menu_highlight"))
+        node("menu_highlight").performClick()
+        compose.waitForIdle()
+        node("highlight_5").assertIsFocused()
+        compose.onNodeWithTag("highlight_10").assertTextContains("8s", substring = true)
+        press(Key.DirectionDown)
+        press(Key.DirectionCenter)
+        assertEquals(listOf("page:HIGHLIGHT", "highlight:10"), calls)
+        back()
+        node("menu_resume").assertExists()
+    }
+
+    @Test
+    fun highlight_sem_gravacao_fica_desabilitado() {
+        show(SystemRegistry.SNES, highlightSeconds = 0)
+        compose.onNodeWithTag("menu_list").performScrollToNode(androidx.compose.ui.test.hasTestTag("menu_highlight"))
+        node("menu_highlight").performClick()
+        compose.waitForIdle()
+        node("highlight_5").assertIsNotEnabled()
     }
 }

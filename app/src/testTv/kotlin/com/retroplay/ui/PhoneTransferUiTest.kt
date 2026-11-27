@@ -89,7 +89,7 @@ class PhoneTransferUiTest {
     fun tela_transferir_liga_o_servidor_e_desliga_ao_sair() {
         waitFor("home_transfer")
         press(Key.DirectionLeft)
-        repeat(4) { press(Key.DirectionDown) }
+        repeat(5) { press(Key.DirectionDown) }
         node("nav_transfer").assertIsFocused()
         press(Key.DirectionCenter)
         waitFor("transfer_qr")

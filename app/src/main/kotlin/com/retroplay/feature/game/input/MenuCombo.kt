@@ -54,6 +54,13 @@ class MenuCombo(private val keys: Set<Int>) {
             },
         )
 
+        /**
+         * Botão do RetroPad que a tecla aciona depois do remapeamento (ex.: um controle genérico
+         * com o Start em BUTTON_10 remapeado vira BUTTON_START), para os atalhos seguirem o remapeamento.
+         */
+        fun logicalKey(router: InputRouter, keyCode: Int): Int =
+            (router.route(keyCode, true) as? InputAction.Forward)?.retroKeyCode ?: normalize(keyCode)
+
         /** Alguns controles enviam o Select como "Voltar"; o botão Menu (≡) como Start. */
         fun normalize(keyCode: Int) = when (keyCode) {
             KeyEvent.KEYCODE_BACK -> KeyEvent.KEYCODE_BUTTON_SELECT

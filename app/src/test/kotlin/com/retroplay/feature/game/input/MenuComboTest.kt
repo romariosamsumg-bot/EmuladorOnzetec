@@ -55,4 +55,19 @@ class MenuComboTest {
         off.onKey(KEYCODE_BUTTON_START, true)
         assertEquals(NONE, off.onKey(KEYCODE_BUTTON_SELECT, true))
     }
+
+    @Test
+    fun atalho_segue_o_remapeamento_do_controle_generico() {
+        // Controle USB genérico: Start e Select chegam como BUTTON_10 e BUTTON_9, remapeados no assistente.
+        val custom = mapOf(
+            android.view.KeyEvent.KEYCODE_BUTTON_10 to com.retroplay.domain.system.RetroPadButton.START,
+            android.view.KeyEvent.KEYCODE_BUTTON_9 to com.retroplay.domain.system.RetroPadButton.SELECT,
+        )
+        val router = InputRouter(gamepadMap = MappingCodec.gamepadMap(custom, nintendoLayout = false))
+        val c = MenuCombo.forSetting("start_select")
+        assertEquals(NONE, c.onKey(MenuCombo.logicalKey(router, android.view.KeyEvent.KEYCODE_BUTTON_10), true))
+        assertEquals(OPEN_MENU, c.onKey(MenuCombo.logicalKey(router, android.view.KeyEvent.KEYCODE_BUTTON_9), true))
+        // "Voltar" do controle conta como Select.
+        assertEquals(KEYCODE_BUTTON_SELECT, MenuCombo.logicalKey(router, KEYCODE_BACK))
+    }
 }

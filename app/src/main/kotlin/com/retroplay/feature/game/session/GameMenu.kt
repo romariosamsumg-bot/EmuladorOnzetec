@@ -53,7 +53,7 @@ import com.retroplay.domain.system.RetroPadButton
 import com.retroplay.ui.components.requestFocusWhenReady
 import androidx.compose.runtime.LaunchedEffect
 
-enum class MenuPage { MAIN, SAVE, LOAD, CONTROLS, CORE_OPTIONS }
+enum class MenuPage { MAIN, SAVE, LOAD, CONTROLS, CORE_OPTIONS, HIGHLIGHT }
 enum class ShaderChoice(val label: Int) { DEFAULT(R.string.shader_none), CRT(R.string.shader_crt), LCD(R.string.shader_lcd), SHARP(R.string.shader_sharp), SMOOTH(R.string.shader_smooth) }
 enum class AspectChoice(val label: Int) { ORIGINAL(R.string.aspect_original), PIXEL_PERFECT(R.string.aspect_pixel) }
 
@@ -75,6 +75,9 @@ data class GameMenuState(
     /** Jogos de vários discos (.m3u): quantidade e disco atual (0 = primeiro). */
     val discs: Int = 1,
     val currentDisc: Int = 0,
+    /** Highlights: segundos já gravados e se a gravação está ligada. */
+    val highlightSeconds: Int = 0,
+    val highlightsOn: Boolean = false,
 )
 
 /** Ações do menu (implementadas pela GameActivity). */
@@ -96,6 +99,8 @@ interface GameMenuActions {
     fun setCoreOption(key: String, value: String) {}
     /** Troca para o próximo disco (como abrir a tampa e trocar o CD). */
     fun nextDisc() {}
+    /** Salva os últimos [seconds] segundos de jogo (highlight). */
+    fun saveHighlight(seconds: Int) {}
 }
 
 /** Menu rápido sobre o jogo pausado. Voltar fecha a página atual ou o menu. */
@@ -119,6 +124,7 @@ fun GameMenu(state: GameMenuState, actions: GameMenuActions) {
                 MenuPage.LOAD -> SlotsPage(state, saving = false, actions)
                 MenuPage.CONTROLS -> ControlsPage(state.system)
                 MenuPage.CORE_OPTIONS -> CoreOptionsPage(state.coreOptions, actions)
+                MenuPage.HIGHLIGHT -> HighlightPage(state, actions)
             }
         }
     }
@@ -154,8 +160,9 @@ private fun MainPage(state: GameMenuState, a: GameMenuActions) {
         add(Item("menu_core", R.string.menu_core_options, null) { a.openPage(MenuPage.CORE_OPTIONS) })
         add(Item("menu_fps", R.string.menu_fps, if (state.showFps) on else off) { a.toggleFps() })
         add(Item("menu_screenshot", R.string.menu_screenshot, null) { a.screenshot() })
+        add(Item("menu_highlight", R.string.menu_highlight, null) { a.openPage(MenuPage.HIGHLIGHT) })
     }
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp), contentPadding = PaddingValues(vertical = 4.dp)) {
+    LazyColumn(Modifier.testTag("menu_list"), verticalArrangement = Arrangement.spacedBy(4.dp), contentPadding = PaddingValues(vertical = 4.dp)) {
         items(items, key = { it.tag }) { item ->
             val value = when (item.tag) {
                 "menu_shader" -> stringResource(state.shader.label)
@@ -172,6 +179,34 @@ private fun MainPage(state: GameMenuState, a: GameMenuActions) {
         }
     }
 }
+
+/** Highlight: escolhe quantos segundos salvar (só os que já foram gravados ficam ativos). */
+@Composable
+private fun HighlightPage(state: GameMenuState, a: GameMenuActions) {
+    val first = remember { FocusRequester() }
+    LaunchedEffect(Unit) { first.requestFocusWhenReady() }
+    Text(stringResource(R.string.menu_highlight_title), style = MaterialTheme.typography.titleMedium)
+    Text(
+        stringResource(if (state.highlightsOn) R.string.highlight_note else R.string.highlight_off),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp), contentPadding = PaddingValues(vertical = 4.dp)) {
+        items(HIGHLIGHT_OPTIONS, key = { it }) { seconds ->
+            MenuRow(
+                label = stringResource(R.string.menu_highlight_seconds, seconds),
+                // Menos gravado do que o pedido: salva o que tem (mostra quanto).
+                value = if (state.highlightsOn && state.highlightSeconds in 1 until seconds) "${state.highlightSeconds}s" else null,
+                enabled = state.highlightsOn && state.highlightSeconds > 0,
+                onClick = { a.saveHighlight(seconds) },
+                modifier = (if (seconds == HIGHLIGHT_OPTIONS.first()) Modifier.focusRequester(first) else Modifier).testTag("highlight_$seconds"),
+            )
+        }
+    }
+}
+
+/** Durações do highlight (segundos). */
+val HIGHLIGHT_OPTIONS = listOf(5, 10, 15)
 
 @Composable
 private fun MenuRow(label: String, value: String?, enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {

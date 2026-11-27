@@ -14,6 +14,8 @@ object AppSettings {
     val ASPECT = Choice("video.aspect", "original", listOf("original", "pixel"), scoped = true)
     val SHOW_FPS = Bool("video.fps", false)
     val LOW_POWER = Bool("video.low_power", false)
+    /** Highlights: grava continuamente os últimos 15 s do jogo (vídeo) para salvar pelo menu. */
+    val HIGHLIGHTS = Bool("video.highlights", true)
 
     // ---- Áudio
     val AUDIO_ENABLED = Bool("audio.enabled", true, scoped = true)

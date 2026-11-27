@@ -92,6 +92,7 @@ class DpadNavigationTest {
             "nav_search" to "screen_search",
             "nav_consoles" to "screen_consoles",
             "nav_favorites" to "screen_favorites",
+            "nav_media" to "screen_media",
             "nav_transfer" to "screen_transfer",
             "nav_settings" to "screen_settings",
         )
@@ -165,6 +166,8 @@ class DpadNavigationTest {
                 "screen_search" -> node("key_a").assertIsFocused()
                 // Configurações: foco na primeira categoria (Vídeo).
                 "screen_settings" -> node("cat_VIDEO").assertIsFocused()
+                // Mídia: foco no primeiro filtro (Tudo).
+                "screen_media" -> node("media_filter_ALL").assertIsFocused()
                 else -> primary.assertIsFocused()
             }
         }

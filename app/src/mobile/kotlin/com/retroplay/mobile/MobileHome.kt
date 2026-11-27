@@ -74,6 +74,7 @@ fun MobileHome(nav: MobileNav, profile: Profile?, onSwitchProfile: (() -> Unit)?
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchGamesEffect(viewModel.launcher)
     MobileHomeContent(
+        onMedia = nav::media,
         state = state,
         profile = profile,
         onSwitchProfile = onSwitchProfile,
@@ -89,6 +90,7 @@ fun MobileHome(nav: MobileNav, profile: Profile?, onSwitchProfile: (() -> Unit)?
 @Composable
 fun MobileHomeContent(
     state: HomeState,
+    onMedia: () -> Unit = {},
     profile: Profile?,
     onSwitchProfile: (() -> Unit)?,
     onPlay: (Game) -> Unit,
@@ -109,6 +111,9 @@ fun MobileHomeContent(
                     )
                 },
                 actions = {
+                    IconButton(onClick = onMedia, modifier = Modifier.testTag("home_media")) {
+                        Icon(painterResource(UiR.drawable.ic_nav_media), contentDescription = stringResource(R.string.media_title))
+                    }
                     IconButton(onClick = onAddGames, modifier = Modifier.testTag("home_add_games")) {
                         Icon(painterResource(UiR.drawable.ic_nav_transfer), contentDescription = stringResource(R.string.mobile_add_games))
                     }
