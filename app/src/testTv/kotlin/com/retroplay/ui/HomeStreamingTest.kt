@@ -219,6 +219,8 @@ class HomeStreamingTest {
         compose.mainClock.advanceTimeBy(300)
         node("search_query").assertTextEquals("so")
         waitFor("result_3")
+        // A busca roda fora da thread principal (com atraso de digitação): espera o resultado.
+        compose.waitUntil(5_000) { compose.onAllNodes(hasTestTag("result_2"), useUnmergedTree = true).fetchSemanticsNodes().isEmpty() }
         node("result_2").assertDoesNotExist()
         node("result_3_name").assertExists()
         screenshot("34_busca")

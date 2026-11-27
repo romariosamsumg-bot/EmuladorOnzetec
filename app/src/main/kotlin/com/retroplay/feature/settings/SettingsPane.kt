@@ -289,7 +289,12 @@ class SettingsPane(
         choice(AppSettings.THEME, R.string.set_theme, R.string.set_theme_desc)
         choice(AppSettings.ANIMATIONS, R.string.set_animations, R.string.set_animations_desc)
         bool(AppSettings.HERO_ANIMATED, R.string.set_hero, R.string.set_hero_desc)
+        item(key = "feel_h") { Header(stringResource(R.string.feel_header)) }
         bool(AppSettings.NAV_SOUND, R.string.set_nav_sound, R.string.set_nav_sound_desc)
+        choice(AppSettings.UI_VOLUME, R.string.set_ui_volume, R.string.set_ui_volume_desc)
+        bool(AppSettings.MUSIC, R.string.set_music, R.string.set_music_desc)
+        choice(AppSettings.MUSIC_VOLUME, R.string.set_music_volume, R.string.set_music_volume_desc)
+        bool(AppSettings.HAPTICS, R.string.set_haptics, R.string.set_haptics_desc)
         choice(AppSettings.CARD_SIZE, R.string.set_card_size, R.string.set_card_size_desc)
         item(key = "rows") {
             val order = parseRowOrder(snap.value(AppSettings.ROW_ORDER))
@@ -1018,7 +1023,7 @@ fun optionLabels(def: SettingDef.Choice): Map<String, String> {
         res(v)?.let { stringResource(it) } ?: when (def) {
             AppSettings.FF_SPEED -> "${v}x"
             AppSettings.REWIND_MB -> "$v MB"
-            AppSettings.DEADZONE, AppSettings.TOUCH_PAD_OPACITY, AppSettings.TOUCH_SIZE -> "$v%"
+            AppSettings.DEADZONE, AppSettings.TOUCH_PAD_OPACITY, AppSettings.TOUCH_SIZE, AppSettings.UI_VOLUME, AppSettings.MUSIC_VOLUME -> "$v%"
             AppSettings.LANGUAGE -> LANGUAGE_NAMES[v] ?: v
             else -> v
         }

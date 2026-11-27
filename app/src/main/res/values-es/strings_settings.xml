@@ -172,8 +172,6 @@
     <string name="set_theme_desc">Oscuro o negro total, ideal para TV OLED.</string>
     <string name="theme_dark">Oscuro</string>
     <string name="theme_oled">Negro OLED</string>
-    <string name="set_accent">Color de acento</string>
-    <string name="set_accent_desc">Color del foco y de los botones.</string>
     <string name="accent_LARANJA">Naranja Onzetec</string>
     <string name="accent_VIOLETA">Violeta</string>
     <string name="accent_CIANO">Cian</string>
@@ -187,8 +185,8 @@
     <string name="anim_DESLIGADAS">Desactivadas</string>
     <string name="set_hero">Destacado animado</string>
     <string name="set_hero_desc">Movimiento suave en la imagen grande de Inicio.</string>
-    <string name="set_nav_sound">Sonido de navegación</string>
-    <string name="set_nav_sound_desc">Clic al mover el foco con la cruceta.</string>
+    <string name="set_nav_sound">Sonidos de la interfaz</string>
+    <string name="set_nav_sound_desc">Sonidos al moverse, elegir, volver, guardar y abrir un juego.</string>
     <string name="set_card_size">Tamaño de las portadas</string>
     <string name="set_card_size_desc">Tamaño de las tarjetas de juego en las listas.</string>
     <string name="size_small">Pequeño</string>
@@ -283,7 +281,6 @@
     <string name="set_profiles">Perfiles</string>
     <string name="set_profiles_desc">Cada perfil tiene favoritos, historial y guardados propios.</string>
     <string name="profile_new">Nuevo perfil</string>
-    <string name="profile_rename">Renombrar perfil actual</string>
     <string name="profile_delete">Eliminar perfil actual</string>
     <string name="profile_delete_confirm">¿Eliminar el perfil %1$s? Se borrarán sus favoritos, historial y guardados. Los juegos se quedan.</string>
     <string name="profile_name_title">Nombre del perfil</string>
@@ -358,7 +355,6 @@
     <string name="profile_delete_this">Eliminar perfil</string>
     <string name="profile_default_name">Jugador %1$d</string>
     <string name="welcome_hello">¡Hola, %1$s!</string>
-    <string name="nav_switch_profile">Cambiar perfil</string>
     <string name="profile_edit_row">Editar perfil</string>
     <string name="profile_edit_row_desc">Avatar, nombre y color del tema del perfil actual.</string>
     <string name="set_touch_style">Modelo del mando en pantalla</string>
@@ -371,4 +367,13 @@
     <string name="set_touch_layout_desc">Arrastra cada botón donde prefieras, por consola. Varios dedos funcionan a la vez.</string>
     <string name="touch_editor_hint">Arrastra los botones y la cruceta con el dedo.</string>
     <string name="touch_reset">Restaurar</string>
+    <string name="feel_header">Sonidos y vibración</string>
+    <string name="set_ui_volume">Volumen de los sonidos</string>
+    <string name="set_ui_volume_desc">Volumen de los sonidos de la interfaz.</string>
+    <string name="set_music">Música de fondo</string>
+    <string name="set_music_desc">Banda sonora original en los menús; se detiene al abrir un juego.</string>
+    <string name="set_music_volume">Volumen de la música</string>
+    <string name="set_music_volume_desc">Volumen de la música de fondo.</string>
+    <string name="set_haptics">Vibración</string>
+    <string name="set_haptics_desc">Vibra el celular, o hace temblar el control, al elegir, al llegar a un borde y al abrir un juego.</string>
 </resources>

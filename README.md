@@ -358,6 +358,26 @@ Transferir jogos, Configurações e **Sair**.
   cada nome no banco de DATs e gera `PopularGamesData.kt`.
 - Ao voltar de uma tela, o foco volta ao card de onde você saiu.
 
+## Sensação ao usar (game feel)
+
+O app responde a cada ação com som, movimento e vibração, como um console:
+
+- **Sons próprios** (originais, gerados por `tools/sound/build_sounds.py`): "tic" ao mover o foco,
+  "toc" grave ao bater na borda (não há para onde ir), sons de escolher, voltar, ligar/desligar,
+  sucesso (salvou, print, highlight), erro (PIN errado, falha) e um som de **abrir o jogo**.
+  Tocados com SoundPool (já carregados na memória, sem atraso).
+- **Música de fundo** original nos menus (loop de 40 s, 96 BPM): entra e sai com fade, para ao
+  abrir um jogo e continua do mesmo ponto na volta; pausa se outro app tocar som.
+- **Vibração (haptics)**: no celular, os efeitos prontos do Android (tique, clique, clique forte,
+  duplo no erro); na TV, o **controle treme** (se tiver motor) na borda, ao abrir um jogo e nos erros.
+- **Física de mola**: os cards de jogo e de console crescem com mola ao receber o foco (passam um
+  pouco do tamanho e assentam); no celular, os cards afundam e voltam ao toque.
+- **Tremor** no erro (ex.: PIN errado, que também vibra).
+- **UI otimista**: Favoritar muda o botão na hora; o banco confirma em seguida.
+- **Abrir o jogo**: a tela do jogo entra com zoom e fade enquanto o menu recua.
+- Tudo ajustável em **Configurações → Interface → Sons e vibração**: sons da interface, volume
+  dos sons, música de fundo, volume da música e vibração.
+
 ## Durante o jogo
 
 - **Menu rápido**: botão **Voltar** do controle remoto, **Guide** do gamepad ou **Start + Select**

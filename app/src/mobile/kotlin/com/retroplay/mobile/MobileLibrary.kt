@@ -123,6 +123,7 @@ fun MobileLibrary(
                 if (r.error == LocalRomSource.ImportResult.NoSpace) add(resources.getString(R.string.error_no_space))
                 else if (r.error != null) add(resources.getString(R.string.import_failed))
             }.joinToString("\n")
+            if (r.copied > 0 && r.error == null) com.retroplay.ui.feel.UiFeel.success() else com.retroplay.ui.feel.UiFeel.error()
             if (msg.isNotEmpty()) Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
         }
     }

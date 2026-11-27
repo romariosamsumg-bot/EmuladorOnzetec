@@ -215,7 +215,13 @@ private fun DetailsBody(
             Row(Modifier.statusBarsPadding().padding(4.dp).fillMaxWidth()) {
                 RoundIcon("←", "back", onBack)
                 Spacer(Modifier.weight(1f))
-                RoundIcon(if (game.isFavorite) "★" else "☆", "details_favorite", onFavorite)
+                // UI otimista: a estrela muda na hora (com som e vibração); o banco confirma depois.
+                var favorite by remember(game.id, game.isFavorite) { mutableStateOf(game.isFavorite) }
+                RoundIcon(if (favorite) "★" else "☆", "details_favorite") {
+                    favorite = !favorite
+                    com.retroplay.ui.feel.UiFeel.toggle(favorite)
+                    onFavorite()
+                }
                 RoundIcon("⋮", "details_options", onOptions)
             }
             GameCover(
@@ -239,7 +245,7 @@ private fun DetailsBody(
                 }
                 OutlinedButton(onClick = onPlay, modifier = Modifier.fillMaxWidth().testTag("details_play")) { Text(stringResource(R.string.play_from_start)) }
             } else {
-                Button(onClick = onPlay, modifier = Modifier.fillMaxWidth().height(52.dp).testTag("details_play")) {
+                Button(onClick = { com.retroplay.ui.feel.UiFeel.select(); onPlay() }, modifier = Modifier.fillMaxWidth().height(52.dp).testTag("details_play")) {
                     Icon(painterResource(UiR.drawable.ic_play), null, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.play))
@@ -290,7 +296,7 @@ private fun RoundIcon(symbol: String, tag: String, onClick: () -> Unit) {
 private fun SheetItem(text: String, tag: String, danger: Boolean = false, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(text, color = if (danger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface) },
-        modifier = Modifier.testTag(tag).clickableRow(onClick),
+        modifier = Modifier.testTag(tag).clickableRow { com.retroplay.ui.feel.UiFeel.select(); onClick() },
     )
 }
 

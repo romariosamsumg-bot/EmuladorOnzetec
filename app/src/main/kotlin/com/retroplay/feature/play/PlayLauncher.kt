@@ -121,5 +121,9 @@ fun Context.startGame(r: LaunchRequest) {
     // O jogo roda em outro processo: libera as capas da memória para sobrar RAM ao emulador
     // (numa TV de 2 GB isso faz diferença). O cache em disco fica, e as capas voltam rápido.
     runCatching { coil3.SingletonImageLoader.get(this).memoryCache?.clear() }
-    startActivity(GameLauncher.intent(this, r.system, r.core, r.uri, r.fileName, r.title, r.gameId, r.loadSlot))
+    // Game feel: som de "abrir jogo", tremor/vibração forte, música sai e a tela do jogo entra com zoom.
+    com.retroplay.ui.feel.UiFeel.launch()
+    com.retroplay.ui.feel.MenuMusic.stop(fast = true)
+    val options = android.app.ActivityOptions.makeCustomAnimation(this, com.retroplay.R.anim.game_open_enter, com.retroplay.R.anim.game_open_exit)
+    startActivity(GameLauncher.intent(this, r.system, r.core, r.uri, r.fileName, r.title, r.gameId, r.loadSlot), options.toBundle())
 }

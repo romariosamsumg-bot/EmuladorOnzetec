@@ -172,8 +172,6 @@
     <string name="set_theme_desc">Dark or pure black, ideal for OLED TVs.</string>
     <string name="theme_dark">Dark</string>
     <string name="theme_oled">OLED black</string>
-    <string name="set_accent">Accent color</string>
-    <string name="set_accent_desc">Color of focus and buttons.</string>
     <string name="accent_LARANJA">Onzetec orange</string>
     <string name="accent_VIOLETA">Violet</string>
     <string name="accent_CIANO">Cyan</string>
@@ -187,8 +185,8 @@
     <string name="anim_DESLIGADAS">Off</string>
     <string name="set_hero">Animated highlight</string>
     <string name="set_hero_desc">Gentle motion on the large Home image.</string>
-    <string name="set_nav_sound">Navigation sound</string>
-    <string name="set_nav_sound_desc">Click when moving focus with the D-pad.</string>
+    <string name="set_nav_sound">Interface sounds</string>
+    <string name="set_nav_sound_desc">Sounds when moving, choosing, going back, saving and opening a game.</string>
     <string name="set_card_size">Cover size</string>
     <string name="set_card_size_desc">Size of game cards in lists.</string>
     <string name="size_small">Small</string>
@@ -283,7 +281,6 @@
     <string name="set_profiles">Profiles</string>
     <string name="set_profiles_desc">Each profile has its own favorites, history and saves.</string>
     <string name="profile_new">New profile</string>
-    <string name="profile_rename">Rename current profile</string>
     <string name="profile_delete">Delete current profile</string>
     <string name="profile_delete_confirm">Delete profile %1$s? Its favorites, history and saves will be deleted. Games stay.</string>
     <string name="profile_name_title">Profile name</string>
@@ -358,7 +355,6 @@
     <string name="profile_delete_this">Delete profile</string>
     <string name="profile_default_name">Player %1$d</string>
     <string name="welcome_hello">Hi, %1$s!</string>
-    <string name="nav_switch_profile">Switch profile</string>
     <string name="profile_edit_row">Edit profile</string>
     <string name="profile_edit_row_desc">Avatar, name and theme color of the current profile.</string>
     <string name="set_touch_style">On-screen controller model</string>
@@ -371,4 +367,13 @@
     <string name="set_touch_layout_desc">Drag each button wherever you like, per console. Several fingers work at once.</string>
     <string name="touch_editor_hint">Drag the buttons and the D-pad with your finger.</string>
     <string name="touch_reset">Restore default</string>
+    <string name="feel_header">Sounds and vibration</string>
+    <string name="set_ui_volume">Sound volume</string>
+    <string name="set_ui_volume_desc">Loudness of the interface sounds.</string>
+    <string name="set_music">Background music</string>
+    <string name="set_music_desc">Original soundtrack in the menus; stops when a game opens.</string>
+    <string name="set_music_volume">Music volume</string>
+    <string name="set_music_volume_desc">Loudness of the background music.</string>
+    <string name="set_haptics">Vibration</string>
+    <string name="set_haptics_desc">Vibrates the phone, or rumbles the controller, when choosing, hitting an edge and opening a game.</string>
 </resources>

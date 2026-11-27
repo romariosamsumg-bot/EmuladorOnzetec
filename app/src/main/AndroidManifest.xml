@@ -5,6 +5,8 @@
     <!-- Download de núcleos e capas. Nenhum dado do usuário é enviado. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Vibração da interface (celular) e tremor do controle. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- Ler a pasta "Jogos" e outras pastas escolhidas. Android 11+: "acesso a todos os arquivos"
          (o app é distribuído por APK, fora da Play Store). Android 8-10: permissões clássicas. -->

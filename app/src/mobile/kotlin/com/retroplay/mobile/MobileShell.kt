@@ -96,7 +96,7 @@ fun MobileShell(
             TABS.forEach { dest ->
                 NavigationRailItem(
                     selected = selected(dest),
-                    onClick = { nav.tab(dest) },
+                    onClick = { tabFeel(); nav.tab(dest) },
                     icon = { Icon(painterResource(dest.iconRes), contentDescription = null) },
                     label = { Text(stringResource(tabLabel(dest)), maxLines = 1) },
                     modifier = Modifier.testTag("tab_${dest.name.lowercase()}"),
@@ -113,7 +113,7 @@ fun MobileShell(
                 TABS.forEach { dest ->
                     NavigationBarItem(
                         selected = selected(dest),
-                        onClick = { nav.tab(dest) },
+                        onClick = { tabFeel(); nav.tab(dest) },
                         icon = { Icon(painterResource(dest.iconRes), contentDescription = null) },
                         label = { Text(stringResource(tabLabel(dest)), maxLines = 1) },
                         modifier = Modifier.testTag("tab_${dest.name.lowercase()}"),
@@ -145,6 +145,12 @@ fun MobileShell(
     }
     }
     }
+}
+
+/** Trocar de aba: "tic" curto e vibração leve. */
+private fun tabFeel() {
+    com.retroplay.ui.feel.UiFeel.play(com.retroplay.ui.feel.Sfx.MOVE)
+    com.retroplay.ui.feel.UiFeel.haptic(com.retroplay.ui.feel.Haptic.TICK)
 }
 
 /** Rótulos curtos que cabem na barra do celular ("Ajustes" em vez de "Configurações"). */

@@ -36,7 +36,6 @@
 
     <!-- Fase 2: console, núcleos e jogo -->
     <string name="ok">OK</string>
-    <string name="console_games">Jogos</string>
     <string name="console_core_label">Núcleo: %1$s</string>
     <string name="core_state_not_installed">Ainda não baixado. Ele é baixado automaticamente ao abrir o primeiro jogo.</string>
     <string name="core_download">Baixar núcleo</string>
@@ -52,7 +51,6 @@
     <string name="core_error_unknown">Não foi possível baixar o núcleo.</string>
     <string name="error_no_space">Espaço insuficiente na TV. Libere espaço (apague jogos ou apps) e tente de novo.</string>
     <string name="pick_file">Escolher arquivo…</string>
-    <string name="pick_file_subtitle">Abrir uma ROM de um pendrive ou da memória da TV</string>
     <string name="no_picker">Esta TV não tem seletor de arquivos. Copie as ROMs para a pasta indicada abaixo (por USB ou adb).</string>
     <string name="import_ok">Jogo adicionado.</string>
     <string name="import_wrong_type">Este arquivo não é um jogo deste console.</string>
@@ -331,7 +329,6 @@
     <string name="media_empty_body">Durante o jogo, abra o menu e escolha Print ou Highlight. Eles aparecem aqui.</string>
     <string name="media_deleted">Apagado</string>
     <string name="media_delete_failed">Não deu para apagar</string>
-    <string name="media_share">Compartilhar</string>
     <string name="media_close">Fechar</string>
     <string name="media_delete_confirm">Apagar este arquivo?</string>
 </resources>

@@ -41,6 +41,8 @@ import com.retroplay.domain.system.GameSystem
 import com.retroplay.domain.system.SystemCatalog
 import com.retroplay.domain.system.SystemRegistry
 import com.retroplay.ui.components.GameCover
+import com.retroplay.ui.feel.UiFeel
+import com.retroplay.ui.feel.pressBounce
 
 /** Proporção única das capas nas grades e fileiras do celular (3:4); a capa inteira cabe dentro. */
 const val TILE_RATIO = 3f / 4f
@@ -48,10 +50,13 @@ const val TILE_RATIO = 3f / 4f
 /** Capa + nome do jogo (toque abre os detalhes). */
 @Composable
 fun GameTile(game: Game, system: GameSystem, onClick: () -> Unit, modifier: Modifier = Modifier, width: Dp? = null) {
+    // Toque: afunda e volta com mola, com som e vibração de seleção.
+    val interaction = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     Column(
         (if (width != null) modifier.width(width) else modifier)
+            .pressBounce(interaction)
             .clip(RoundedCornerShape(10.dp))
-            .clickable(onClick = onClick)
+            .clickable(interactionSource = interaction, indication = androidx.compose.foundation.LocalIndication.current) { UiFeel.select(); onClick() }
             .testTag("game_${game.id}"),
     ) {
         GameCover(

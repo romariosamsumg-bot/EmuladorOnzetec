@@ -257,11 +257,13 @@ private fun Hero(
                     Spacer(Modifier.size(8.dp))
                     Text(stringResource(R.string.play))
                 }
+                // UI otimista: muda na hora, o banco confirma depois.
+                var favorite by remember(game.id, game.isFavorite) { mutableStateOf(game.isFavorite) }
                 OutlinedButton(
-                    onClick = { onToggleFavorite(game) },
+                    onClick = { favorite = !favorite; onToggleFavorite(game) },
                     modifier = Modifier.rememberFocus(memory, "hero_fav").testTag("hero_favorite"),
                 ) {
-                    Text(stringResource(if (game.isFavorite) R.string.remove_favorite else R.string.add_favorite))
+                    Text(stringResource(if (favorite) R.string.remove_favorite else R.string.add_favorite))
                 }
             }
         }

@@ -25,7 +25,6 @@
 
     <!-- Fase 2: console, núcleos e jogo -->
     <string name="ok">OK</string>
-    <string name="console_games">Games</string>
     <string name="console_core_label">Core: %1$s</string>
     <string name="core_state_not_installed">Not downloaded yet. It downloads automatically when you open the first game.</string>
     <string name="core_download">Download core</string>
@@ -41,7 +40,6 @@
     <string name="core_error_unknown">Could not download the core.</string>
     <string name="error_no_space">Not enough space on the TV. Free some space (delete games or apps) and try again.</string>
     <string name="pick_file">Choose file…</string>
-    <string name="pick_file_subtitle">Open a ROM from a USB drive or the TV storage</string>
     <string name="no_picker">This TV has no file picker. Copy ROMs to the folder shown below (via USB or adb).</string>
     <string name="import_ok">Game added.</string>
     <string name="import_wrong_type">This file is not a game for this console.</string>
@@ -311,7 +309,6 @@
     <string name="media_empty_body">While playing, open the menu and pick Screenshot or Highlight. They show up here.</string>
     <string name="media_deleted">Deleted</string>
     <string name="media_delete_failed">Could not delete</string>
-    <string name="media_share">Share</string>
     <string name="media_close">Close</string>
     <string name="media_delete_confirm">Delete this file?</string>
 </resources>

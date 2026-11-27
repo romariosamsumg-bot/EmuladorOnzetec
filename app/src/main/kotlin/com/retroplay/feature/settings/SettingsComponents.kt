@@ -23,6 +23,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.retroplay.ui.feel.shake
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
@@ -231,10 +232,19 @@ fun PinDialog(
 ) {
     var digits by remember { mutableStateOf("") }
     var wrong by remember { mutableStateOf(false) }
+    // PIN errado: tremor do diálogo + som de erro (e vibração/tremor do controle).
+    val shaker = com.retroplay.ui.feel.rememberShaker()
+    var attempts by remember { mutableStateOf(0) }
+    androidx.compose.runtime.LaunchedEffect(attempts) {
+        if (attempts > 0) {
+            com.retroplay.ui.feel.UiFeel.error()
+            shaker.shake()
+        }
+    }
     val first = rememberInitialFocus()
     com.retroplay.ui.components.CenteredDialog(onDismissRequest = onDismiss) {
         Column(
-            Modifier.width(380.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface).padding(24.dp).testTag("pin_dialog"),
+            Modifier.shake(shaker).width(380.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface).padding(24.dp).testTag("pin_dialog"),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -255,10 +265,10 @@ fun PinDialog(
                                 wrong = false
                                 when (key) {
                                     "⌫" -> digits = digits.dropLast(1)
-                                    "OK" -> if (digits.length == length) { if (!onSubmit(digits)) { wrong = true; digits = "" } }
+                                    "OK" -> if (digits.length == length) { if (!onSubmit(digits)) { wrong = true; digits = ""; attempts++ } }
                                     else -> if (digits.length < length) {
                                         digits += key
-                                        if (digits.length == length && !onSubmit(digits)) { wrong = true; digits = "" }
+                                        if (digits.length == length && !onSubmit(digits)) { wrong = true; digits = ""; attempts++ }
                                     }
                                 }
                             },

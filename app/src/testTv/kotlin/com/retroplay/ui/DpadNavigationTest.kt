@@ -154,6 +154,13 @@ class DpadNavigationTest {
     }
 
     private fun assertContentHasFocus(screenTag: String) {
+        // Telas que carregam dados fora da thread principal (ex.: Mídia) focam assim que chegam.
+        if (screenTag == "screen_media") {
+            compose.waitUntil(5_000) {
+                compose.onAllNodes(androidx.compose.ui.test.hasTestTag("media_filter_ALL") and androidx.compose.ui.test.isFocused(), useUnmergedTree = true)
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+        }
         val focused = compose.onAllNodes(androidx.compose.ui.test.isFocused(), useUnmergedTree = true)
             .fetchSemanticsNodes()
         assertTrue("Nenhum nó focado em $screenTag", focused.isNotEmpty())

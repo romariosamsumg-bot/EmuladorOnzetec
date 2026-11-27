@@ -182,3 +182,9 @@ tasks.withType<Test>().configureEach {
     // Repassa -Pretroplay.screenshots=true para gerar PNGs das telas nos testes de UI.
     systemProperty("retroplay.screenshots", providers.gradleProperty("retroplay.screenshots").getOrElse("false"))
 }
+
+// Modelos do domínio (Game, GameSystem, Profile...) são imutáveis: declarados estáveis para o
+// Compose pular a recomposição de cards e fileiras quando nada mudou neles.
+composeCompiler {
+    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose-stability.conf"))
+}

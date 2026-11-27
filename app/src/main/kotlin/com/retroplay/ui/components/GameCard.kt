@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.onFocusChanged
+import com.retroplay.ui.feel.springFocusScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -145,9 +146,11 @@ private fun GameCardBody(
             modifier = cardModifier
                 .let { if (fillWidth) it.fillMaxWidth().aspectRatio(ratio) else it.size(rowHeight * ratio, rowHeight) }
                 .onFocusChanged { focused = it.isFocused }
+                // Cresce com mola (salta e assenta) em vez da animação linear padrão.
+                .springFocusScale(focused)
                 .let { if (testTag != null) it.testTag(testTag) else it },
             shape = CardDefaults.shape(CardShape),
-            scale = CardDefaults.scale(focusedScale = if (animations == AnimationLevel.DESLIGADAS) 1f else 1.1f),
+            scale = CardDefaults.scale(focusedScale = 1f, pressedScale = 0.95f),
             border = CardDefaults.border(
                 focusedBorder = Border(BorderStroke(3.dp, MaterialTheme.colorScheme.primary), shape = CardShape),
             ),

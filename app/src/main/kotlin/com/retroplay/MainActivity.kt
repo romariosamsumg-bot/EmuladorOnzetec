@@ -20,6 +20,9 @@ import com.retroplay.core.ui.theme.AccentColor
 import com.retroplay.core.ui.theme.AnimationLevel
 import com.retroplay.core.ui.theme.RetroPlayTheme
 import com.retroplay.core.ui.theme.RetroUiPrefs
+import com.retroplay.ui.feel.FeelPrefs
+import com.retroplay.ui.feel.MenuMusic
+import com.retroplay.ui.feel.UiFeel
 import com.retroplay.data.settings.SettingsCache
 import com.retroplay.diagnostics.AppLocale
 import com.retroplay.diagnostics.ErrorLog
@@ -85,6 +88,7 @@ class MainActivity : ComponentActivity() {
         installSplashScreen().setKeepOnScreenCondition { !settingsReady }
         super.onCreate(savedInstanceState)
         applyAppWindow()
+        UiFeel.init(this)
         setContent {
             val snap by settings.snapshots.collectAsStateWithLifecycle(SettingsSnapshot())
             val list by profiles.profiles.collectAsStateWithLifecycle(null)
@@ -123,12 +127,26 @@ class MainActivity : ComponentActivity() {
             val snap = settings.current()
             settingsReady = true
             ready = true
+            if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.STARTED)) MenuMusic.start(this@MainActivity)
             // Idioma: aplica na hora se o valor gravado e o espelho síncrono divergirem.
             if (AppLocale.store(this@MainActivity, snap.value(AppSettings.LANGUAGE))) recreate()
             library.ensureDefaultFolders()
             // Varredura incremental ao abrir: só arquivos novos/alterados são lidos.
             if (snap.value(AppSettings.SCAN_ON_START)) library.scanNow()
             runCatching { coreUpdater.runIfDue() }.onFailure { ErrorLog.record(filesDir, "Atualização automática de núcleos falhou", it) }
+        }
+        // Sons, vibração e música seguem as Configurações na hora.
+        lifecycleScope.launch {
+            settings.snapshots.map { FeelPrefs.of(it) }.distinctUntilChanged().collect { f ->
+                UiFeel.soundsOn = f.sounds
+                UiFeel.volume = f.volume
+                UiFeel.hapticsOn = f.haptics
+                MenuMusic.enabled = f.music
+                MenuMusic.volume = f.musicVolume
+                if (lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.STARTED)) {
+                    MenuMusic.update(this@MainActivity, f.music, f.musicVolume)
+                }
+            }
         }
         lifecycleScope.launch {
             settings.snapshots.map { it.value(AppSettings.LANGUAGE) }.distinctUntilChanged().drop(1).collect { tag ->
@@ -137,25 +155,51 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** Som de navegação (Interface): clique ao mover o foco com o direcional. */
+    override fun onStart() {
+        super.onStart()
+        if (settingsReady) MenuMusic.start(this)
+    }
+
+    override fun onStop() {
+        // Indo para um jogo (ou saindo): a música para na hora e continua do ponto ao voltar.
+        MenuMusic.stop(fast = true)
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        if (isFinishing) MenuMusic.release()
+        super.onDestroy()
+    }
+
+    private val bumpCheck = android.os.Handler(android.os.Looper.getMainLooper())
+
+    /**
+     * Game feel do controle remoto/gamepad: guarda o último direcional (o "tic" toca quando o foco
+     * muda, em UiFeel.onFocusGained) e, se o foco não mudou logo depois, toca o "toc" da borda.
+     * Voltar toca o som de voltar.
+     */
     @SuppressLint("RestrictedApi") // falso positivo: Activity.dispatchKeyEvent é API pública
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        if (event.action == KeyEvent.ACTION_DOWN && settingsCache.latest.value.value(AppSettings.NAV_SOUND)) {
-            val effect = when (event.keyCode) {
-                KeyEvent.KEYCODE_DPAD_UP -> AudioManager.FX_FOCUS_NAVIGATION_UP
-                KeyEvent.KEYCODE_DPAD_DOWN -> AudioManager.FX_FOCUS_NAVIGATION_DOWN
-                KeyEvent.KEYCODE_DPAD_LEFT -> AudioManager.FX_FOCUS_NAVIGATION_LEFT
-                KeyEvent.KEYCODE_DPAD_RIGHT -> AudioManager.FX_FOCUS_NAVIGATION_RIGHT
-                KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> AudioManager.FX_KEY_CLICK
-                else -> null
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            UiFeel.lastDeviceId = event.deviceId
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                    val at = android.os.SystemClock.uptimeMillis()
+                    UiFeel.lastDpadAt = at
+                    if (event.repeatCount == 0) {
+                        bumpCheck.removeCallbacksAndMessages(null)
+                        bumpCheck.postDelayed({ if (UiFeel.lastFocusAt < at) UiFeel.bump() }, BUMP_DELAY_MS)
+                    }
+                }
+                KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_BUTTON_B -> if (event.repeatCount == 0) UiFeel.back()
             }
-            if (effect != null) getSystemService(AudioManager::class.java)?.playSoundEffect(effect)
         }
         return super.dispatchKeyEvent(event)
     }
 
     companion object {
         const val EXTRA_GO_HOME = "go_home"
+        private const val BUMP_DELAY_MS = 140L
 
         fun uiPrefs(snap: SettingsSnapshot, profileAccent: String? = null) = RetroUiPrefs(
             accent = runCatching { AccentColor.valueOf(profileAccent ?: snap.value(AppSettings.ACCENT)) }.getOrDefault(AccentColor.LARANJA),

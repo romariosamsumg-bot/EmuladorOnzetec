@@ -74,7 +74,14 @@ object AppSettings {
     val ACCENT = Choice("ui.accent", "LARANJA", listOf("LARANJA", "VIOLETA", "CIANO", "AMBAR", "VERDE", "CORAL"))
     val ANIMATIONS = Choice("ui.animations", "COMPLETAS", listOf("COMPLETAS", "REDUZIDAS", "DESLIGADAS"))
     val HERO_ANIMATED = Bool("ui.hero_animated", true)
-    val NAV_SOUND = Bool("ui.nav_sound", false)
+    /** Sons da interface (navegar, selecionar, voltar...). */
+    val NAV_SOUND = Bool("ui.sounds", true)
+    val UI_VOLUME = Choice("ui.sounds_volume", "50", listOf("25", "50", "75", "100"))
+    /** Música de fundo nos menus. */
+    val MUSIC = Bool("ui.music", true)
+    val MUSIC_VOLUME = Choice("ui.music_volume", "20", listOf("10", "20", "35", "50", "75"))
+    /** Vibração do celular e tremor do controle nas interações. */
+    val HAPTICS = Bool("ui.haptics", true)
     val CARD_SIZE = Choice("ui.card_size", "medium", listOf("small", "medium", "large"))
     /** Fileiras da Home ocultas (chaves separadas por vírgula). */
     val HIDDEN_ROWS = Text("ui.hidden_rows", "")

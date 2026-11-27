@@ -25,6 +25,8 @@ import com.retroplay.domain.settings.SettingsRepository
 import com.retroplay.feature.settings.parseHidden
 import com.retroplay.feature.settings.parseRowOrder
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -59,12 +61,14 @@ class HomeViewModel @Inject constructor(
     /** Semente do destaque aleatório: estável durante a sessão. */
     private val heroSeed = System.nanoTime()
 
-    val state: StateFlow<HomeState> = combine(library.observeAll(), settings.snapshots) { all, snap ->
-            val games = all.visible(snap.value(AppSettings.HIDE_UNIDENTIFIED))
-            val rows = HomeRowsBuilder.build(games, catalog).arranged(
-                parseRowOrder(snap.value(AppSettings.ROW_ORDER)),
-                parseHidden(snap.value(AppSettings.HIDDEN_ROWS)),
-            )
+    /** Só as configurações que mudam a Início (volume, tema etc. não refazem as fileiras). */
+    private val homePrefs = settings.snapshots
+        .map { Triple(it.value(AppSettings.HIDE_UNIDENTIFIED), it.value(AppSettings.ROW_ORDER), it.value(AppSettings.HIDDEN_ROWS)) }
+        .distinctUntilChanged()
+
+    val state: StateFlow<HomeState> = combine(library.observeAll(), homePrefs) { all, (hide, order, hidden) ->
+            val games = all.visible(hide)
+            val rows = HomeRowsBuilder.build(games, catalog).arranged(parseRowOrder(order), parseHidden(hidden))
             val thumbs = rows.firstOrNull { it.type == RowType.ContinuePlaying }?.games.orEmpty().mapNotNull { g ->
                 val sys = g.systemId ?: return@mapNotNull null
                 saves.latest(sys, g.fileName)?.thumbnailPath?.let { g.id to it }

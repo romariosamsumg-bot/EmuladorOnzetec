@@ -29,3 +29,9 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)
 }
+
+// Modelos do domínio (Game, GameSystem, Profile...) são imutáveis: declarados estáveis para o
+// Compose pular a recomposição de cards e fileiras quando nada mudou neles.
+composeCompiler {
+    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose-stability.conf"))
+}

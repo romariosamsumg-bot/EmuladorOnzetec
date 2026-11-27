@@ -134,6 +134,8 @@ fun GameDetailsScreen(
     var confirmDelete by remember { mutableStateOf(false) }
     var askPin by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf(false) }
+    // UI otimista: o botão de favorito muda na hora; o banco confirma em seguida.
+    var favorite by remember(game.id, game.isFavorite) { mutableStateOf(game.isFavorite) }
     val background = MaterialTheme.colorScheme.background
 
     Box(Modifier.fillMaxSize().testTag("screen_details")) {
@@ -231,8 +233,8 @@ fun GameDetailsScreen(
                             Text(stringResource(R.string.play))
                         }
                     }
-                    OutlinedButton(onClick = onToggleFavorite, modifier = Modifier.testTag("details_favorite")) {
-                        Text(stringResource(if (game.isFavorite) R.string.remove_favorite else R.string.add_favorite))
+                    OutlinedButton(onClick = { favorite = !favorite; onToggleFavorite() }, modifier = Modifier.testTag("details_favorite")) {
+                        Text(stringResource(if (favorite) R.string.remove_favorite else R.string.add_favorite))
                     }
                     OutlinedButton(onClick = { showOptions = true }, modifier = Modifier.testTag("details_options")) {
                         Text(stringResource(R.string.game_options))

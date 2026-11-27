@@ -14,6 +14,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import com.retroplay.ui.feel.UiFeel
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.tv.material3.ButtonColors
 import androidx.tv.material3.ButtonDefaults
@@ -46,12 +48,23 @@ import androidx.tv.material3.Surface as TvSurface
  * rolando as listas normalmente.
  */
 
-/** Toque = focar + clicar. Usado por todos os componentes abaixo. */
+/**
+ * Clique com "game feel": som de seleção e vibração/tremor (UiFeel) antes da ação.
+ * A lambda devolvida é estável (não recompõe o componente a cada recomposição do pai).
+ */
+@Composable
+fun feelClick(onClick: () -> Unit): () -> Unit {
+    val latest by rememberUpdatedState(onClick)
+    return remember { { UiFeel.select(); latest() } }
+}
+
+/** Toque = focar + clicar. Usado por todos os componentes abaixo. Foco ganho = "tic" de navegação. */
 @Composable
 fun Modifier.touchClick(enabled: Boolean = true, onClick: () -> Unit): Modifier {
     val latest by rememberUpdatedState(onClick)
     val focus = remember { FocusRequester() }
     return this
+        .onFocusChanged { if (it.isFocused) UiFeel.onFocusGained() }
         .focusRequester(focus)
         .pointerInput(enabled) {
             if (enabled) detectTapGestures(onTap = {
@@ -69,7 +82,7 @@ fun Button(
     colors: ButtonColors = ButtonDefaults.colors(),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     content: @Composable RowScope.() -> Unit,
-) = TvButton(onClick = onClick, modifier = modifier.touchClick(enabled, onClick), enabled = enabled, colors = colors, contentPadding = contentPadding, content = content)
+) = feelClick(onClick).let { click -> TvButton(onClick = click, modifier = modifier.touchClick(enabled, click), enabled = enabled, colors = colors, contentPadding = contentPadding, content = content) }
 
 @Composable
 fun OutlinedButton(
@@ -77,7 +90,7 @@ fun OutlinedButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     content: @Composable RowScope.() -> Unit,
-) = TvOutlinedButton(onClick = onClick, modifier = modifier.touchClick(enabled, onClick), enabled = enabled, content = content)
+) = feelClick(onClick).let { click -> TvOutlinedButton(onClick = click, modifier = modifier.touchClick(enabled, click), enabled = enabled, content = content) }
 
 @Composable
 fun Card(
@@ -89,7 +102,7 @@ fun Card(
     border: CardBorder = CardDefaults.border(),
     glow: CardGlow = CardDefaults.glow(),
     content: @Composable ColumnScope.() -> Unit,
-) = TvCard(onClick = onClick, modifier = modifier.touchClick(true, onClick), shape = shape, colors = colors, scale = scale, border = border, glow = glow, content = content)
+) = feelClick(onClick).let { click -> TvCard(onClick = click, modifier = modifier.touchClick(true, click), shape = shape, colors = colors, scale = scale, border = border, glow = glow, content = content) }
 
 @Composable
 fun Surface(
@@ -101,7 +114,7 @@ fun Surface(
     scale: ClickableSurfaceScale = ClickableSurfaceDefaults.scale(),
     border: ClickableSurfaceBorder = ClickableSurfaceDefaults.border(),
     content: @Composable BoxScope.() -> Unit,
-) = TvSurface(onClick = onClick, modifier = modifier.touchClick(enabled, onClick), enabled = enabled, shape = shape, colors = colors, scale = scale, border = border, content = content)
+) = feelClick(onClick).let { click -> TvSurface(onClick = click, modifier = modifier.touchClick(enabled, click), enabled = enabled, shape = shape, colors = colors, scale = scale, border = border, content = content) }
 
 @Composable
 fun ListItem(
@@ -113,10 +126,12 @@ fun ListItem(
     supportingContent: (@Composable () -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null,
     colors: ListItemColors = ListItemDefaults.colors(),
-) = TvListItem(
-    selected = selected, onClick = onClick, headlineContent = headlineContent, modifier = modifier.touchClick(enabled, onClick),
-    enabled = enabled, supportingContent = supportingContent, trailingContent = trailingContent, colors = colors,
-)
+) = feelClick(onClick).let { click ->
+    TvListItem(
+        selected = selected, onClick = click, headlineContent = headlineContent, modifier = modifier.touchClick(enabled, click),
+        enabled = enabled, supportingContent = supportingContent, trailingContent = trailingContent, colors = colors,
+    )
+}
 
 @Composable
 fun FilterChip(
@@ -124,7 +139,7 @@ fun FilterChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
-) = TvFilterChip(selected = selected, onClick = onClick, modifier = modifier.touchClick(true, onClick), content = content)
+) = feelClick(onClick).let { click -> TvFilterChip(selected = selected, onClick = click, modifier = modifier.touchClick(true, click), content = content) }
 
 @Composable
 fun NavigationDrawerScope.NavigationDrawerItem(
@@ -133,4 +148,4 @@ fun NavigationDrawerScope.NavigationDrawerItem(
     leadingContent: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
-) = TvNavigationDrawerItem(selected = selected, onClick = onClick, leadingContent = leadingContent, modifier = modifier.touchClick(true, onClick), content = content)
+) = feelClick(onClick).let { click -> TvNavigationDrawerItem(selected = selected, onClick = click, leadingContent = leadingContent, modifier = modifier.touchClick(true, click), content = content) }

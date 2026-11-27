@@ -20,6 +20,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.retroplay.ui.feel.springFocusScale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -66,11 +70,15 @@ fun SystemCard(
     gameCount: Int? = null,
 ) {
     val accent = Color(system.accentColor)
+    var focused by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     Card(
         onClick = onClick,
-        modifier = modifier.width(220.dp).testTag("system_${system.id.value}"),
+        modifier = modifier.width(220.dp)
+            .onFocusChanged { focused = it.isFocused }
+            .springFocusScale(focused)
+            .testTag("system_${system.id.value}"),
         shape = CardDefaults.shape(CardShape),
-        scale = CardDefaults.scale(focusedScale = 1.1f),
+        scale = CardDefaults.scale(focusedScale = 1f, pressedScale = 0.95f),
         border = CardDefaults.border(
             focusedBorder = Border(BorderStroke(3.dp, MaterialTheme.colorScheme.primary), shape = CardShape),
         ),

@@ -27,4 +27,5 @@
     <string name="mobile_folders_body">Elige otras carpetas del celular o de la tarjeta de memoria. Los juegos se leen directamente de allí.</string>
     <string name="mobile_switch_profile">Cambiar de perfil</string>
     <string name="mobile_tab_settings">Ajustes</string>
+    <string name="media_share">Compartir</string>
 </resources>

@@ -74,6 +74,8 @@ import com.retroplay.domain.system.SystemId
 import com.retroplay.feature.game.input.Hotkey
 import com.retroplay.feature.game.input.HotkeyDetector
 import com.retroplay.feature.game.input.MenuCombo
+import com.retroplay.ui.feel.FeelPrefs
+import com.retroplay.ui.feel.UiFeel
 import com.retroplay.feature.game.input.InputAction
 import com.retroplay.feature.game.input.InputRouter
 import com.retroplay.feature.game.input.PortAssigner
@@ -204,6 +206,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        UiFeel.init(this)
         container = FrameLayout(this).apply { setBackgroundColor(android.graphics.Color.BLACK) }
         setContentView(container)
         hideSystemBars()
@@ -369,6 +372,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
 
     /** Aplica as configurações (global → console → jogo) a esta sessão. */
     private fun applySettings(snap: SettingsSnapshot) {
+        FeelPrefs.apply(FeelPrefs.of(snap))
         val sys = system.id
         shader = when (snap.value(AppSettings.SHADER, sys, gameKey)) {
             "crt" -> ShaderChoice.CRT
@@ -528,6 +532,9 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         }
     }
 
+    /** Som de sucesso/erro (e vibração) no resultado de salvar, carregar, print e highlight. */
+    private fun feedback(ok: Boolean) = if (ok) UiFeel.success() else UiFeel.error()
+
     private fun flash(message: String) {
         toast = message
         lifecycleScope.launch {
@@ -589,6 +596,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         hotkeys.reset()
         menuCombo.reset()
         menu = GameMenuState(title = intent.getStringExtra(GameLauncher.EXTRA_TITLE) ?: fileName, system = system)
+        UiFeel.play(com.retroplay.ui.feel.Sfx.TOGGLE_ON)
         refreshMenu()
         view.requestRender()
     }
@@ -616,6 +624,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     }
 
     override fun resume() {
+        UiFeel.back()
         menu = null
         setPaused(false)
     }
@@ -627,7 +636,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         ioScope.launch {
             val ok = writeState(slot, thumb, onEmulationThread = true)
             withContext(Dispatchers.Main) {
-                flash(getString(if (ok) R.string.saved_slot else R.string.save_failed, slot))
+                feedback(ok); flash(getString(if (ok) R.string.saved_slot else R.string.save_failed, slot))
                 refreshMenu(MenuPage.MAIN)
             }
         }
@@ -646,7 +655,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             val bytes = saves.read(system.id, fileName, slot) ?: return@withContext false
             runCatching { view.unserializeState(bytes) }.getOrDefault(false)
         }
-        if (showMessage || !ok) flash(getString(if (ok) R.string.loaded_slot else R.string.load_failed, slot))
+        if (showMessage || !ok) feedback(ok); flash(getString(if (ok) R.string.loaded_slot else R.string.load_failed, slot))
         if (ok) rewind.clear()
     }
 
@@ -743,7 +752,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             }
             ioScope.launch {
                 val ok = runCatching { media.saveImage(mediaBaseName(), bitmap) }.getOrDefault(false)
-                withContext(Dispatchers.Main) { flash(getString(if (ok) R.string.screenshot_saved else R.string.screenshot_failed)) }
+                withContext(Dispatchers.Main) { feedback(ok); flash(getString(if (ok) R.string.screenshot_saved else R.string.screenshot_failed)) }
             }
         }
     }
@@ -762,7 +771,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         refreshMenu(MenuPage.MAIN)
         ioScope.launch {
             val ok = runCatching { media.saveVideo(mediaBaseName()) { fd -> rec.save(seconds, fd) != null } }.getOrDefault(false)
-            withContext(Dispatchers.Main) { flash(getString(if (ok) R.string.highlight_saved else R.string.highlight_failed)) }
+            withContext(Dispatchers.Main) { feedback(ok); flash(getString(if (ok) R.string.highlight_saved else R.string.highlight_failed)) }
         }
     }
 
@@ -838,7 +847,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
             Hotkey.QUICK_SAVE -> {
                 captureThumbnail { thumb ->
                     val ok = writeState(QUICK_SLOT, thumb, onEmulationThread = true)
-                    lifecycleScope.launch { flash(getString(if (ok) R.string.saved_slot else R.string.save_failed, QUICK_SLOT)) }
+                    lifecycleScope.launch { feedback(ok); flash(getString(if (ok) R.string.saved_slot else R.string.save_failed, QUICK_SLOT)) }
                 }
             }
             Hotkey.QUICK_LOAD -> lifecycleScope.launch { loadState(QUICK_SLOT, showMessage = true) }
@@ -859,7 +868,14 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         // Atalhos usam o botão já remapeado (ex.: controle genérico com Start em BUTTON_10).
         val logical = logicalKey(event.keyCode)
         if (fromGamepad) onPhysicalInput()
-        if (menu != null) return super.dispatchKeyEvent(translateForMenu(event))
+        if (menu != null) {
+            // Menu aberto: o direcional dá o "tic" de navegação (UiFeel) e o tremor sai neste controle.
+            if (event.action == KeyEvent.ACTION_DOWN) {
+                UiFeel.lastDeviceId = event.deviceId
+                if (event.keyCode in DPAD_KEYS) UiFeel.lastDpadAt = SystemClock.uptimeMillis()
+            }
+            return super.dispatchKeyEvent(translateForMenu(event))
+        }
         // Atalho do menu (padrão Start + Select, em qualquer ordem): vem antes dos outros atalhos.
         if (fromGamepad && event.repeatCount == 0) {
             when (menuCombo.onKey(logical, event.action == KeyEvent.ACTION_DOWN)) {
@@ -986,6 +1002,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     @SuppressLint("RestrictedApi")
     private fun hatToKey(old: Float, new: Float, negative: Int, positive: Int) {
         if (old == new) return
+        if (new != 0f) UiFeel.lastDpadAt = SystemClock.uptimeMillis()
         fun send(code: Int, action: Int) = super.dispatchKeyEvent(KeyEvent(action, code))
         if (old < 0) send(negative, KeyEvent.ACTION_UP)
         if (old > 0) send(positive, KeyEvent.ACTION_UP)
@@ -1105,6 +1122,7 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     }
 
     private companion object {
+        val DPAD_KEYS = setOf(KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT)
         const val TAG = "GameActivity"
         const val THUMB_W = 384
         const val THUMB_H = 216
