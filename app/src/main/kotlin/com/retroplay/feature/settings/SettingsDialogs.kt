@@ -86,7 +86,7 @@ fun RemapWizardDialog(
     var map by remember { mutableStateOf(initial) }
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { focus.requestFocusWhenReady() }
-    Dialog(onDismissRequest = onDismiss) {
+    com.retroplay.ui.components.CenteredDialog(onDismissRequest = onDismiss) {
         val button = buttons.getOrNull(index)
         Column(
             Modifier.width(520.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface).padding(28.dp)

@@ -31,7 +31,8 @@ fun ConsolesEntry(
     viewModel: ConsolesViewModel = hiltViewModel(),
 ) {
     val bios by viewModel.bios.collectAsStateWithLifecycle()
-    ConsolesScreen(systems = viewModel.systems, onOpenConsole = onOpenConsole, badges = viewModel.systems.associate { it.id to biosBadge(it, bios) })
+    val counts by viewModel.counts.collectAsStateWithLifecycle()
+    ConsolesScreen(systems = viewModel.systems, onOpenConsole = onOpenConsole, badges = viewModel.systems.associate { it.id to biosBadge(it, bios) }, counts = counts)
 }
 
 @Composable
@@ -39,6 +40,7 @@ fun ConsolesScreen(
     systems: List<GameSystem>,
     onOpenConsole: (GameSystem) -> Unit,
     badges: Map<com.retroplay.domain.system.SystemId, BiosBadge> = emptyMap(),
+    counts: Map<com.retroplay.domain.system.SystemId, Int>? = null,
 ) {
     val focus = rememberInitialFocus()
     Column(
@@ -66,6 +68,7 @@ fun ConsolesScreen(
                         onClick = { onOpenConsole(system) },
                         modifier = if (index == 0) Modifier.focusRequester(focus) else Modifier,
                         biosBadge = badges[system.id] ?: BiosBadge.NONE,
+                        gameCount = counts?.let { it[system.id] ?: 0 },
                     )
                 }
             }

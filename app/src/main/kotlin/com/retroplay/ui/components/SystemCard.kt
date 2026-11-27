@@ -57,6 +57,8 @@ fun SystemCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     biosBadge: com.retroplay.feature.consoles.BiosBadge = com.retroplay.feature.consoles.BiosBadge.NONE,
+    /** Quantidade de jogos do console na biblioteca (null = não mostra). */
+    gameCount: Int? = null,
 ) {
     val accent = Color(system.accentColor)
     Card(
@@ -97,7 +99,9 @@ fun SystemCard(
             Text(system.displayName, style = MaterialTheme.typography.titleMedium, maxLines = 1)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    system.releaseYear.toString(),
+                    if (gameCount == null) system.releaseYear.toString()
+                    else system.releaseYear.toString() + " · " + (if (gameCount == 0) stringResource(R.string.console_no_games) else androidx.compose.ui.res.pluralStringResource(R.plurals.console_games, gameCount, gameCount)),
+                    modifier = Modifier.testTag("count_${system.id.value}"),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

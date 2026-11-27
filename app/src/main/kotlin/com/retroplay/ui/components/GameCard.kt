@@ -76,8 +76,17 @@ fun GameCard(
     fillWidth: Boolean = false,
     /** Grade com consoles misturados: a capa cabe numa caixa de célula × 1,3 (altura igual). */
     mixedGrid: Boolean = false,
+    /**
+     * Resultados da busca: todas as capas no mesmo tamanho (3:4, a capa inteira dentro) e o nome
+     * sempre visível embaixo.
+     */
+    uniform: Boolean = false,
     testTag: String? = null,
 ) {
+    if (uniform) {
+        GameCardBody(system, game, title, onClick, modifier, cardModifier, width, true, UNIFORM_RATIO, {}, testTag, alwaysTitle = true)
+        return
+    }
     // Proporção da capa: a típica do console até a imagem chegar; depois, a da imagem encontrada
     // (guardada em memória, então ao rolar de volta o card já nasce no tamanho certo).
     val url = game?.let { CoverUrls.url(system, it) }
@@ -113,6 +122,8 @@ private fun GameCardBody(
     ratio: Float,
     onAspect: (Float) -> Unit,
     testTag: String?,
+    /** Nome sempre visível (sem foco: texto simples; com foco: a etiqueta colorida). */
+    alwaysTitle: Boolean = false,
 ) {
     val animations = LocalRetroUiPrefs.current.animations
     val scale = LocalRetroUiPrefs.current.cardScale
@@ -151,6 +162,17 @@ private fun GameCardBody(
                 animationSpec = tween(if (animations == AnimationLevel.COMPLETAS) 150 else 0),
                 label = "title",
             )
+            if (alwaysTitle && !showTitle && alpha == 0f) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().let { if (testTag != null) it.testTag("${testTag}_name") else it },
+                )
+            }
             if (showTitle || alpha > 0f) {
                 Text(
                     title,
@@ -173,3 +195,6 @@ private fun GameCardBody(
         }
     }
 }
+
+/** Proporção única das capas na busca (a capa inteira cabe dentro, com sobras escuras). */
+private const val UNIFORM_RATIO = 3f / 4f

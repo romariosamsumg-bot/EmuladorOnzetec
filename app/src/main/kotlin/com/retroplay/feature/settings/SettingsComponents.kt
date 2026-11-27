@@ -136,7 +136,7 @@ fun LazyListScope.note(text: String, key: String) {
 /** Caixa padrão dos diálogos das configurações. */
 @Composable
 fun SettingsDialog(tag: String, title: String, onDismiss: () -> Unit, subtitle: String? = null, content: LazyListScope.() -> Unit) {
-    Dialog(onDismissRequest = onDismiss) {
+    com.retroplay.ui.components.CenteredDialog(onDismissRequest = onDismiss) {
         Column(
             Modifier.widthIn(min = 420.dp, max = 640.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface).padding(24.dp).testTag(tag),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -227,7 +227,7 @@ fun PinDialog(
     var digits by remember { mutableStateOf("") }
     var wrong by remember { mutableStateOf(false) }
     val first = rememberInitialFocus()
-    Dialog(onDismissRequest = onDismiss) {
+    com.retroplay.ui.components.CenteredDialog(onDismissRequest = onDismiss) {
         Column(
             Modifier.width(380.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface).padding(24.dp).testTag("pin_dialog"),
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -311,7 +311,7 @@ fun TextInputDialog(
     var text by remember { mutableStateOf(initial.take(maxLength)) }
     var shift by remember { mutableStateOf(false) }
     val first = rememberInitialFocus()
-    Dialog(onDismissRequest = onDismiss) {
+    com.retroplay.ui.components.CenteredDialog(onDismissRequest = onDismiss) {
         Column(
             Modifier.width(620.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface).padding(24.dp).testTag("text_dialog_input"),
             verticalArrangement = Arrangement.spacedBy(8.dp),

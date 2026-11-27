@@ -96,6 +96,17 @@ class StartupFirstRunTest : StartupTestBase() {
         waitFor("screen_profile_editor")
         screenshot("01_criar_perfil")
         node("profile_name").assertIsFocused()
+        press(Key.DirectionCenter)
+        waitFor("text_dialog_input")
+        screenshot("01b_teclado")
+        node("tkey_A").assertIsFocused()
+        press(Key.DirectionCenter) // "A"
+        repeat(8) { if (!focused("text_input_save")) press(Key.DirectionDown) }
+        node("text_input_save").assertIsFocused()
+        press(Key.DirectionCenter)
+        compose.waitUntil(3_000) { compose.onAllNodes(hasTestTag("text_dialog_input")).fetchSemanticsNodes().isEmpty() }
+        // O foco volta para o botão do nome, com o nome novo.
+        node("profile_name").assertIsFocused()
         press(Key.DirectionDown)
         node("avatar_controle").assertIsFocused()
         press(Key.DirectionRight, 2)

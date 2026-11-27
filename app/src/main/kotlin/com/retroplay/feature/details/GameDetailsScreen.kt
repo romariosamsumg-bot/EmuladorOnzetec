@@ -297,7 +297,7 @@ private fun OptionsDialog(
     onRename: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    Dialog(onDismissRequest = onDismiss) {
+    com.retroplay.ui.components.CenteredDialog(onDismissRequest = onDismiss) {
         val first = rememberInitialFocus()
         DialogColumn("options_dialog") {
             Text(stringResource(R.string.game_options), style = MaterialTheme.typography.headlineSmall)
@@ -347,7 +347,7 @@ private fun coverLabel(type: CoverType?) = when (type) {
 
 @Composable
 private fun ConfirmDeleteDialog(game: Game, onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss) {
+    com.retroplay.ui.components.CenteredDialog(onDismissRequest = onDismiss) {
         val cancel = rememberInitialFocus()
         DialogColumn("delete_dialog") {
             Text(stringResource(R.string.delete_title, game.title), style = MaterialTheme.typography.headlineSmall)

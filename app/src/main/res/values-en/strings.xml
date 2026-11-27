@@ -281,4 +281,9 @@
     <string name="neogeo_bios_wrong_fbneo">Your %1$s does not work with FinalBurn Neo: it is an old version (probably the MAME 0.37 one, which lacks sp-s3.sp1, sm1.sm1 and sfix.sfix). Replace it with the %1$s from the FinalBurn Neo set in Jogos/BIOS and rescan in Settings → Library.</string>
     <string name="console_bios_wrong_version">BIOS: other version</string>
     <string name="bios_old_version">Old BIOS version (FBNeo needs its own)</string>
+    <plurals name="console_games">
+        <item quantity="one">%1$d game</item>
+        <item quantity="other">%1$d games</item>
+    </plurals>
+    <string name="console_no_games">no games</string>
 </resources>

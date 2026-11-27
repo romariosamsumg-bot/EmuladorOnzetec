@@ -194,7 +194,12 @@ class ConsoleScreenTest {
             FakeLibraryRepository.game(2, SystemRegistry.Ids.MEGA_DRIVE, "Sonic The Hedgehog", "sonic.md"),
         )
         fake.complete()
-        openSnesPage()
+        openConsoles()
+        // Cada console mostra quantos jogos tem.
+        compose.onNodeWithTag("count_snes", useUnmergedTree = true).assertTextContains("1 jogo", substring = true)
+        compose.onNodeWithTag("count_arcade", useUnmergedTree = true).assertTextContains("nenhum jogo", substring = true)
+        press(Key.DirectionCenter)
+        waitFor("screen_console_snes")
         press(Key.DirectionRight)
         node("game_1").assertIsFocused()
         node("game_2").assertDoesNotExist() // é de outro console

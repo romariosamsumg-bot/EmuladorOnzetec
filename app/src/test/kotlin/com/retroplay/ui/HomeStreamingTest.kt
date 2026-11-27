@@ -218,6 +218,7 @@ class HomeStreamingTest {
         node("search_query").assertTextEquals("so")
         waitFor("result_3")
         node("result_2").assertDoesNotExist()
+        node("result_3_name").assertExists()
         screenshot("34_busca")
         // → até os resultados e abre o Sonic
         repeat(6) { if (runCatching { node("result_3").assertIsFocused() }.isFailure) press(Key.DirectionRight) }

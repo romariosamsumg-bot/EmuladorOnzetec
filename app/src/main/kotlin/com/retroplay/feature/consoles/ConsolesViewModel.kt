@@ -1,5 +1,6 @@
 package com.retroplay.feature.consoles
 
+import kotlinx.coroutines.flow.map
 import com.retroplay.domain.system.IdentificationStrategy
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,6 +20,11 @@ class ConsolesViewModel @Inject constructor(catalog: SystemCatalog, library: Lib
 
     /** BIOS encontradas, para mostrar a situação no cartão do console. */
     val bios: StateFlow<List<BiosStatus>> = library.observeBios().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Quantidade de jogos de cada console (mostrada no cartão). */
+    val counts: StateFlow<Map<com.retroplay.domain.system.SystemId, Int>> = library.observeAll()
+        .map { list -> list.mapNotNull { it.systemId }.groupingBy { it }.eachCount() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 }
 
 /** Situação da BIOS de um console no cartão. */

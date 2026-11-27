@@ -338,7 +338,7 @@ private fun FolderRow(folder: GameFolder, onRemove: (GameFolder) -> Unit, onCopy
 
 @Composable
 private fun ChooseSystemDialog(game: Game, onChoose: (SystemId) -> Unit, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss) {
+    com.retroplay.ui.components.CenteredDialog(onDismissRequest = onDismiss) {
         val focus = rememberInitialFocus()
         Column(
             Modifier.widthIn(max = 520.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface)
