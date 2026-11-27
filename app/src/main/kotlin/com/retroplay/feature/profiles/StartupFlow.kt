@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -63,6 +65,43 @@ interface StartupActions {
     suspend fun delete(id: Long)
 }
 
+/**
+ * Telas da trilha. A TV usa [TvStartupUi]; o app de celular troca a escolha e o editor de perfil
+ * por versões de toque em retrato.
+ */
+interface StartupUi {
+    @Composable
+    fun Picker(profiles: List<Profile>, activeId: Long, onPick: (Profile) -> Unit, onAdd: () -> Unit, onEdit: (Profile) -> Unit)
+
+    @Composable
+    fun Editor(
+        initial: Profile?,
+        suggestedIndex: Int,
+        firstRun: Boolean,
+        canDelete: Boolean,
+        onSave: (name: String, avatar: String, accent: String) -> Unit,
+        onCancel: () -> Unit,
+        onDelete: () -> Unit,
+    )
+}
+
+object TvStartupUi : StartupUi {
+    @Composable
+    override fun Picker(profiles: List<Profile>, activeId: Long, onPick: (Profile) -> Unit, onAdd: () -> Unit, onEdit: (Profile) -> Unit) =
+        ProfilePickerScreen(profiles, activeId, onPick, onAdd, onEdit)
+
+    @Composable
+    override fun Editor(
+        initial: Profile?,
+        suggestedIndex: Int,
+        firstRun: Boolean,
+        canDelete: Boolean,
+        onSave: (name: String, avatar: String, accent: String) -> Unit,
+        onCancel: () -> Unit,
+        onDelete: () -> Unit,
+    ) = ProfileEditorScreen(initial, suggestedIndex, firstRun, canDelete, onSave, onCancel, onDelete)
+}
+
 private enum class Stage { INTRO, PICK, EDIT, WELCOME, APP }
 
 /** Editor: novo perfil. */
@@ -79,6 +118,7 @@ fun StartupFlow(
     activeId: Long,
     ask: Boolean,
     actions: StartupActions,
+    ui: StartupUi = TvStartupUi,
     app: @Composable (switchProfile: () -> Unit) -> Unit,
 ) {
     // Sem abertura (testes), a Início aparece já enquanto os perfis carregam (fração de segundo).
@@ -123,7 +163,7 @@ fun StartupFlow(
             Stage.INTRO -> IntroScreen(fast = animations == AnimationLevel.DESLIGADAS) { introDone = true }
             Stage.PICK -> {
                 BackHandler(enabled = fromApp) { fromApp = false; stage = Stage.APP }
-                ProfilePickerScreen(
+                ui.Picker(
                     profiles.orEmpty(), activeId,
                     onPick = { p -> scope.launch { actions.switchTo(p.id) }; enter(p.id) },
                     onAdd = { editing = NEW_PROFILE; firstRun = false; stage = Stage.EDIT },
@@ -134,7 +174,7 @@ fun StartupFlow(
                 val list = profiles.orEmpty()
                 val current = list.firstOrNull { it.id == editing }
                 BackHandler(enabled = !firstRun) { stage = Stage.PICK }
-                ProfileEditorScreen(
+                ui.Editor(
                     initial = current,
                     suggestedIndex = if (current == null) list.size else list.indexOf(current),
                     firstRun = firstRun,
@@ -199,7 +239,7 @@ fun IntroScreen(fast: Boolean, onDone: () -> Unit) {
         Image(
             painterResource(R.drawable.logo_onzetec),
             contentDescription = stringResource(R.string.app_name),
-            modifier = Modifier.width(360.dp).graphicsLayer { this.alpha = alpha.value; scaleX = scale.value; scaleY = scale.value },
+            modifier = Modifier.fillMaxWidth(0.8f).widthIn(max = 360.dp).graphicsLayer { this.alpha = alpha.value; scaleX = scale.value; scaleY = scale.value },
         )
     }
 }

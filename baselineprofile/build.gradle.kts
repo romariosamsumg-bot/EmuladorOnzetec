@@ -20,6 +20,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     targetProjectPath = ":app"
+    flavorDimensions += "device"
+    productFlavors {
+        create("tv") { dimension = "device" }
+        create("mobile") { dimension = "device" }
+    }
 }
 
 baselineProfile {

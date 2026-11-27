@@ -300,7 +300,7 @@ fun GameDetailsScreen(
 }
 
 @Composable
-private fun romsetMessage(game: Game): String? = when (game.romsetStatus) {
+internal fun romsetMessage(game: Game): String? = when (game.romsetStatus) {
     RomsetStatus.INCOMPLETE -> pluralStringResource(R.plurals.romset_incomplete, game.missingFiles, game.missingFiles)
     RomsetStatus.WRONG_VERSION -> stringResource(R.string.romset_wrong_version)
     RomsetStatus.NEEDS_PARENT -> stringResource(R.string.romset_needs_parent)
@@ -309,7 +309,7 @@ private fun romsetMessage(game: Game): String? = when (game.romsetStatus) {
 }
 
 @Composable
-private fun formatDuration(ms: Long): String {
+internal fun formatDuration(ms: Long): String {
     val minutes = ms / 60_000
     return if (minutes < 60) stringResource(R.string.duration_minutes, minutes)
     else stringResource(R.string.duration_hours, minutes / 60, minutes % 60)
@@ -373,7 +373,7 @@ private fun RenameDialog(current: String, onSave: (String?) -> Unit, onDismiss: 
     )
 }
 
-private fun coverLabel(type: CoverType?) = when (type) {
+internal fun coverLabel(type: CoverType?) = when (type) {
     null -> R.string.cover_auto
     CoverType.BOXART -> R.string.cover_boxart
     CoverType.TITLE -> R.string.cover_title

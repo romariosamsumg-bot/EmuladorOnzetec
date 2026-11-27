@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mobile_add_games">Add games</string>
+    <string name="mobile_add_games_desc">Pick files on your phone, the Games folder and other folders</string>
+    <string name="mobile_browse_consoles">See all consoles</string>
+    <string name="mobile_empty_body">Tap Add games and pick the files you downloaded to your phone. They show up here with name, cover and info.</string>
+    <string name="mobile_pick_file">Add</string>
+    <string name="mobile_console_empty">No games yet</string>
+    <string name="mobile_console_empty_body">Tap Add and pick %1$s games on your phone.</string>
+    <string name="mobile_core_ready">Ready to play</string>
+    <string name="mobile_import_title">Files on your phone</string>
+    <string name="mobile_import_body">Pick one or more games (Downloads, Drive, memory card). The console is detected automatically; .zip works too.</string>
+    <string name="mobile_import_button">Pick files</string>
+    <plurals name="mobile_import_done">
+        <item quantity="one">%1$d game added</item>
+        <item quantity="other">%1$d games added</item>
+    </plurals>
+    <plurals name="mobile_import_unsupported">
+        <item quantity="one">%1$d file is not from a supported console</item>
+        <item quantity="other">%1$d files are not from supported consoles</item>
+    </plurals>
+    <string name="mobile_folder_ready">Ready at %1$s. Games copied there show up automatically.</string>
+    <string name="mobile_folder_needs_access">To read the %1$s folder on your phone (where you can put games from a computer), allow file access. Picking files above works without it.</string>
+    <string name="mobile_folder_layout">Subfolders: %1$s.</string>
+    <string name="mobile_folders_body">Pick other folders on your phone or memory card. Games are read straight from there.</string>
+    <string name="mobile_switch_profile">Switch profile</string>
+    <string name="mobile_tab_settings">Settings</string>
+</resources>

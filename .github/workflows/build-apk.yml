@@ -4,7 +4,8 @@
 # - Com os 4 segredos de assinatura cadastrados (KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS,
 #   KEY_PASSWORD), o APK é o release assinado; sem eles, é um APK de debug (também instala na TV).
 # - Ao criar uma tag "v1.2.3" (ou rodar manualmente informando a versão), publica uma Release com
-#   o APK. O link fixo para a TV fica: .../releases/latest/download/OnzetecGames.apk
+#   os APKs. Links fixos: TV .../releases/latest/download/OnzetecGames.apk e
+#   celular .../releases/latest/download/OnzetecGames-Celular.apk
 # Passo a passo para leigos no README ("Gerar o APK pelo GitHub").
 name: Gerar APK
 
@@ -67,7 +68,7 @@ jobs:
           echo "release=$RELEASE" >> "$GITHUB_OUTPUT"
 
       - name: Testes e lint
-        run: ./gradlew test lint --stacktrace
+        run: ./gradlew test :app:lintTvDebug :app:lintMobileDebug --stacktrace
 
       - name: Preparar a chave de assinatura
         id: chave
@@ -98,15 +99,18 @@ jobs:
           RETROPLAY_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           RETROPLAY_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          ./gradlew :app:assembleRelease --stacktrace
-          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --print-certs app/build/outputs/apk/release/app-release.apk
-          cp app/build/outputs/apk/release/app-release.apk OnzetecGames.apk
+          ./gradlew :app:assembleTvRelease :app:assembleMobileRelease --stacktrace
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --print-certs app/build/outputs/apk/tv/release/app-tv-release.apk
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify app/build/outputs/apk/mobile/release/app-mobile-release.apk
+          cp app/build/outputs/apk/tv/release/app-tv-release.apk OnzetecGames.apk
+          cp app/build/outputs/apk/mobile/release/app-mobile-release.apk OnzetecGames-Celular.apk
 
       - name: Gerar o APK de debug (sem chave)
         if: steps.chave.outputs.assinado != 'true'
         run: |
-          ./gradlew :app:assembleDebug --stacktrace
-          cp app/build/outputs/apk/debug/app-debug.apk OnzetecGames-debug.apk
+          ./gradlew :app:assembleTvDebug :app:assembleMobileDebug --stacktrace
+          cp app/build/outputs/apk/tv/debug/app-tv-debug.apk OnzetecGames-debug.apk
+          cp app/build/outputs/apk/mobile/debug/app-mobile-debug.apk OnzetecGames-Celular-debug.apk
 
       - name: Apagar a chave do servidor
         if: always()
@@ -140,9 +144,12 @@ jobs:
           prerelease: ${{ steps.chave.outputs.assinado != 'true' }}
           files: OnzetecGames*.apk
           body: |
-            APK para Android TV / Google TV (ARM 32 e 64 bits).
+            Dois apps (ARM 32 e 64 bits):
+            - `OnzetecGames.apk`: Android TV, Google TV, TV Box e Stick.
+            - `OnzetecGames-Celular.apk`: celulares e tablets Android.
 
-            **Instalar na TV:** no app *Downloader*, digite o endereço deste arquivo
-            (`OnzetecGames.apk`) ou copie-o para um pendrive. Passo a passo no README.
+            **Instalar na TV:** no app *Downloader*, digite o endereço de `OnzetecGames.apk`
+            ou copie-o para um pendrive. **No celular:** baixe `OnzetecGames-Celular.apk` e abra.
+            Passo a passo no README.
 
             O Onzetec Games não inclui jogos nem BIOS. Use apenas cópias que você possui.

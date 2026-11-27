@@ -18,16 +18,51 @@ import javax.inject.Singleton
 class LocalRomSource @Inject constructor(
     @ApplicationContext private val context: Context,
     private val library: LibraryRepository,
+    private val catalog: com.retroplay.domain.system.SystemCatalog,
 ) {
 
     suspend fun import(system: GameSystem, uri: Uri): ImportResult {
         val name = displayName(uri) ?: return ImportResult.Failed
         if (SystemDetector.extensionOf(name) !in system.extensions) return ImportResult.WrongType
-        val appDir = File(library.ensureDefaultFolders().appPath, system.id.value).apply { mkdirs() }
+        return copy(uri, name, system.id.value).also { if (it == ImportResult.Ok) library.scanNow() }
+    }
+
+    /**
+     * Vários arquivos de uma vez, sem escolher o console (app de celular): a extensão decide a
+     * subpasta quando só um console a aceita; .zip, .bin etc. vão para "Outros" e a biblioteca
+     * identifica pelo conteúdo. Retorna quantos foram copiados.
+     */
+    suspend fun importMany(uris: List<Uri>): ImportSummary {
+        var ok = 0
+        var wrong = 0
+        var failed: ImportResult? = null
+        for (uri in uris) {
+            val name = displayName(uri)
+            val folder = name?.let { folderFor(it) }
+            when {
+                name == null -> failed = ImportResult.Failed
+                folder == null -> wrong++
+                else -> when (val r = copy(uri, name, folder)) {
+                    ImportResult.Ok -> ok++
+                    else -> failed = r
+                }
+            }
+        }
+        if (ok > 0) library.scanNow()
+        return ImportSummary(ok, wrong, failed)
+    }
+
+    private fun folderFor(name: String): String? = when (val m = SystemDetector(catalog).matchByFileName(name)) {
+        is com.retroplay.domain.system.ExtensionMatch.Unique -> m.system.id.value
+        is com.retroplay.domain.system.ExtensionMatch.Ambiguous -> OTHER_FOLDER
+        com.retroplay.domain.system.ExtensionMatch.Unsupported -> null
+    }
+
+    private suspend fun copy(uri: Uri, name: String, folder: String): ImportResult {
+        val appDir = File(library.ensureDefaultFolders().appPath, folder).apply { mkdirs() }
         val dest = File(appDir, name.substringAfterLast('/').substringAfterLast('\\'))
         return runCatching {
             context.contentResolver.openInputStream(uri)!!.use { input -> dest.outputStream().use { input.copyTo(it) } }
-            library.scanNow()
             ImportResult.Ok
         }.getOrElse {
             dest.delete()
@@ -41,4 +76,11 @@ class LocalRomSource @Inject constructor(
         } ?: uri.lastPathSegment
 
     enum class ImportResult { Ok, WrongType, NoSpace, Failed }
+
+    /** [copied] arquivos copiados, [unsupported] de tipo desconhecido, [error] o último erro (se houve). */
+    data class ImportSummary(val copied: Int, val unsupported: Int, val error: ImportResult?)
+
+    private companion object {
+        const val OTHER_FOLDER = "outros"
+    }
 }

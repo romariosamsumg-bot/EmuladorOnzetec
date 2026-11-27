@@ -50,6 +50,9 @@ fun overrideBadge(current: Scope, source: Scope?, scoped: Boolean): OverrideBadg
     else -> OverrideBadge.FROM_GLOBAL
 }
 
+/** Largura máxima do valor à direita (o celular em pé usa menos, para o nome caber). */
+val LocalSettingValueWidth = androidx.compose.runtime.staticCompositionLocalOf { 320.dp }
+
 /** Linha de configuração: nome, descrição de uma linha e valor atual à direita. */
 @Composable
 fun SettingRow(
@@ -77,11 +80,13 @@ fun SettingRow(
         headlineContent = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         supportingContent = description?.let { { Text(it, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurfaceVariant) } },
         trailingContent = {
-            Column(Modifier.widthIn(max = 320.dp), horizontalAlignment = Alignment.End) {
+            val maxWidth = LocalSettingValueWidth.current
+            Column(Modifier.widthIn(max = maxWidth), horizontalAlignment = Alignment.End) {
                 if (value != null) {
                     Text(
                         value,
-                        maxLines = 1,
+                        maxLines = if (maxWidth < 320.dp) 2 else 1,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.End,
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.titleSmall,
                         color = if (badge == OverrideBadge.HERE) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,

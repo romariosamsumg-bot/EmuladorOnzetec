@@ -68,6 +68,23 @@ android {
         language { enableSplit = false }
     }
 
+    // Dois apps a partir do mesmo código:
+    // - tv: TV, TV Box e Stick (controle remoto/gamepad, menu lateral, interface em 960x540);
+    // - mobile: celular (toque, menu inferior, telas em retrato; o jogo abre deitado).
+    flavorDimensions += "device"
+    productFlavors {
+        create("tv") {
+            dimension = "device"
+            applicationId = "com.retroplay.tv"
+            buildConfigField("boolean", "TV_APP", "true")
+        }
+        create("mobile") {
+            dimension = "device"
+            applicationId = "com.retroplay.mobile"
+            buildConfigField("boolean", "TV_APP", "false")
+        }
+    }
+
     signingConfigs {
         if (signing != null) {
             create("release") {
@@ -128,6 +145,10 @@ dependencies {
     implementation(libs.work.runtime.ktx)
     implementation(libs.hilt.work)
     ksp(libs.hilt.work.compiler)
+
+    // Interface do celular (barra inferior, campos de texto, folhas inferiores).
+    "mobileImplementation"(platform(libs.compose.bom))
+    "mobileImplementation"(libs.compose.material3)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)

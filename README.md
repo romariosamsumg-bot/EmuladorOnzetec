@@ -2,7 +2,17 @@
 
 Frontend de emuladores de consoles clássicos para **Android TV / Google TV** e **celular**, com
 interface "estilo streaming", navegação por controle remoto, gamepad ou toque e núcleos
-**libretro** baixados sob demanda. O mesmo APK serve para a TV e para o celular.
+**libretro** baixados sob demanda. São dois apps feitos do mesmo código:
+
+| App | Para | Arquivo | Pacote |
+|---|---|---|---|
+| **Onzetec Games (TV)** | Android TV, Google TV, TV Box e Stick | `OnzetecGames.apk` | `com.retroplay.tv` |
+| **Onzetec Games (Celular)** | celulares e tablets Android | `OnzetecGames-Celular.apk` | `com.retroplay.mobile` |
+
+Cada um tem a interface desenhada para o aparelho: na TV, menu lateral, foco pelo controle remoto
+e telas em 960×540; no celular, barra de navegação inferior (lateral quando deitado), telas em
+coluna, teclado do próprio celular, folhas de opções e escolha de vários arquivos de uma vez.
+A biblioteca, os núcleos, os saves, os perfis e o jogo em si são os mesmos.
 
 > **Aviso legal:** o Onzetec Games **não inclui jogos nem BIOS**. Use apenas cópias de jogos e
 > BIOS que você possui legalmente.
@@ -36,6 +46,9 @@ interface "estilo streaming", navegação por controle remoto, gamepad ou toque 
 | 8 | Mega Drive, Master System e Neo Geo (opções por console, BIOS, romsets, núcleos) | ✅ |
 | 9 | Polimento (perfis, backup, pasta da rede SMB, Baseline Profile, memória) | ✅ |
 | 10 | Release assinado + GitHub Actions | ✅ |
+| 11 | Dois apps: TV e celular (interface própria para cada um) | ✅ |
+| 12 | Versão web (jogar no navegador) | ⏳ |
+| 13 | Site oficial (GitHub Pages) | ⏳ |
 
 O APK pronto sai pelo GitHub (veja [Gerar o APK pelo GitHub](#gerar-o-apk-pelo-github-sem-instalar-nada)).
 
@@ -72,19 +85,27 @@ Para atualizar, instale o APK novo por cima (os jogos, saves e configurações f
 
 ## No celular (Android 8 ou mais novo)
 
-1. Baixe o `OnzetecGames.apk` no celular e abra-o. O Android pede para **permitir instalar apps
-   desta fonte** (do navegador ou do gerenciador de arquivos): permita e instale.
-2. O app abre sempre **deitado** e em tela cheia, com a mesma interface da TV; tudo funciona
-   **por toque** (e também com controle Bluetooth).
-3. Durante o jogo aparece o **controle na tela**: direcional à esquerda, botões do console à
+1. Baixe o **`OnzetecGames-Celular.apk`** no celular e abra-o. O Android pede para **permitir
+   instalar apps desta fonte** (do navegador ou do gerenciador de arquivos): permita e instale.
+   Ele é um app separado do de TV (pode ter os dois no mesmo aparelho).
+2. As telas funcionam **em pé ou deitado**: Início, Buscar, Consoles, Favoritos e Ajustes ficam
+   na barra de baixo (na lateral, com o celular deitado). O jogo abre sempre deitado, em tela cheia.
+3. **Adicionar jogos** (ícone ⇧ na Início, ou Ajustes → Adicionar jogos): toque em **Escolher
+   arquivos** e marque um ou vários jogos baixados (Downloads, Drive, cartão de memória). O
+   console é reconhecido sozinho, inclusive em `.zip`. Também dá para usar a pasta **Jogos** do
+   celular (o app pede a permissão de arquivos) ou outras pastas.
+4. Na página de cada console, o botão **Adicionar** escolhe jogos só daquele console.
+5. Durante o jogo aparece o **controle na tela**: direcional à esquerda, botões do console à
    direita (SNES com X/A/B/Y, L e R; Mega Drive com 3 ou 6 botões; Master System com 1, 2 e
-   Pause; Arcade com A–F, ou A, B, C, D nos jogos de Neo Geo, e **Ficha**), Select/Start embaixo e **☰** no topo para o menu.
-   Vale usar vários dedos e deslizar de um botão para outro. Ele **some sozinho** quando você usa
-   um controle físico e volta ao tocar na tela.
-4. Ajustes em **Configurações → Controles**: controle na tela (automático, sempre ou nunca),
-   visibilidade dos botões e vibração.
-5. Para colocar jogos: copie para a pasta **Jogos** do armazenamento do celular (o app pede a
-   permissão de arquivos na primeira vez) ou use **Transferir jogos → Adicionar pasta**.
+   Pause; Arcade com A–F e **Ficha**; PlayStation com △○✕□, L1/L2/R1/R2), Select/Start embaixo e
+   **☰** no topo para o menu. Vale usar vários dedos. Ele **some sozinho** quando você usa um
+   controle físico e volta ao tocar na tela.
+6. Ajustes em **Ajustes → Controles**: controle na tela, modelo clássico, tamanho, posições,
+   visibilidade e vibração.
+
+Quem usava o APK único antigo no celular: instale o app de celular e, se quiser levar os saves,
+use **Configurações → Armazenamento → Fazer backup** no app antigo e **Ajustes → Armazenamento →
+Restaurar backup** no novo.
 
 ## Gerar o APK pelo GitHub (sem instalar nada)
 
@@ -423,7 +444,10 @@ python3 tools/testrom/run_in_core.py snes9x2010_libretro.so teste.sfc saida/   #
 ## Estrutura
 
 ```
-app/          Activity, navegação (menu lateral), telas (feature/*), DI (Hilt)
+app/          Activity, telas compartilhadas e da TV (feature/*), ViewModels, DI (Hilt)
+  src/tv/       App de TV: entrada (menu lateral, tela 960×540), manifesto com leanback/banner
+  src/mobile/   App de celular: Material 3, barra inferior, telas em coluna (mobile/*)
+  src/testTv/, src/testMobile/  Testes de tela de cada app (Robolectric)
 core/common/  Utilitários Android (detecção de ABI, dispatchers)
 core/ui/      Tema escuro/OLED, cores de destaque, ícones genéricos
 domain/       Kotlin puro: registro de consoles, detecção por extensão, modelos de núcleo
@@ -528,17 +552,19 @@ keyAlias=retroplay
 keyPassword=sua-senha
 ```
 
-e rode `./gradlew :app:assembleRelease` (saída em `app/build/outputs/apk/release/app-release.apk`).
-Sem esse arquivo, sai `app-release-unsigned.apk`. A versão vem de `RETROPLAY_VERSION_NAME` e
+e rode `./gradlew :app:assembleTvRelease :app:assembleMobileRelease` (saída em
+`app/build/outputs/apk/tv/release/app-tv-release.apk` e `.../mobile/release/app-mobile-release.apk`).
+Sem esse arquivo, saem APKs `-unsigned`. A versão vem de `RETROPLAY_VERSION_NAME` e
 `RETROPLAY_VERSION_CODE` (o GitHub Actions preenche pela tag e pelo número da execução).
 
 ```bash
 echo "sdk.dir=/caminho/para/android-sdk" > local.properties
-./gradlew test               # testes unitários + testes de navegação por D-pad (Robolectric)
+./gradlew test               # testes unitários + telas da TV (src/testTv) e do celular (src/testMobile)
 ./gradlew :data:testDebugUnitTest -Pretroplay.network=true --tests '*BuildbotLiveTest*'  # baixa núcleos reais
 ./gradlew :data:testDebugUnitTest -Pretroplay.e2e=true --tests '*PhoneTransferE2ETest*'   # página do celular no Chromium (Node + Playwright)
 ./gradlew :data:testDebugUnitTest -Pretroplay.smb=true --tests '*SmbE2ETest*'            # pasta da rede contra um Samba local (root + samba instalado)
-./gradlew assembleDebug      # app/build/outputs/apk/debug/app-debug.apk
+./gradlew :app:lintTvDebug :app:lintMobileDebug
+./gradlew assembleTvDebug assembleMobileDebug   # app/build/outputs/apk/{tv,mobile}/debug/
 ```
 
 **Baseline Profile**: o app traz um perfil da inicialização e da tela Início
@@ -546,7 +572,7 @@ echo "sdk.dir=/caminho/para/android-sdk" > local.properties
 abrir o app pela primeira vez. Para medir e gerar um perfil novo com uma TV ou emulador
 conectado (Android 9+): `./gradlew :app:generateReleaseBaselineProfile`.
 
-Screenshots das telas geradas pelos testes: `./gradlew :app:testDebugUnitTest -Pretroplay.screenshots=true`
+Screenshots das telas geradas pelos testes: `./gradlew :app:testTvDebugUnitTest :app:testMobileDebugUnitTest -Pretroplay.screenshots=true`
 (saída em `app/build/screenshots/`).
 
 ## Licença

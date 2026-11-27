@@ -53,7 +53,7 @@ import com.retroplay.ui.components.rememberInitialFocus
 import com.retroplay.ui.components.requestFocusWhenReady
 
 /** Categorias que fazem sentido no nível de um jogo. */
-private val GAME_CATEGORIES = listOf(SettingsCategory.VIDEO, SettingsCategory.AUDIO, SettingsCategory.CONTROLS, SettingsCategory.EMULATION)
+internal val GAME_CATEGORIES = listOf(SettingsCategory.VIDEO, SettingsCategory.AUDIO, SettingsCategory.CONTROLS, SettingsCategory.EMULATION)
 
 @Composable
 fun SettingsEntry(
@@ -80,7 +80,7 @@ fun SettingsEntry(
 }
 
 @Composable
-private fun LockedSettings(pin: String, onUnlock: () -> Unit) {
+internal fun LockedSettings(pin: String, onUnlock: () -> Unit) {
     var asking by remember { mutableStateOf(true) }
     val button = rememberInitialFocus(!asking)
     Column(
@@ -170,7 +170,7 @@ fun SettingsScreen(viewModel: SettingsViewModel, snap: SettingsSnapshot, onOpenT
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun ScopeSelector(viewModel: SettingsViewModel, scope: ScopeRef, game: GameContext?) {
+internal fun ScopeSelector(viewModel: SettingsViewModel, scope: ScopeRef, game: GameContext?) {
     if (game != null) {
         Text(
             stringResource(R.string.scope_game, game.title),

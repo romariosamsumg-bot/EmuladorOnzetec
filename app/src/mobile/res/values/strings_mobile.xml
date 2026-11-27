@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Textos só do app de celular. -->
+<resources>
+    <string name="mobile_add_games">Adicionar jogos</string>
+    <string name="mobile_add_games_desc">Escolher arquivos do celular, pasta Jogos e outras pastas</string>
+    <string name="mobile_browse_consoles">Ver todos os consoles</string>
+    <string name="mobile_empty_body">Toque em Adicionar jogos e escolha os arquivos baixados no celular. Eles aparecem aqui com nome, capa e informações.</string>
+    <string name="mobile_pick_file">Adicionar</string>
+    <string name="mobile_console_empty">Nenhum jogo ainda</string>
+    <string name="mobile_console_empty_body">Toque em Adicionar e escolha jogos de %1$s no celular.</string>
+    <string name="mobile_core_ready">Pronto para jogar</string>
+    <string name="mobile_import_title">Arquivos do celular</string>
+    <string name="mobile_import_body">Escolha um ou vários jogos (Downloads, Drive, cartão de memória). O console é reconhecido sozinho; .zip também vale.</string>
+    <string name="mobile_import_button">Escolher arquivos</string>
+    <plurals name="mobile_import_done">
+        <item quantity="one">%1$d jogo adicionado</item>
+        <item quantity="many">%1$d jogos adicionados</item>
+        <item quantity="other">%1$d jogos adicionados</item>
+    </plurals>
+    <plurals name="mobile_import_unsupported">
+        <item quantity="one">%1$d arquivo não é de um console aceito</item>
+        <item quantity="many">%1$d arquivos não são de consoles aceitos</item>
+        <item quantity="other">%1$d arquivos não são de consoles aceitos</item>
+    </plurals>
+    <string name="mobile_folder_ready">Pronta em %1$s. Jogos copiados para lá aparecem sozinhos.</string>
+    <string name="mobile_folder_needs_access">Para ler a pasta %1$s do celular (onde você pode guardar os jogos pelo computador), permita o acesso aos arquivos. Escolher arquivos acima funciona sem essa permissão.</string>
+    <string name="mobile_folder_layout">Subpastas: %1$s.</string>
+    <string name="mobile_folders_body">Escolha outras pastas do celular ou do cartão de memória. Os jogos são lidos direto de lá.</string>
+    <string name="mobile_switch_profile">Trocar de perfil</string>
+    <string name="mobile_tab_settings">Ajustes</string>
+</resources>

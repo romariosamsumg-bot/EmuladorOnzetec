@@ -28,12 +28,8 @@ import com.retroplay.domain.settings.AppSettings
 import com.retroplay.domain.settings.SettingsRepository
 import com.retroplay.domain.settings.SettingsSnapshot
 import com.retroplay.feature.cores.CoreAutoUpdater
-import com.retroplay.ui.shell.RetroPlayShell
-import com.retroplay.ui.components.TvCanvas
-import com.retroplay.ui.components.applyPhoneWindow
 import com.retroplay.domain.profile.ProfileRepository
 import com.retroplay.feature.profiles.StartupActions
-import com.retroplay.feature.profiles.StartupFlow
 import com.retroplay.feature.profiles.StartupOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -88,7 +84,7 @@ class MainActivity : ComponentActivity() {
         // Mantida até as configurações carregarem, para o tema/cor escolhidos aparecerem já no 1º quadro.
         installSplashScreen().setKeepOnScreenCondition { !settingsReady }
         super.onCreate(savedInstanceState)
-        applyPhoneWindow()
+        applyAppWindow()
         setContent {
             val snap by settings.snapshots.collectAsStateWithLifecycle(SettingsSnapshot())
             val list by profiles.profiles.collectAsStateWithLifecycle(null)
@@ -101,17 +97,19 @@ class MainActivity : ComponentActivity() {
                     shape = RectangleShape,
                     colors = SurfaceDefaults.colors(containerColor = MaterialTheme.colorScheme.background),
                 ) {
-                    TvCanvas {
-                        StartupFlow(
+                    // Interface de cada app (sabores "tv" e "mobile"): mesma trilha de perfis,
+                    // telas e navegação próprias.
+                    AppContent(
+                        AppContentArgs(
                             options = startupOptions,
                             profiles = list.takeIf { ready },
                             activeId = active?.id ?: snap.value(AppSettings.ACTIVE_PROFILE).toLongOrNull() ?: 1L,
                             ask = snap.value(AppSettings.PROFILE_ASK),
                             actions = startupActions,
-                        ) { switchProfile ->
-                            RetroPlayShell(goHomeRequests = goHome, profile = active, onSwitchProfile = switchProfile)
-                        }
-                    }
+                            goHome = goHome,
+                            active = active,
+                        ),
+                    )
                 }
             }
         }
