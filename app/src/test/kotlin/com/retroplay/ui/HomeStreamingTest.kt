@@ -125,6 +125,8 @@ class HomeStreamingTest {
         // O nome aparece numa etiqueta logo abaixo do card focado (200 ms); o do anterior some.
         node("card_recent/5_title").assertExists()
         node("card_recent/6_title").assertDoesNotExist()
+        // Painel do topo com o jogo em foco.
+        compose.waitUntil(3_000) { compose.onAllNodes(hasTestTag("focus_title") and hasText("Yoshi's Island")).fetchSemanticsNodes().isNotEmpty() }
         screenshot("31_home_fileiras")
         press(Key.DirectionCenter)
         waitFor("screen_details")
@@ -226,6 +228,10 @@ class HomeStreamingTest {
         press(Key.DirectionCenter)
         waitFor("details_title")
         node("details_title").assertTextEquals("Sonic The Hedgehog")
+        // Resumo (Wikipédia) e o botão do trailer.
+        compose.waitUntil(5_000) { compose.onAllNodes(hasTestTag("details_summary"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        node("details_trailer").assertExists()
+        screenshot("36_detalhes_resumo")
     }
 
     @Test

@@ -1,5 +1,9 @@
 package com.retroplay.feature.home
 
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -98,6 +102,7 @@ fun HomeEntry(
             onPlay = viewModel::play,
             onToggleFavorite = viewModel::toggleFavorite,
             onOpenGame = onOpenGame,
+            loadSummary = viewModel::summary,
             onOpenConsole = onOpenConsole,
         )
     }
@@ -111,13 +116,20 @@ fun HomeScreen(
     onToggleFavorite: (Game) -> Unit,
     onOpenGame: (Game) -> Unit,
     onOpenConsole: (GameSystem) -> Unit,
+    loadSummary: suspend (Game) -> com.retroplay.domain.library.GameSummary? = { null },
 ) {
     val memory = rememberFocusMemory()
     val heroPlay = remember { FocusRequester() }
     RestoreOrInitialFocus(memory, heroPlay, ready = state.loaded)
+    // Jogo em foco nas fileiras: o painel do topo mostra as informações dele (como na Netflix).
+    var focusedGame by remember { mutableStateOf<Game?>(null) }
 
+    Column(Modifier.fillMaxSize().testTag("screen_home")) {
+    androidx.compose.animation.AnimatedVisibility(visible = focusedGame != null) {
+        focusedGame?.let { g -> g.systemId?.let { catalog.byId(it) }?.let { sys -> FocusedInfo(g, sys, loadSummary) } }
+    }
     LazyColumn(
-        modifier = Modifier.fillMaxSize().testTag("screen_home"),
+        modifier = Modifier.weight(1f).fillMaxWidth(),
         contentPadding = PaddingValues(bottom = 48.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -125,12 +137,62 @@ fun HomeScreen(
             item(key = "hero") {
                 val system = hero.systemId?.let { catalog.byId(it) }
                 if (system != null) {
-                    Hero(hero, system, memory, heroPlay, onPlay, onToggleFavorite)
+                    // No destaque o próprio banner já mostra o jogo: o painel some.
+                    Box(Modifier.onFocusChanged { if (it.hasFocus) focusedGame = null }) {
+                        Hero(hero, system, memory, heroPlay, onPlay, onToggleFavorite)
+                    }
                 }
             }
         }
         items(state.rows, key = { it.type.key }) { row ->
-            GameRow(row, catalog, memory, onOpenGame, onOpenConsole, state.continueThumbs)
+            GameRow(row, catalog, memory, onOpenGame, onOpenConsole, state.continueThumbs) { focusedGame = it }
+        }
+    }
+    }
+}
+
+/**
+ * Painel do jogo em foco: nome, console · ano · gênero · empresa, resumo (Wikipédia) e uma cena
+ * do jogo ao fundo. O resumo só é buscado depois de o foco parar no jogo (rolar não dispara buscas).
+ */
+@Composable
+private fun FocusedInfo(game: Game, system: GameSystem, loadSummary: suspend (Game) -> com.retroplay.domain.library.GameSummary?) {
+    val background = MaterialTheme.colorScheme.background
+    val summary by androidx.compose.runtime.produceState<com.retroplay.domain.library.GameSummary?>(null, game.id) {
+        value = null
+        kotlinx.coroutines.delay(450)
+        value = loadSummary(game)
+    }
+    Box(Modifier.fillMaxWidth().height(190.dp).testTag("focus_info")) {
+        val art = listOf(CoverType.SNAP, CoverType.TITLE).firstOrNull { it in game.availableCovers }
+        if (art != null) {
+            AsyncImage(
+                model = CoverUrls.url(system, game, art),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().fillMaxWidth(0.5f),
+            )
+        }
+        Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to background, 0.5f to background, 0.75f to background.copy(alpha = 0.55f), 1f to background.copy(alpha = 0.2f))))
+        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.6f to Color.Transparent, 1f to background)))
+        Column(Modifier.padding(start = 48.dp, top = 20.dp, end = 48.dp).widthIn(max = 620.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(game.title, style = MaterialTheme.typography.headlineMedium, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.testTag("focus_title"))
+            Text(
+                listOfNotNull(system.displayName, game.year, game.genre?.let { genreName(it) }, game.developer).joinToString(" · "),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+            )
+            summary?.let {
+                Text(
+                    it.text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    modifier = Modifier.testTag("focus_summary"),
+                )
+            }
         }
     }
 }
@@ -214,6 +276,7 @@ private fun GameRow(
     onOpenGame: (Game) -> Unit,
     onOpenConsole: (GameSystem) -> Unit,
     continueThumbs: Map<Long, String> = emptyMap(),
+    onFocusGame: (Game) -> Unit = {},
 ) {
     val rowSystem = (row.type as? RowType.BySystem)?.let { catalog.byId(it.system) }
     Column(Modifier.testTag("row_${row.type.key}")) {
@@ -231,8 +294,9 @@ private fun GameRow(
             items(row.games, key = { it.id }, contentType = { "game" }) { game ->
                 val system = game.systemId?.let { catalog.byId(it) } ?: return@items
                 val key = "${row.type.key}/${game.id}"
+                val focusMod = Modifier.onFocusChanged { if (it.isFocused) onFocusGame(game) }
                 if (row.type == RowType.ContinuePlaying) {
-                    ContinueCard(system, game, continueThumbs[game.id], { onOpenGame(game) }, Modifier.rememberFocus(memory, key), "card_$key")
+                    ContinueCard(system, game, continueThumbs[game.id], { onOpenGame(game) }, focusMod.rememberFocus(memory, key), "card_$key")
                     return@items
                 }
                 GameCard(
@@ -240,7 +304,7 @@ private fun GameRow(
                     game = game,
                     title = game.title,
                     onClick = { onOpenGame(game) },
-                    cardModifier = Modifier.rememberFocus(memory, key),
+                    cardModifier = focusMod.rememberFocus(memory, key),
                     testTag = "card_$key",
                 )
             }

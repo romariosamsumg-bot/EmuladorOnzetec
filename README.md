@@ -455,6 +455,30 @@ divisórias sozinho e gera `cover_<console>.webp` (3:2, 660×440). Consoles sem 
 A capa do PlayStation veio de uma imagem à parte (`tools/brand/console_psx.png`), cortada no
 centro para 3:2 (660×440) em `cover_psx.webp`.
 
+## Informações dos jogos
+
+- **Na Início**, ao focar um jogo numa fileira, o painel do topo mostra o nome, console · ano ·
+  gênero · empresa, o resumo e uma cena do jogo ao fundo, como na Netflix. O resumo só é buscado
+  depois de o foco parar no jogo.
+- **Nos Detalhes**: o resumo (até 5 linhas, com a fonte), as **cenas** (tela de título e uma cena
+  de jogo) e **"Ver trailer"**.
+- **Resumo:** vem da **Wikipédia** (idioma do app, depois inglês), gratuita e sem chave. Só aceita
+  artigos que falam de jogo eletrônico, e só envia o título do jogo e o nome do console. Fica
+  guardado no aparelho; sem resultado, tenta de novo em 7 dias; sem internet, não mostra nada.
+- **Trailer:** não há fonte de vídeos que o app possa embutir sem chave paga. O botão abre a busca do
+  trailer no app do YouTube da TV (ou no navegador).
+
+## Controle na tela (celular)
+
+- **Modelo clássico** (padrão), inspirado no controle original de cada console, sem logotipos:
+  losango colorido no SNES, botões pretos no Mega Drive e Master System, alavanca de bolinha e
+  botões coloridos no Arcade, símbolos coloridos no PlayStation. Ou o **modelo simples** translúcido.
+- **Configurações → Controles:** modelo, tamanho dos botões (80% a 130%), transparência, vibração e
+  **Posições dos botões**: escolha o console e arraste cada botão ou o direcional com o dedo
+  ("Restaurar padrão" volta ao original). As posições ficam salvas por console.
+- **Multitoque:** direcional e vários botões ao mesmo tempo, inclusive com os botões em posições
+  personalizadas.
+
 ## PlayStation
 
 - **Núcleo:** só o **PCSX ReARMed**, o mais leve: feito para processadores ARM (TVs e celulares),

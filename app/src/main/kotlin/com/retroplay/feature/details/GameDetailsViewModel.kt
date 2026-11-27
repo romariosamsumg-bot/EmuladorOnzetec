@@ -1,5 +1,7 @@
 package com.retroplay.feature.details
 
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -43,7 +45,17 @@ class GameDetailsViewModel @Inject constructor(
     launcherFactory: PlayLauncher.Factory,
     private val saves: SaveStateStore,
     settings: SettingsRepository,
+    private val info: com.retroplay.domain.library.GameInfoSource,
 ) : ViewModel() {
+
+    /** Resumo do jogo (Wikipédia), carregado uma vez por título; null enquanto/sem resultado. */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val summary: StateFlow<com.retroplay.domain.library.GameSummary?> by lazy {
+        state.map { (it as? DetailsState.Ready)?.let { r -> r.game.title to r.system.displayName } }
+            .distinctUntilChanged()
+            .mapLatest { key -> key?.let { (t, s) -> runCatching { info.summary(t, s) }.getOrNull() } }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    }
 
     /** PIN exigido para apagar (Controle parental), ou null. */
     val deletePin: StateFlow<String?> = settings.snapshots

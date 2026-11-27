@@ -286,4 +286,8 @@
         <item quantity="other">%1$d games</item>
     </plurals>
     <string name="console_no_games">no games</string>
+    <string name="details_trailer">▶ Watch trailer</string>
+    <string name="details_trailer_none">No video app or browser to open the trailer.</string>
+    <string name="details_scenes">Scenes and trailer</string>
+    <string name="details_summary_source">Summary: %1$s</string>
 </resources>

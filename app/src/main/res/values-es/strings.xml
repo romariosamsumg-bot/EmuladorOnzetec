@@ -295,4 +295,8 @@
         <item quantity="other">%1$d juegos</item>
     </plurals>
     <string name="console_no_games">ningún juego</string>
+    <string name="details_trailer">▶ Ver tráiler</string>
+    <string name="details_trailer_none">Ninguna app de vídeo o navegador para abrir el tráiler.</string>
+    <string name="details_scenes">Escenas y tráiler</string>
+    <string name="details_summary_source">Resumen: %1$s</string>
 </resources>

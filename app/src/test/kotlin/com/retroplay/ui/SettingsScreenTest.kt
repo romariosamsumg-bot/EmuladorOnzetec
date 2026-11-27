@@ -96,7 +96,13 @@ class SettingsScreenTest {
     }
 
     private fun openSettings() {
-        press(Key.DirectionLeft)
+        // A Início pode trocar de conteúdo ao montar: insiste no ← até o menu receber o foco.
+        compose.waitUntil(5_000) { compose.onAllNodes(androidx.compose.ui.test.isFocused()).fetchSemanticsNodes().isNotEmpty() }
+        repeat(5) {
+            if (compose.onAllNodes(hasTestTag("nav_home") and androidx.compose.ui.test.isFocused(), useUnmergedTree = true).fetchSemanticsNodes().isEmpty()) {
+                press(Key.DirectionLeft)
+            }
+        }
         node("nav_home").assertIsFocused()
         press(Key.DirectionDown, 5)
         node("nav_settings").assertIsFocused()

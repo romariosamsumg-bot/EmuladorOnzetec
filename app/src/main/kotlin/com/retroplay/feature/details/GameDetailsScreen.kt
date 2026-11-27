@@ -1,5 +1,7 @@
 package com.retroplay.feature.details
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import android.text.format.DateUtils
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -73,6 +75,7 @@ fun GameDetailsEntry(onBack: () -> Unit, onOpenSettings: (Long) -> Unit = {}, vi
     val state by viewModel.state.collectAsStateWithLifecycle()
     val deletePin by viewModel.deletePin.collectAsStateWithLifecycle()
     val download by viewModel.launcher.coreDownload.collectAsStateWithLifecycle()
+    val summary by viewModel.summary.collectAsStateWithLifecycle()
     LaunchGamesEffect(viewModel.launcher)
     LaunchedEffect(viewModel) {
         viewModel.deleteResults.collect { result ->
@@ -101,6 +104,8 @@ fun GameDetailsEntry(onBack: () -> Unit, onOpenSettings: (Long) -> Unit = {}, vi
             deletePin = deletePin,
             onOpenSettings = { onOpenSettings(s.game.id) },
             onRename = { viewModel.rename(s.game, it) },
+            summary = summary,
+            onTrailer = { openTrailer(context, s.game.title, s.system.displayName) },
         )
     }
 }
@@ -120,6 +125,9 @@ fun GameDetailsScreen(
     deletePin: String? = null,
     onOpenSettings: () -> Unit = {},
     onRename: (String?) -> Unit = {},
+    /** Resumo (ex.: Wikipédia); null = sem resumo. */
+    summary: com.retroplay.domain.library.GameSummary? = null,
+    onTrailer: () -> Unit = {},
 ) {
     val playFocus = rememberInitialFocus()
     var showOptions by remember { mutableStateOf(false) }
@@ -148,7 +156,8 @@ fun GameDetailsScreen(
                 title = game.title,
                 modifier = Modifier.width(240.dp).height(320.dp).clip(RoundedCornerShape(12.dp)),
             )
-            Column(Modifier.widthIn(max = 900.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            // Rola quando o resumo e as cenas não cabem (o foco nos botões rola sozinho).
+            Column(Modifier.widthIn(max = 900.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(system.displayName, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
                 Text(game.title, style = MaterialTheme.typography.displaySmall, maxLines = 2, modifier = Modifier.testTag("details_title"))
                 val genre = game.genre?.let { genreName(it) }
@@ -158,6 +167,16 @@ fun GameDetailsScreen(
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (summary != null) {
+                    Text(
+                        summary.text,
+                        style = MaterialTheme.typography.bodyLarge,
+                        maxLines = 5,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        modifier = Modifier.testTag("details_summary"),
+                    )
+                    Text(stringResource(R.string.details_summary_source, summary.source), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 Text(
                     listOfNotNull(game.region, game.fileName).joinToString(" · "),
                     style = MaterialTheme.typography.bodyMedium,
@@ -220,6 +239,22 @@ fun GameDetailsScreen(
                     }
                     OutlinedButton(onClick = { if (deletePin != null) askPin = true else confirmDelete = true }, modifier = Modifier.testTag("details_delete")) {
                         Text(stringResource(R.string.delete))
+                    }
+                }
+                // Cenas do jogo: tela de título e uma cena de jogo (libretro-thumbnails).
+                val scenes = listOf(CoverType.TITLE, CoverType.SNAP).filter { it in game.availableCovers }
+                Text(stringResource(R.string.details_scenes), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.testTag("details_scenes")) {
+                    OutlinedButton(onClick = onTrailer, modifier = Modifier.testTag("details_trailer")) {
+                        Text(stringResource(R.string.details_trailer))
+                    }
+                    scenes.forEach { t ->
+                        AsyncImage(
+                            model = CoverUrls.url(system, game, t),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.width(176.dp).height(132.dp).clip(RoundedCornerShape(8.dp)),
+                        )
                     }
                 }
                 when (coreDownload) {
@@ -361,4 +396,22 @@ private fun ConfirmDeleteDialog(game: Game, onConfirm: () -> Unit, onDismiss: ()
             }
         }
     }
+}
+
+/**
+ * Trailer: não há fonte de vídeos que o app possa embutir sem chave paga; abre a busca do trailer
+ * no YouTube da TV (ou no navegador).
+ */
+fun openTrailer(context: android.content.Context, title: String, system: String) {
+    val q = android.net.Uri.encode("$title $system trailer gameplay")
+    val uri = android.net.Uri.parse("https://www.youtube.com/results?search_query=$q")
+    val intents = listOf(
+        android.content.Intent(android.content.Intent.ACTION_VIEW, uri).setPackage("com.google.android.youtube.tv"),
+        android.content.Intent(android.content.Intent.ACTION_VIEW, uri).setPackage("com.google.android.youtube"),
+        android.content.Intent(android.content.Intent.ACTION_VIEW, uri),
+    )
+    val opened = intents.any { i ->
+        runCatching { context.startActivity(i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }.isSuccess
+    }
+    if (!opened) Toast.makeText(context, R.string.details_trailer_none, Toast.LENGTH_LONG).show()
 }

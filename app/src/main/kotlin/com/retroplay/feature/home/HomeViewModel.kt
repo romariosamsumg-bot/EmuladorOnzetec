@@ -44,7 +44,14 @@ class HomeViewModel @Inject constructor(
     val phone: PhoneTransfer,
     private val saves: SaveStateStore,
     settings: SettingsRepository,
+    private val info: com.retroplay.domain.library.GameInfoSource,
 ) : ViewModel() {
+
+    /** Resumo do jogo em foco (Wikipédia, com cache). */
+    suspend fun summary(game: Game): com.retroplay.domain.library.GameSummary? {
+        val system = game.systemId?.let { catalog.byId(it) } ?: return null
+        return runCatching { info.summary(game.title, system.displayName) }.getOrNull()
+    }
 
     val systems: List<GameSystem> = catalog.all
     val launcher = launcherFactory.create(viewModelScope)
