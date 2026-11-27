@@ -3,7 +3,8 @@
 
 Fontes (baixadas para um cache local na primeira execução):
   * libretro-database (CC BY-SA 4.0): DATs No-Intro + metadados (gênero, ano, desenvolvedora,
-    editora, jogadores) de SNES, Mega Drive e Master System;
+    editora, jogadores) de SNES, Mega Drive, Master System, Nintendinho, Game Boy, Game Boy
+    Color, Game Boy Advance e Atari 2600;
   * PlayStation: DAT Redump do libretro-database (nome, região e código do disco, ex.: SLUS-00594;
     o app lê o código do SYSTEM.CNF da imagem, sem calcular o CRC de CDs de 700 MB);
   * Arcade: DAT do MAME 0.37b5 (núcleo MAME 2000) e DAT "Arcade only" do FinalBurn Neo (nomes
@@ -36,6 +37,11 @@ SYSTEMS = {
     "mastersystem": "Sega - Master System - Mark III",
     "arcade": "MAME",
     "psx": "Sony - PlayStation",
+    "nes": "Nintendo - Nintendo Entertainment System",
+    "gb": "Nintendo - Game Boy",
+    "gbc": "Nintendo - Game Boy Color",
+    "gba": "Nintendo - Game Boy Advance",
+    "atari2600": "Atari - 2600",
 }
 META_FIELDS = ["genre", "releaseyear", "developer", "publisher", "maxusers"]
 THUMB_TYPES = {"Named_Boxarts": 1, "Named_Titles": 2, "Named_Snaps": 4}
@@ -232,7 +238,11 @@ def build(out_path, cache):
             continue
         meta = {}
         for field in META_FIELDS:
-            path = fetch(f"{LIBRETRO_DB}/{field}/{q}.dat", os.path.join(cache, f"{field}-{sid}.dat"))
+            try:
+                path = fetch(f"{LIBRETRO_DB}/{field}/{q}.dat", os.path.join(cache, f"{field}-{sid}.dat"))
+            except Exception as e:  # nem todo sistema tem todos os metadados no libretro-database
+                print("sem", field, "para", sid, "-", e)
+                continue
             for g in parse_clrmamepro(open(path, encoding="utf-8", errors="replace").read()):
                 rom = get(g, "rom")
                 crc = rom and get(rom, "crc")

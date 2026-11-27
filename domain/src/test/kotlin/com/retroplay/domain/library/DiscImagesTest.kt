@@ -223,4 +223,14 @@ class DiscIdentifierTest {
         val snes = identifier.identify(zipTarget("mario.zip", listOf("Super Mario World (USA).sfc"), parent = "Super Nintendo"))
         assertEquals(SystemRegistry.Ids.SNES, game(snes).system)
     }
+
+    @Test
+    fun bin_pequeno_e_atari_grande_e_mega_drive() {
+        val folder = Folder(
+            mapOf("jogo.bin" to ByteArray(4096), "outro.bin" to ByteArray(1024 * 1024)),
+            crcOf = mapOf("jogo.bin" to 0x1L, "outro.bin" to 0x2L),
+        )
+        assertEquals(SystemRegistry.Ids.ATARI_2600, game(identifier.identify(folder.target("jogo.bin"))).system)
+        assertEquals(SystemRegistry.Ids.MEGA_DRIVE, game(identifier.identify(folder.target("outro.bin"))).system)
+    }
 }

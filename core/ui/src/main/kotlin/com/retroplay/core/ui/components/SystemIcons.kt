@@ -12,6 +12,9 @@ object SystemIcons {
         "pad_8bit" -> R.drawable.ic_sys_pad_8bit
         "arcade_stick" -> R.drawable.ic_sys_arcade
         "pad_dual_grip" -> R.drawable.ic_sys_pad_dual
+        "handheld" -> R.drawable.ic_sys_handheld
+        "handheld_wide" -> R.drawable.ic_sys_handheld_wide
+        "joystick_atari" -> R.drawable.ic_sys_joystick
         else -> R.drawable.ic_nav_consoles
     }
 }

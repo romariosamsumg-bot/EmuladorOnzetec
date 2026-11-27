@@ -412,3 +412,206 @@ PaRappa the Rapper
 Worms Armageddon
 Duke Nukem - Time to Kill
 Army Men - Air Attack
+
+[nes]
+Super Mario Bros.
+Super Mario Bros. 3
+The Legend of Zelda
+Contra
+Mega Man 2
+Duck Hunt
+Super Mario Bros. 2
+Punch-Out!!
+Castlevania
+Metroid
+Tetris
+Kirby's Adventure
+Teenage Mutant Ninja Turtles
+Double Dragon II - The Revenge
+Ninja Gaiden
+Excitebike
+Battletoads
+Mega Man 3
+Donkey Kong
+Bomberman
+Zelda II - The Adventure of Link
+Castlevania III - Dracula's Curse
+Final Fantasy
+Dragon Warrior
+Ice Climber
+Balloon Fight
+Pac-Man
+Galaga
+Tecmo Bowl
+Teenage Mutant Ninja Turtles II - The Arcade Game
+Teenage Mutant Ninja Turtles III - The Manhattan Project
+DuckTales
+Chip 'n Dale - Rescue Rangers
+Adventure Island
+Rush'n Attack
+Life Force
+Gradius
+Ghosts'n Goblins
+Double Dragon
+River City Ransom
+Mike Tyson's Punch-Out!!
+Dr. Mario
+Super C
+Mega Man
+Mega Man 4
+Mega Man 5
+Mega Man 6
+Castlevania II - Simon's Quest
+Kid Icarus
+Bubble Bobble
+Paperboy
+Faxanadu
+Little Nemo - The Dream Master
+Ninja Gaiden II - The Dark Sword of Chaos
+Batman - The Video Game
+Darkwing Duck
+Top Gun
+Spy Hunter
+Tiny Toon Adventures
+Popeye
+
+[gb]
+Tetris
+Pokemon - Red Version | Pokemon - Edicao Vermelha
+Pokemon - Blue Version
+Super Mario Land
+Super Mario Land 2 - 6 Golden Coins
+The Legend of Zelda - Link's Awakening | Legend of Zelda, The - Link's Awakening
+Kirby's Dream Land
+Donkey Kong
+Wario Land - Super Mario Land 3
+Metroid II - Return of Samus
+Dr. Mario
+Kirby's Dream Land 2
+Donkey Kong Land
+Pokemon - Yellow Version - Special Pikachu Edition
+Mega Man - Dr. Wily's Revenge
+Castlevania - The Adventure
+Final Fantasy Adventure
+Final Fantasy Legend
+Bomberman GB
+Teenage Mutant Ninja Turtles - Fall of the Foot Clan
+Batman - The Video Game
+Mortal Kombat
+Street Fighter II
+Kid Icarus - Of Myths and Monsters
+Tennis
+Alleyway
+Golf
+Baseball
+
+[gbc]
+Pokemon - Gold Version
+Pokemon - Silver Version
+Pokemon - Crystal Version
+The Legend of Zelda - Link's Awakening DX
+The Legend of Zelda - Oracle of Ages
+The Legend of Zelda - Oracle of Seasons
+Super Mario Bros. Deluxe
+Wario Land II
+Wario Land 3
+Pokemon Trading Card Game
+Pokemon Pinball
+Donkey Kong Country
+Dragon Warrior Monsters
+Tetris DX
+Metal Gear Solid
+Mario Tennis
+Mario Golf
+Shantae
+Harvest Moon GBC
+Bomberman Max - Blue Champion
+Toy Story 2
+Tony Hawk's Pro Skater
+Pokemon Puzzle Challenge
+Dragon Ball Z - Legendary Super Warriors
+Yu-Gi-Oh! Duel Monsters 4 - Battle of Great Duelist - Yugi Deck
+
+[gba]
+Pokemon - FireRed Version
+Pokemon - Emerald Version
+Pokemon - Ruby Version
+Pokemon - Sapphire Version
+Pokemon - LeafGreen Version
+The Legend of Zelda - The Minish Cap
+The Legend of Zelda - A Link to the Past & Four Swords
+Mario Kart - Super Circuit
+Metroid Fusion
+Metroid - Zero Mission
+Super Mario Advance 4 - Super Mario Bros. 3
+Super Mario Advance 2 - Super Mario World
+Super Mario Advance
+Mario & Luigi - Superstar Saga
+Advance Wars
+Fire Emblem
+Kirby & The Amazing Mirror
+Kirby - Nightmare in Dream Land
+WarioWare, Inc. - Mega Microgame$!
+Golden Sun
+Golden Sun - The Lost Age
+Castlevania - Aria of Sorrow
+Castlevania - Circle of the Moon
+Final Fantasy Tactics Advance
+Final Fantasy VI Advance
+Mega Man Zero
+Mega Man Battle Network
+Sonic Advance
+Sonic Advance 2
+Sonic Advance 3
+Dragon Ball Z - The Legacy of Goku II
+Dragon Ball Z - Buu's Fury
+Yu-Gi-Oh! - The Eternal Duelist Soul
+Street Fighter Alpha 3
+Mortal Kombat - Deadly Alliance
+Tony Hawk's Pro Skater 2
+Harvest Moon - Friends of Mineral Town
+Donkey Kong Country
+Donkey Kong Country 2
+Donkey Kong Country 3
+Metal Slug Advance
+Mother 3
+Spyro - Season of Ice
+Crash Bandicoot - The Huge Adventure
+Teenage Mutant Ninja Turtles
+Need for Speed - Most Wanted
+FIFA Soccer 2005
+
+[atari2600]
+Pitfall! - Pitfall Harry's Jungle Adventure | Pitfall!
+River Raid
+Pac-Man
+Space Invaders
+Asteroids
+Enduro
+Frogger
+Missile Command
+Breakout
+Adventure
+Combat
+Kaboom!
+Donkey Kong
+Ms. Pac-Man
+Freeway
+Seaquest
+Keystone Kapers
+Atlantis
+Demon Attack
+Defender
+Berzerk
+H.E.R.O.
+MegaMania - A Space Nightmare | Megamania
+Yars' Revenge
+Centipede
+Pole Position
+Boxing
+Tennis
+Skiing
+Spider Fighter
+Q-bert | Q*bert
+Moon Patrol
+Galaxian

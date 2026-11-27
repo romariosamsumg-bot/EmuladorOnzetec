@@ -121,10 +121,12 @@ class RomIdentifierTest {
 
     @Test
     fun `zip ambiguo sem casamento pede o console`() {
-        val entries = listOf(ArchiveEntry("jogo.bin", 1, 0x77))
+        val entries = listOf(ArchiveEntry("jogo.bin", 1024 * 1024, 0x77))
         val id = game(identifier.identify(Target("jogo.zip", entries = entries)))
-        // .bin só existe no Mega Drive entre os consoles suportados.
+        // .bin de 1 MB: Mega Drive (o Atari 2600 também usa .bin, mas com no máximo 64 KB).
         assertEquals(md, id.system)
+        val tiny = game(identifier.identify(Target("atari.zip", entries = listOf(ArchiveEntry("jogo.bin", 4096, 0x78)))))
+        assertEquals(com.retroplay.domain.system.SystemRegistry.Ids.ATARI_2600, tiny.system)
         val ambiguous = game(identifier.identify(Target("x.zip", entries = listOf(ArchiveEntry("a.sfc", 1, 1), ArchiveEntry("b.sms", 2, 2)))))
         assertEquals(sms, ambiguous.system) // pega a maior entrada (b.sms)
     }

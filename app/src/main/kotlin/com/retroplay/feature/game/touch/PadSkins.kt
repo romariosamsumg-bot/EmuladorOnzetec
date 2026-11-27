@@ -75,6 +75,36 @@ object PadSkins {
             dpad = Color(0xFF3A3B42), dpadLine = Color(0xFF62636C),
             pill = dark, shoulder = Color(0xFF55565E),
         )
+        // Nintendinho: botões vermelhos redondos, direcional preto, Select/Start cinza-escuro.
+        SystemRegistry.Ids.NES -> PadSkin(
+            face = emptyMap(), faceDefault = Color(0xFFC8202A),
+            dpad = Color(0xFF1C1C1F), dpadLine = Color(0xFF4A4A50),
+            pill = Color(0xFF3B3B40),
+        )
+        // Game Boy: botões A/B magenta-escuro.
+        SystemRegistry.Ids.GAME_BOY -> PadSkin(
+            face = emptyMap(), faceDefault = Color(0xFF8E2154),
+            dpad = Color(0xFF26262B), dpadLine = Color(0xFF55555C),
+            pill = Color(0xFF6E6E78),
+        )
+        // Game Boy Color: corpo roxo, botões escuros.
+        SystemRegistry.Ids.GAME_BOY_COLOR -> PadSkin(
+            face = emptyMap(), faceDefault = Color(0xFF2B2140),
+            dpad = Color(0xFF2B2140), dpadLine = Color(0xFF6A4FA0),
+            pill = Color(0xFF5A3F94),
+        )
+        // Game Boy Advance: botões lilás-claros com letras escuras, gatilhos L/R.
+        SystemRegistry.Ids.GBA -> PadSkin(
+            face = emptyMap(), faceDefault = Color(0xFFCFCBE6), faceTextDefault = Color(0xFF2B2650),
+            dpad = Color(0xFF3B3570), dpadLine = Color(0xFF7A73B8),
+            pill = Color(0xFF4A3FA8), shoulder = Color(0xFF9C97C2), shoulderText = Color(0xFF2B2650),
+        )
+        // Atari 2600: alavanca preta e botão de fogo vermelho; chaves cor de madeira.
+        SystemRegistry.Ids.ATARI_2600 -> PadSkin(
+            face = emptyMap(), faceDefault = Color(0xFFD62828),
+            dpad = Color(0xFF141416), dpadLine = Color(0xFF45454C),
+            pill = Color(0xFF7A4A22), stick = true, stickBall = Color(0xFF1E1E22),
+        )
         else -> null
     }
 }

@@ -16,6 +16,11 @@ interface "estilo streaming", navegação por controle remoto, gamepad ou toque 
 | Master System / Mark III | genesis_plus_gx | picodrive | .sms .zip .7z |
 | Arcade (fliperama, inclusive Neo Geo) | mame2000 (MAME 0.37) | fbneo, mame2003_plus | .zip .7z (romsets) — jogos de Neo Geo exigem `neogeo.zip` |
 | PlayStation | pcsx_rearmed (PCSX ReARMed) | — | .chd .pbp .cue (+ trilhas .bin) .iso .m3u .zip .7z — BIOS recomendada (`scph5501.bin`) |
+| Nintendinho (NES / Famicom) | fceumm (FCEUmm) | nestopia | .nes .unf .unif .zip .7z |
+| Game Boy | gambatte | — | .gb .zip .7z (colorido automático nos jogos com paleta oficial) |
+| Game Boy Color | gambatte | — | .gbc .zip .7z |
+| Game Boy Advance | mgba (mGBA) | vba_next (mais leve) | .gba .zip .7z — roda sem BIOS |
+| Atari 2600 | stella2014 (Stella 2014) | stella | .a26 .bin .zip .7z — um .bin de até 64 KB é Atari; maior, Mega Drive |
 
 ## Estado do desenvolvimento
 

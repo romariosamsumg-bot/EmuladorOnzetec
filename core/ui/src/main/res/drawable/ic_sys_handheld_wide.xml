@@ -1,0 +1,6 @@
+<!-- Portátil genérico horizontal (desenho próprio). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="@android:color/white" android:pathData="M5,6h14c2.2,0 4,1.8 4,4v4c0,2.2 -1.8,4 -4,4H5c-2.2,0 -4,-1.8 -4,-4v-4c0,-2.2 1.8,-4 4,-4zM8,8.5v7h8v-7zM3.6,11.2v1.2H2.6v1.2h1v1h1.2v-1h1v-1.2h-1v-1.2zM19.6,10.6a0.9,0.9 0,1 0,0.01 0zM18,12.6a0.9,0.9 0,1 0,0.01 0z"/>
+</vector>

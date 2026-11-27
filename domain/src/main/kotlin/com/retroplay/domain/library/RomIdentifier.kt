@@ -70,7 +70,17 @@ class RomIdentifier(private val catalog: SystemCatalog, private val dat: DatLook
         if (disc != null && ext !in archiveExt) return identifyDisc(target, disc, ext)
 
         return if (ext in archiveExt) identifyArchive(target, byExt, hint, forced)
-        else identifyPlain(target, ext, if (forced != null) listOf(forced) else byExt, hint)
+        else identifyPlain(target, ext, if (forced != null) listOf(forced) else bySize(byExt, target.size), hint)
+    }
+
+    /**
+     * Desempata extensões comuns pelo tamanho: um .bin de até 64 KB é Atari 2600 (Mega Drive tem
+     * no mínimo 128 KB); um maior não pode ser Atari.
+     */
+    private fun bySize(candidates: List<GameSystem>, size: Long): List<GameSystem> {
+        val fits = candidates.filter { it.maxRomBytes == null || size <= it.maxRomBytes }
+        val small = fits.filter { it.maxRomBytes != null }
+        return (if (small.isNotEmpty()) small else fits).ifEmpty { candidates }
     }
 
     // ------------------------------------------------------------ arquivo comum
@@ -146,7 +156,7 @@ class RomIdentifier(private val catalog: SystemCatalog, private val dat: DatLook
             .filter { e -> homeSystems.any { s -> entryExt(e) in s.extensions - archiveExt } }
             .maxByOrNull { it.size }
         if (romEntry != null && (hint == null || hint in homeSystems)) {
-            val candidates = homeSystems.filter { entryExt(romEntry) in it.extensions }
+            val candidates = bySize(homeSystems.filter { entryExt(romEntry) in it.extensions }, romEntry.size)
             val crc = (romEntry.crc ?: target.archiveEntryCrc(romEntry.name))
                 ?.takeIf { copierHeader(entryExt(romEntry), romEntry.size) == 0L }
             val match = crc?.let { pick(dat.byCrc(it, candidates.map { s -> s.id }), hint, md5 = null) }

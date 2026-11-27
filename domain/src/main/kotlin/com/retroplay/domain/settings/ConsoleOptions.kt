@@ -113,6 +113,8 @@ object ConsoleCoreOptions {
                     }
                 }
             }
+            // Game Boy: o Gambatte colore os jogos que têm paleta oficial do Super Game Boy/GBC.
+            SystemRegistry.Ids.GAME_BOY -> if (coreId == "gambatte") vars["gambatte_gb_colorization"] = "auto"
             SystemRegistry.Ids.PLAYSTATION -> if (coreId == "pcsx_rearmed") {
                 // Recompilador dinâmico ligado (o que deixa o núcleo leve em ARM) e sem o logo da BIOS.
                 vars["pcsx_rearmed_drc"] = "enabled"

@@ -63,6 +63,21 @@ object VirtualPadSpecs {
                 shoulders = listOf(of(RetroPadButton.L), of(RetroPadButton.R), of(RetroPadButton.L2), of(RetroPadButton.R2)),
                 center = listOf(of(RetroPadButton.SELECT), of(RetroPadButton.START)),
             )
+            // Nintendinho, Game Boy e Game Boy Color: B e A lado a lado (A à direita), Select e Start.
+            SystemRegistry.Ids.NES, SystemRegistry.Ids.GAME_BOY, SystemRegistry.Ids.GAME_BOY_COLOR -> VirtualPadSpec(
+                face = listOf(listOf(of(RetroPadButton.B), of(RetroPadButton.A))),
+                center = listOf(of(RetroPadButton.SELECT), of(RetroPadButton.START)),
+            )
+            SystemRegistry.Ids.GBA -> VirtualPadSpec(
+                face = listOf(listOf(of(RetroPadButton.B), of(RetroPadButton.A))),
+                shoulders = listOf(of(RetroPadButton.L), of(RetroPadButton.R)),
+                center = listOf(of(RetroPadButton.SELECT), of(RetroPadButton.START)),
+            )
+            // Atari 2600: alavanca, um botão de fogo e as chaves Select/Reset do console.
+            SystemRegistry.Ids.ATARI_2600 -> VirtualPadSpec(
+                face = listOf(listOf(of(RetroPadButton.B))),
+                center = listOf(of(RetroPadButton.SELECT), of(RetroPadButton.START)),
+            )
             // Console novo: tudo que não é direcional vira botão de ação.
             else -> VirtualPadSpec(face = b.filter { it.retroPad !in DIRECTIONS }.chunked(3))
         }

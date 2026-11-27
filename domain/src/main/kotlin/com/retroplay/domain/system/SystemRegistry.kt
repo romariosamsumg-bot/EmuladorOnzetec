@@ -28,6 +28,11 @@ object SystemRegistry : SystemCatalog {
         /** Fliperama (MAME/FBNeo), inclusive Neo Geo. Antes da versão 1.2 era "neogeo". */
         val ARCADE = SystemId("arcade")
         val PLAYSTATION = SystemId("psx")
+        val NES = SystemId("nes")
+        val GAME_BOY = SystemId("gb")
+        val GAME_BOY_COLOR = SystemId("gbc")
+        val GBA = SystemId("gba")
+        val ATARI_2600 = SystemId("atari2600")
     }
 
     private val genesisPlusGx = CoreDescriptor(
@@ -179,5 +184,107 @@ object SystemRegistry : SystemCatalog {
         folderAliases = setOf("playstation", "psx", "ps1", "psone", "playstation1", "sonyplaystation", "ps"),
     )
 
-    override val all: List<GameSystem> = listOf(SNES, MEGA_DRIVE, MASTER_SYSTEM, ARCADE, PLAYSTATION)
+    private val gambatte = CoreDescriptor("gambatte", "Gambatte", "Preciso e leve. Recomendado.")
+    private fun twoButtons() = ControllerLayout(
+        listOf(ConsoleButton("B", B), ConsoleButton("A", A), ConsoleButton("Select", SELECT), ConsoleButton("Start", START)),
+    )
+
+    val NES = GameSystem(
+        id = Ids.NES,
+        displayName = "Nintendinho",
+        shortName = "NES",
+        releaseYear = 1983,
+        extensions = setOf("nes", "unf", "unif", "zip", "7z"),
+        cores = listOf(
+            CoreDescriptor("fceumm", "FCEUmm", "Leve e compatível. Recomendado."),
+            CoreDescriptor("nestopia", "Nestopia UE", "Muito preciso; um pouco mais pesado."),
+        ),
+        controllerLayout = twoButtons(),
+        accentColor = 0xFFC8202A,
+        iconKey = "pad_8bit",
+        coverAspect = 0.73f,
+        libretroDatabaseName = "Nintendo - Nintendo Entertainment System",
+        folderAliases = setOf("nes", "nintendinho", "famicom", "nintendo", "nintendoentertainmentsystem", "fc"),
+    )
+
+    val GAME_BOY = GameSystem(
+        id = Ids.GAME_BOY,
+        displayName = "Game Boy",
+        shortName = "GB",
+        releaseYear = 1989,
+        extensions = setOf("gb", "zip", "7z"),
+        cores = listOf(gambatte),
+        controllerLayout = twoButtons(),
+        accentColor = 0xFF8BAC0F,
+        iconKey = "handheld",
+        coverAspect = 0.97f,
+        libretroDatabaseName = "Nintendo - Game Boy",
+        folderAliases = setOf("gb", "gameboy", "dmg"),
+    )
+
+    val GAME_BOY_COLOR = GameSystem(
+        id = Ids.GAME_BOY_COLOR,
+        displayName = "Game Boy Color",
+        shortName = "GBC",
+        releaseYear = 1998,
+        extensions = setOf("gbc", "zip", "7z"),
+        cores = listOf(gambatte),
+        controllerLayout = twoButtons(),
+        accentColor = 0xFF7B3FC4,
+        iconKey = "handheld",
+        coverAspect = 0.97f,
+        libretroDatabaseName = "Nintendo - Game Boy Color",
+        folderAliases = setOf("gbc", "gameboycolor", "gameboycolour", "cgb"),
+    )
+
+    val GBA = GameSystem(
+        id = Ids.GBA,
+        displayName = "Game Boy Advance",
+        shortName = "GBA",
+        releaseYear = 2001,
+        extensions = setOf("gba", "zip", "7z"),
+        cores = listOf(
+            CoreDescriptor("mgba", "mGBA", "Preciso; roda sem BIOS. Recomendado."),
+            CoreDescriptor("vba_next", "VBA Next", "Mais leve, para TVs e celulares fracos."),
+        ),
+        controllerLayout = ControllerLayout(
+            listOf(
+                ConsoleButton("B", B), ConsoleButton("A", A),
+                ConsoleButton("L", L), ConsoleButton("R", R),
+                ConsoleButton("Select", SELECT), ConsoleButton("Start", START),
+            ),
+        ),
+        accentColor = 0xFF4A3FA8,
+        iconKey = "handheld_wide",
+        coverAspect = 1.0f,
+        libretroDatabaseName = "Nintendo - Game Boy Advance",
+        folderAliases = setOf("gba", "gameboyadvance", "advance", "agb"),
+    )
+
+    val ATARI_2600 = GameSystem(
+        id = Ids.ATARI_2600,
+        displayName = "Atari 2600",
+        shortName = "2600",
+        releaseYear = 1977,
+        // .bin também é Mega Drive: o tamanho desempata (cartuchos de Atari têm no máximo 64 KB).
+        extensions = setOf("a26", "bin", "zip", "7z"),
+        cores = listOf(
+            CoreDescriptor("stella2014", "Stella 2014", "Muito leve. Recomendado."),
+            CoreDescriptor("stella", "Stella", "Versão atual; mais compatível."),
+        ),
+        controllerLayout = ControllerLayout(
+            listOf(
+                ConsoleButton("Fogo", B),
+                ConsoleButton("Select", SELECT), ConsoleButton("Reset", START, highlighted = true),
+            ),
+        ),
+        accentColor = 0xFFB5651D,
+        iconKey = "joystick_atari",
+        coverAspect = 0.72f,
+        libretroDatabaseName = "Atari - 2600",
+        folderAliases = setOf("atari", "atari2600", "2600", "a2600", "vcs", "ataricvs", "atarivcs"),
+        maxRomBytes = 64L * 1024,
+    )
+
+    override val all: List<GameSystem> = listOf(SNES, MEGA_DRIVE, MASTER_SYSTEM, ARCADE, PLAYSTATION, NES, GAME_BOY, GAME_BOY_COLOR, GBA, ATARI_2600)
 }

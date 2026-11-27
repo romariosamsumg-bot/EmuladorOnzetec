@@ -19,15 +19,17 @@ class SystemDetectorTest {
     }
 
     @Test
-    fun `bin e exclusivo do mega drive entre os consoles suportados`() {
-        assertEquals(ExtensionMatch.Unique(SystemRegistry.MEGA_DRIVE), detector.matchByFileName("jogo.bin"))
+    fun `bin e do mega drive e do atari 2600`() {
+        assertEquals(ExtensionMatch.Ambiguous(listOf(SystemRegistry.MEGA_DRIVE, SystemRegistry.ATARI_2600)), detector.matchByFileName("jogo.bin"))
+        assertEquals(ExtensionMatch.Unique(SystemRegistry.NES), detector.matchByFileName("mario.nes"))
+        assertEquals(ExtensionMatch.Unique(SystemRegistry.GBA), detector.matchByFileName("pokemon.gba"))
     }
 
     @Test
-    fun `zip e ambiguo entre os 5 sistemas`() {
+    fun `zip e ambiguo entre os 10 sistemas`() {
         val match = detector.matchByFileName("kof98.zip")
         assertTrue(match is ExtensionMatch.Ambiguous)
-        assertEquals(5, (match as ExtensionMatch.Ambiguous).candidates.size)
+        assertEquals(10, (match as ExtensionMatch.Ambiguous).candidates.size)
     }
 
     @Test

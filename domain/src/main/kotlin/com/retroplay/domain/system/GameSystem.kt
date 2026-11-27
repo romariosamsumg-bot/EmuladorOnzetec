@@ -79,6 +79,11 @@ data class GameSystem(
      * Usados para desfazer ambiguidades (ex.: .zip numa pasta "SNES").
      */
     val folderAliases: Set<String> = emptySet(),
+    /**
+     * Tamanho máximo de uma ROM deste console (desfaz ambiguidades de extensão: um .bin de 4 KB é
+     * Atari 2600, um de 1 MB é Mega Drive). null = sem limite.
+     */
+    val maxRomBytes: Long? = null,
 ) {
     init {
         require(cores.isNotEmpty()) { "Sistema ${id.value} precisa de ao menos um núcleo" }
