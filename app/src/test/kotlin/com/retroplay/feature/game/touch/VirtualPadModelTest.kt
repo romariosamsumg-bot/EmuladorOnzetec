@@ -109,4 +109,31 @@ class VirtualPadModelTest {
         // O L2 não invade o direcional.
         assertTrue(l2.y + l2.height / 2 < m.dpad.y - m.dpad.height / 2)
     }
+
+    @Test
+    fun posicoes_personalizadas_e_tamanho() {
+        val spec = VirtualPadSpecs.forSystem(SystemRegistry.SNES)
+        val base = VirtualPadModel(spec, w, h)
+        val a = base.elements.first { it.label == "A" }
+        val moved = VirtualPadModel(spec, w, h, offsets = mapOf("A" to (-300f to -100f), "dpad" to (40f to 0f)))
+        val a2 = moved.elements.first { it.label == "A" }
+        assertEquals(a.x - 300f, a2.x, 0.01f)
+        assertEquals(a.y - 100f, a2.y, 0.01f)
+        assertEquals(base.dpad.x + 40f, moved.dpad.x, 0.01f)
+        // O toque segue a posição nova.
+        assertEquals(setOf(RetroPadButton.A), moved.stateFor(listOf(a2.x to a2.y)).buttons)
+        // Nunca sai da tela.
+        val far = VirtualPadModel(spec, w, h, offsets = mapOf("A" to (5000f to 5000f)))
+        val a3 = far.elements.first { it.label == "A" }
+        assertTrue(a3.x + a3.width / 2 <= w && a3.y + a3.height / 2 <= h)
+        // Maior: botões e direcional crescem.
+        val big = VirtualPadModel(spec, w, h, scale = 1.3f)
+        assertEquals(a.width * 1.3f, big.elements.first { it.label == "A" }.width, 0.01f)
+        assertEquals(base.dpad.width * 1.3f, big.dpad.width, 0.01f)
+        // Gravação: só o que mudou, e volta igual.
+        val enc = PadLayoutCodec.encode(mapOf("A" to (-300f to -100f), "B" to (0f to 0f), "✕" to (1.25f to 2f)))
+        assertEquals("A:-300.0,-100.0;✕:1.3,2.0", enc)
+        assertEquals(mapOf("A" to (-300f to -100f), "✕" to (1.3f to 2f)), PadLayoutCodec.decode(enc))
+        assertTrue(PadLayoutCodec.decode("lixo;x:1").isEmpty())
+    }
 }

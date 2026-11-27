@@ -71,6 +71,64 @@ class VirtualPadOverlayTest {
         assertTrue(states.size >= 3)
     }
 
+    @Test
+    fun modelo_classico_com_botao_movido_e_maior_continua_multitoque() {
+        val states = mutableListOf<PadState>()
+        val spec = VirtualPadSpecs.forSystem(SystemRegistry.PLAYSTATION)
+        val offsets = mapOf("✕" to (-200f to -40f))
+        compose.setContent {
+            RetroPlayTheme {
+                androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.background(Color(0xFF2A3A4A))) {
+                    TvCanvas {
+                        VirtualPadOverlay(
+                            spec, 0.8f, Color(0xFFFF7A1A), onState = { states += it },
+                            skin = PadSkins.forSystem(SystemRegistry.Ids.PLAYSTATION), scale = 1.15f, offsets = offsets,
+                        )
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        val node = compose.onNodeWithTag("virtual_pad")
+        val size = node.fetchSemanticsNode().size
+        val scale = size.height / 540f
+        val model = VirtualPadModel(spec, size.width / scale, 540f, 1.15f, offsets)
+        fun px(e: PadElement) = Offset(e.x * scale, e.y * scale)
+        val cross = model.elements.first { it.button == RetroPadButton.B }
+        val r1 = model.elements.first { it.button == RetroPadButton.R }
+        node.performTouchInput {
+            down(0, px(cross))
+            down(1, px(r1))
+            down(2, Offset((model.dpad.x + 60) * scale, model.dpad.y * scale))
+        }
+        // Três dedos: ✕ (na posição nova), R1 e direita no direcional.
+        assertEquals(setOf(RetroPadButton.B, RetroPadButton.R), states.last().buttons)
+        assertEquals(1, states.last().dx)
+        screenshot("pad_ps_classico")
+        node.performTouchInput { up(0); up(1); up(2) }
+        assertEquals(PadState(), states.last())
+    }
+
+    @Test
+    fun modelos_classicos_de_cada_console() {
+        val currentState = androidx.compose.runtime.mutableStateOf(SystemRegistry.SNES)
+        compose.setContent {
+            RetroPlayTheme {
+                androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.background(Color(0xFF2A3A4A))) {
+                    TvCanvas {
+                        VirtualPadOverlay(VirtualPadSpecs.forSystem(currentState.value), 0.8f, Color(0xFFFF7A1A), onState = {}, skin = PadSkins.forSystem(currentState.value.id))
+                    }
+                }
+            }
+        }
+        SystemRegistry.all.forEach { sys ->
+            currentState.value = sys
+            compose.waitForIdle()
+            assertTrue("${sys.shortName} sem modelo clássico", PadSkins.forSystem(sys.id) != null)
+            screenshot("pad_classico_${sys.id.value}")
+        }
+    }
+
     private fun screenshot(name: String) {
         if (System.getProperty("retroplay.screenshots") != "true") return
         val dir = File("build/screenshots/phone").apply { mkdirs() }

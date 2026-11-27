@@ -381,4 +381,14 @@
     <string name="nav_switch_profile">Trocar perfil</string>
     <string name="profile_edit_row">Editar perfil</string>
     <string name="profile_edit_row_desc">Avatar, nome e cor do tema do perfil atual.</string>
+    <string name="set_touch_style">Modelo do controle na tela</string>
+    <string name="set_touch_style_desc">Clássico: parecido com o controle original de cada console (cores e formato dos botões). Simples: translúcido.</string>
+    <string name="touch_style_classic">Clássico (como o original)</string>
+    <string name="touch_style_minimal">Simples</string>
+    <string name="set_touch_size">Tamanho dos botões na tela</string>
+    <string name="set_touch_size_desc">Aumente se os botões estiverem pequenos para os seus dedos.</string>
+    <string name="set_touch_layout">Posições dos botões na tela</string>
+    <string name="set_touch_layout_desc">Arraste cada botão para onde preferir, em cada console. Vários dedos funcionam ao mesmo tempo.</string>
+    <string name="touch_editor_hint">Arraste os botões e o direcional com o dedo.</string>
+    <string name="touch_reset">Restaurar padrão</string>
 </resources>

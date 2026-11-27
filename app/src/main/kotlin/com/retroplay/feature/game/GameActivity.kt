@@ -145,6 +145,9 @@ class GameActivity : ComponentActivity(), GameMenuActions {
     private var padVisible by mutableStateOf(false)
     private var padMode = "auto"
     private var padOpacity by mutableFloatStateOf(0.6f)
+    private var padSkin by mutableStateOf<com.retroplay.feature.game.touch.PadSkin?>(null)
+    private var padScale by mutableFloatStateOf(1f)
+    private var padOffsets by mutableStateOf<Map<String, Pair<Float, Float>>>(emptyMap())
     private var padHaptics = true
     private var padState = com.retroplay.feature.game.touch.PadState()
     private var padType: com.retroplay.domain.settings.PadType? = null
@@ -395,6 +398,11 @@ class GameActivity : ComponentActivity(), GameMenuActions {
         slotCount = snap.value(AppSettings.SLOTS).toInt()
         padMode = snap.value(AppSettings.TOUCH_PAD)
         padOpacity = snap.value(AppSettings.TOUCH_PAD_OPACITY).toInt() / 100f
+        padSkin = if (com.retroplay.feature.game.touch.PadStyle.of(snap.value(AppSettings.TOUCH_STYLE)) == com.retroplay.feature.game.touch.PadStyle.CLASSIC) {
+            com.retroplay.feature.game.touch.PadSkins.forSystem(sys)
+        } else null
+        padScale = snap.value(AppSettings.TOUCH_SIZE).toInt() / 100f
+        padOffsets = com.retroplay.feature.game.touch.PadLayoutCodec.decode(snap.value(AppSettings.TOUCH_LAYOUT, sys, null))
         padHaptics = snap.value(AppSettings.TOUCH_HAPTICS)
         val sixButtons = snap.value(com.retroplay.domain.settings.ConsoleSettings.MD_PAD, sys, gameKey) == "6"
         padSpec = com.retroplay.feature.game.touch.VirtualPadSpecs.forSystem(system, sixButtons, arcadeNeoGeo)
@@ -493,7 +501,10 @@ class GameActivity : ComponentActivity(), GameMenuActions {
                     val spec = padSpec
                     if (spec != null && menu == null) {
                         if (padVisible) {
-                            com.retroplay.feature.game.touch.VirtualPadOverlay(spec, padOpacity, androidx.tv.material3.MaterialTheme.colorScheme.primary, ::onPadState)
+                            com.retroplay.feature.game.touch.VirtualPadOverlay(
+                                spec, padOpacity, androidx.tv.material3.MaterialTheme.colorScheme.primary, ::onPadState,
+                                skin = padSkin, scale = padScale, offsets = padOffsets,
+                            )
                         } else if (padMode == "auto" && DeviceKind.hasTouchscreen(this@GameActivity)) {
                             // Tocou na tela com o controle escondido: ele volta.
                             Box(Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures(onPress = { padVisible = true }) })

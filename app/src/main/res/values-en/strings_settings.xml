@@ -361,4 +361,14 @@
     <string name="nav_switch_profile">Switch profile</string>
     <string name="profile_edit_row">Edit profile</string>
     <string name="profile_edit_row_desc">Avatar, name and theme color of the current profile.</string>
+    <string name="set_touch_style">On-screen controller model</string>
+    <string name="set_touch_style_desc">Classic: looks like each console\'s original controller (button colors and shapes). Simple: translucent.</string>
+    <string name="touch_style_classic">Classic (like the original)</string>
+    <string name="touch_style_minimal">Simple</string>
+    <string name="set_touch_size">On-screen button size</string>
+    <string name="set_touch_size_desc">Make them bigger if they feel small for your fingers.</string>
+    <string name="set_touch_layout">On-screen button positions</string>
+    <string name="set_touch_layout_desc">Drag each button wherever you like, per console. Several fingers work at once.</string>
+    <string name="touch_editor_hint">Drag the buttons and the D-pad with your finger.</string>
+    <string name="touch_reset">Restore default</string>
 </resources>

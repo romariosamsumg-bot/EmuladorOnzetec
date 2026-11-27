@@ -94,48 +94,75 @@ data class PadElement(
 /** Saída do controle num instante: botões pressionados, direcional (-1, 0, 1) e menu. */
 data class PadState(val buttons: Set<RetroPadButton> = emptySet(), val dx: Int = 0, val dy: Int = 0, val menu: Boolean = false)
 
-class VirtualPadModel(spec: VirtualPadSpec, val width: Float, val height: Float) {
+/**
+ * Geometria do controle. [scale] = tamanho dos botões (0,8 a 1,3); [offsets] = deslocamento (dp)
+ * de cada elemento em relação à posição padrão, salvo pelo editor de posições (por console).
+ */
+class VirtualPadModel(
+    spec: VirtualPadSpec,
+    val width: Float,
+    val height: Float,
+    val scale: Float = 1f,
+    offsets: Map<String, Pair<Float, Float>> = emptyMap(),
+) {
     val elements: List<PadElement>
     val dpad: PadElement
 
     init {
+        val s = scale.coerceIn(0.6f, 1.5f)
+        val dpadR = DPAD_RADIUS * s
+        val clusterR = CLUSTER_RADIUS * s
+        val spacing = SPACING * s
+        val stagger = STAGGER * s
+        val buttonR = BUTTON_RADIUS * s
+        val pillW = PILL_W * s
+        val pillH = PILL_H * s
+        val shW = SHOULDER_W * s
+        val shH = SHOULDER_H * s
+        fun face(b: ConsoleButton, x: Float, y: Float) =
+            PadElement(b.label, PadShape.CIRCLE, x, y, buttonR * 2, buttonR * 2, b.label, b.retroPad, b.highlighted)
+
         val list = ArrayList<PadElement>()
-        dpad = PadElement("dpad", PadShape.CIRCLE, EDGE + DPAD_RADIUS, height - EDGE - DPAD_RADIUS, DPAD_RADIUS * 2, DPAD_RADIUS * 2, "")
-        list += dpad
-        val cx = width - EDGE - CLUSTER_RADIUS
-        val cy = height - EDGE - CLUSTER_RADIUS
+        list += PadElement("dpad", PadShape.CIRCLE, EDGE + dpadR, height - EDGE - dpadR, dpadR * 2, dpadR * 2, "")
+        val cx = width - EDGE - clusterR
+        val cy = height - EDGE - clusterR
         if (spec.diamond && spec.face.firstOrNull()?.size == 4) {
             val (top, right, bottom, left) = spec.face.first()
-            listOf(top to (0f to -SPACING), right to (SPACING to 0f), bottom to (0f to SPACING), left to (-SPACING to 0f)).forEach { (b, o) ->
+            listOf(top to (0f to -spacing), right to (spacing to 0f), bottom to (0f to spacing), left to (-spacing to 0f)).forEach { (b, o) ->
                 list += face(b, cx + o.first, cy + o.second)
             }
         } else {
             val rows = spec.face
-            val y0 = cy + (rows.size - 1) * SPACING / 2
+            val y0 = cy + (rows.size - 1) * spacing / 2
             rows.reversed().forEachIndexed { k, row ->
-                val y = y0 - k * SPACING
+                val y = y0 - k * spacing
                 row.forEachIndexed { j, b ->
-                    val x = cx + (j - (row.size - 1) / 2f) * SPACING + k * STAGGER - (rows.size - 1) * STAGGER / 2
+                    val x = cx + (j - (row.size - 1) / 2f) * spacing + k * stagger - (rows.size - 1) * stagger / 2
                     list += face(b, x, y)
                 }
             }
         }
         spec.center.forEachIndexed { i, b ->
-            val x = width / 2 + (i - (spec.center.size - 1) / 2f) * (PILL_W + 24f)
-            list += PadElement(b.label, PadShape.PILL, x, height - EDGE / 2 - PILL_H / 2, PILL_W, PILL_H, b.label, b.retroPad, b.highlighted)
+            val x = width / 2 + (i - (spec.center.size - 1) / 2f) * (pillW + 24f)
+            list += PadElement(b.label, PadShape.PILL, x, height - EDGE / 2 - pillH / 2, pillW, pillH, b.label, b.retroPad, b.highlighted)
         }
         // Ombros: pares (esquerdo, direito) em fileiras de cima para baixo (L1 R1, depois L2 R2).
         spec.shoulders.forEachIndexed { i, b ->
-            val x = if (i % 2 == 0) EDGE + SHOULDER_W / 2 else width - EDGE - SHOULDER_W / 2
-            val y = EDGE + SHOULDER_H / 2 + (i / 2) * (SHOULDER_H + SHOULDER_GAP)
-            list += PadElement(b.label, PadShape.PILL, x, y, SHOULDER_W, SHOULDER_H, b.label, b.retroPad)
+            val x = if (i % 2 == 0) EDGE + shW / 2 else width - EDGE - shW / 2
+            val y = EDGE + shH / 2 + (i / 2) * (shH + SHOULDER_GAP)
+            list += PadElement(b.label, PadShape.PILL, x, y, shW, shH, b.label, b.retroPad)
         }
         list += PadElement("menu", PadShape.CIRCLE, width / 2, EDGE / 2 + MENU_RADIUS, MENU_RADIUS * 2, MENU_RADIUS * 2, "☰")
-        elements = list
+        // Posições personalizadas, sempre dentro da tela.
+        elements = list.map { e ->
+            val o = offsets[e.id] ?: return@map e
+            e.copy(
+                x = (e.x + o.first).coerceIn(e.width / 2, width - e.width / 2),
+                y = (e.y + o.second).coerceIn(e.height / 2, height - e.height / 2),
+            )
+        }
+        dpad = elements.first { it.id == "dpad" }
     }
-
-    private fun face(b: ConsoleButton, x: Float, y: Float) =
-        PadElement(b.label, PadShape.CIRCLE, x, y, BUTTON_RADIUS * 2, BUTTON_RADIUS * 2, b.label, b.retroPad, b.highlighted)
 
     /** Junta todos os dedos na tela num estado; cada dedo aperta no máximo um botão (o mais próximo). */
     fun stateFor(points: List<Pair<Float, Float>>): PadState {
@@ -143,9 +170,10 @@ class VirtualPadModel(spec: VirtualPadSpec, val width: Float, val height: Float)
         var dx = 0
         var dy = 0
         var menu = false
+        val r = dpad.width / 2
         for ((px, py) in points) {
-            if (dpad.hit(px, py, DPAD_RADIUS * 0.35f)) {
-                val (x, y) = direction(px - dpad.x, py - dpad.y)
+            if (dpad.hit(px, py, r * 0.35f)) {
+                val (x, y) = direction(px - dpad.x, py - dpad.y, r)
                 if (x != 0) dx = x
                 if (y != 0) dy = y
                 continue
@@ -155,6 +183,10 @@ class VirtualPadModel(spec: VirtualPadSpec, val width: Float, val height: Float)
         }
         return PadState(buttons, dx, dy, menu)
     }
+
+    /** Elemento mais perto de um toque (editor de posições). */
+    fun elementAt(px: Float, py: Float): PadElement? =
+        elements.filter { it.hit(px, py, HIT_MARGIN * 2) }.minByOrNull { hypot(px - it.x, py - it.y) }
 
     companion object {
         const val EDGE = 36f
@@ -172,13 +204,29 @@ class VirtualPadModel(spec: VirtualPadSpec, val width: Float, val height: Float)
         const val HIT_MARGIN = 10f
 
         /** 8 direções; zona morta no centro. */
-        fun direction(dx: Float, dy: Float): Pair<Int, Int> {
+        fun direction(dx: Float, dy: Float, radius: Float = DPAD_RADIUS): Pair<Int, Int> {
             val len = hypot(dx, dy)
-            if (len < DPAD_RADIUS * 0.22f) return 0 to 0
+            if (len < radius * 0.22f) return 0 to 0
             val sin22 = 0.3827f
             val x = if (abs(dx) / len > sin22) (if (dx > 0) 1 else -1) else 0
             val y = if (abs(dy) / len > sin22) (if (dy > 0) 1 else -1) else 0
             return x to y
         }
     }
+}
+
+/** Posições personalizadas: "A:12.0,-30.5;dpad:0.0,10.0" (deslocamento em dp por elemento). */
+object PadLayoutCodec {
+    fun decode(raw: String): Map<String, Pair<Float, Float>> = raw.split(';').mapNotNull { part ->
+        val id = part.substringBeforeLast(':', "")
+        val xy = part.substringAfterLast(':', "").split(',')
+        if (id.isEmpty() || xy.size != 2) return@mapNotNull null
+        val x = xy[0].toFloatOrNull() ?: return@mapNotNull null
+        val y = xy[1].toFloatOrNull() ?: return@mapNotNull null
+        id to (x to y)
+    }.toMap()
+
+    fun encode(offsets: Map<String, Pair<Float, Float>>): String =
+        offsets.filterValues { it.first != 0f || it.second != 0f }.entries.sortedBy { it.key }
+            .joinToString(";") { (id, o) -> "$id:${"%.1f".format(java.util.Locale.ROOT, o.first)},${"%.1f".format(java.util.Locale.ROOT, o.second)}" }
 }

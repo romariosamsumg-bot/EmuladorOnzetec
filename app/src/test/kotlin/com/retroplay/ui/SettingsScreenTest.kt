@@ -208,7 +208,7 @@ class SettingsScreenTest {
         node("set_parental.delete").assertIsFocused()
         press(Key.DirectionCenter)
         waitSetting { runBlocking { settings.current() }.value(AppSettings.PARENTAL_DELETE) }
-        merged("set_parental.delete").assertTextContains("Ligado")
+        compose.waitUntil(5_000) { compose.onAllNodes(hasTestTag("set_parental.delete") and hasText("Ligado", substring = true)).fetchSemanticsNodes().isNotEmpty() }
     }
 
     @Test

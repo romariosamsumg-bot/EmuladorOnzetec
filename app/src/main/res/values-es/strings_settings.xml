@@ -361,4 +361,14 @@
     <string name="nav_switch_profile">Cambiar perfil</string>
     <string name="profile_edit_row">Editar perfil</string>
     <string name="profile_edit_row_desc">Avatar, nombre y color del tema del perfil actual.</string>
+    <string name="set_touch_style">Modelo del mando en pantalla</string>
+    <string name="set_touch_style_desc">Clásico: parecido al mando original de cada consola (colores y forma de los botones). Simple: translúcido.</string>
+    <string name="touch_style_classic">Clásico (como el original)</string>
+    <string name="touch_style_minimal">Simple</string>
+    <string name="set_touch_size">Tamaño de los botones en pantalla</string>
+    <string name="set_touch_size_desc">Auméntalo si los botones te quedan pequeños.</string>
+    <string name="set_touch_layout">Posiciones de los botones en pantalla</string>
+    <string name="set_touch_layout_desc">Arrastra cada botón donde prefieras, por consola. Varios dedos funcionan a la vez.</string>
+    <string name="touch_editor_hint">Arrastra los botones y la cruceta con el dedo.</string>
+    <string name="touch_reset">Restaurar</string>
 </resources>

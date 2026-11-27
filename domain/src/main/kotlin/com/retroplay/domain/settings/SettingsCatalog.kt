@@ -37,6 +37,12 @@ object AppSettings {
     val TOUCH_PAD = Choice("controls.touch_pad", "auto", listOf("auto", "always", "never"))
     val TOUCH_PAD_OPACITY = Choice("controls.touch_opacity", "60", listOf("30", "45", "60", "80", "100"))
     val TOUCH_HAPTICS = Bool("controls.touch_haptics", true)
+    /** Controle na tela: "classic" (parecido com o original do console) ou "minimal" (translúcido). */
+    val TOUCH_STYLE = Choice("controls.touch_style", "classic", listOf("classic", "minimal"))
+    /** Tamanho dos botões na tela (%). */
+    val TOUCH_SIZE = Choice("controls.touch_size", "100", listOf("80", "90", "100", "115", "130"))
+    /** Posições personalizadas dos botões (por console): "A:12.0,-30.0;dpad:0.0,10.0". */
+    val TOUCH_LAYOUT = Text("controls.touch_layout", "")
 
     /** Portas dos controles: "descritor=porta;..." */
     val PORTS = Text("controls.ports", "")

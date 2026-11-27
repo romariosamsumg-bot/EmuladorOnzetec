@@ -1,5 +1,7 @@
 package com.retroplay.feature.settings
 
+import androidx.tv.material3.Text
+import androidx.tv.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import android.app.ActivityManager
@@ -112,6 +114,16 @@ class SettingsPane(
         item(key = "turbo") { TurboRow() }
         choice(AppSettings.TOUCH_PAD, R.string.set_touch_pad, R.string.set_touch_pad_desc)
         choice(AppSettings.TOUCH_PAD_OPACITY, R.string.set_touch_opacity, R.string.set_touch_opacity_desc)
+        if (inGlobal) {
+            choice(AppSettings.TOUCH_STYLE, R.string.set_touch_style, R.string.set_touch_style_desc)
+            choice(AppSettings.TOUCH_SIZE, R.string.set_touch_size, R.string.set_touch_size_desc)
+        }
+        item(key = "touch_layout") {
+            SettingRow(stringResource(R.string.set_touch_layout), stringResource(R.string.set_touch_layout_desc), null, "touch_layout") {
+                val sys = system
+                if (sys != null) openDialog { PadEditorHost(sys) } else openDialog { PadConsolePicker() }
+            }
+        }
         bool(AppSettings.TOUCH_HAPTICS, R.string.set_touch_haptics, R.string.set_touch_haptics_desc)
         bool(AppSettings.REMOTE_AS_GAMEPAD, R.string.set_remote, R.string.set_remote_desc)
         bool(AppSettings.ANALOG_TO_DPAD, R.string.set_analog, R.string.set_analog_desc)
@@ -749,6 +761,72 @@ class SettingsPane(
 
     // ------------------------------------------------------------------ perfis
 
+    // ------------------------------------------------------------------ controle na tela
+
+    /** Escolhe o console cujo controle na tela será posicionado. */
+    @Composable
+    private fun PadConsolePicker() {
+        var chosen by remember { mutableStateOf<com.retroplay.domain.system.SystemId?>(null) }
+        val sys = chosen
+        if (sys != null) {
+            PadEditorHost(sys)
+            return
+        }
+        ChoiceDialog(
+            stringResource(R.string.set_touch_layout),
+            com.retroplay.domain.system.SystemRegistry.all.map { it.id.value to it.displayName },
+            selected = null, inheritedLabel = null,
+            onPick = { v -> if (v != null) chosen = com.retroplay.domain.system.SystemId(v) else closeDialog() },
+            onDismiss = closeDialog,
+        )
+    }
+
+    /**
+     * Editor em tela cheia: o controle do console aparece como no jogo e cada botão (ou o
+     * direcional) pode ser arrastado com o dedo. Salva por console.
+     */
+    @Composable
+    private fun PadEditorHost(systemId: com.retroplay.domain.system.SystemId) {
+        val sys = com.retroplay.domain.system.SystemRegistry.byId(systemId) ?: return
+        val saved = snap.value(AppSettings.TOUCH_LAYOUT, systemId, null)
+        var offsets by remember(systemId) { mutableStateOf(com.retroplay.feature.game.touch.PadLayoutCodec.decode(saved)) }
+        val style = com.retroplay.feature.game.touch.PadStyle.of(snap.value(AppSettings.TOUCH_STYLE))
+        val look = com.retroplay.feature.game.touch.PadLook(
+            if (style == com.retroplay.feature.game.touch.PadStyle.CLASSIC) com.retroplay.feature.game.touch.PadSkins.forSystem(systemId) else null,
+            snap.value(AppSettings.TOUCH_PAD_OPACITY).toInt() / 100f,
+            MaterialTheme.colorScheme.primary,
+        )
+        val scale = snap.value(AppSettings.TOUCH_SIZE).toInt() / 100f
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = closeDialog,
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
+        ) {
+            androidx.compose.foundation.layout.Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color(0xFF1B1D24)).testTag("pad_editor_dialog")) {
+                com.retroplay.feature.game.touch.VirtualPadEditor(
+                    com.retroplay.feature.game.touch.VirtualPadSpecs.forSystem(sys), look, scale, offsets, onChange = { offsets = it },
+                )
+                androidx.compose.foundation.layout.Column(
+                    Modifier.align(androidx.compose.ui.Alignment.Center),
+                    horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(sys.displayName, style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(R.string.touch_editor_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    androidx.compose.foundation.layout.Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
+                        com.retroplay.ui.tv.Button(onClick = {
+                            vm.setAt(AppSettings.TOUCH_LAYOUT, ScopeRef.system(systemId), com.retroplay.feature.game.touch.PadLayoutCodec.encode(offsets).ifEmpty { null })
+                            closeDialog()
+                        }, modifier = Modifier.testTag("touch_save")) { Text(stringResource(R.string.save)) }
+                        com.retroplay.ui.tv.OutlinedButton(onClick = { offsets = emptyMap() }, modifier = Modifier.testTag("touch_reset")) {
+                            Text(stringResource(R.string.touch_reset))
+                        }
+                        com.retroplay.ui.tv.OutlinedButton(onClick = closeDialog, modifier = Modifier.testTag("touch_cancel")) { Text(stringResource(R.string.cancel)) }
+                    }
+                }
+            }
+        }
+    }
+
     private enum class ProfileStep { LIST, NEW, EDIT, DELETE }
 
     /** Editor de perfil (avatar, nome e cor) em tela cheia, sobre as Configurações. */
@@ -930,6 +1008,7 @@ fun optionLabels(def: SettingDef.Choice): Map<String, String> {
         AppSettings.LANGUAGE -> { v -> if (v == "system") R.string.lang_system else null }
         ConsoleSettings.NEOGEO_MODE -> { v -> mapOf("mvs" to R.string.neogeo_mode_mvs, "aes" to R.string.neogeo_mode_aes, "unibios" to R.string.neogeo_mode_unibios)[v] }
         ConsoleSettings.MD_PAD -> { v -> if (v == "3") R.string.md_pad_3 else R.string.md_pad_6 }
+        AppSettings.TOUCH_STYLE -> { v -> if (v == "minimal") R.string.touch_style_minimal else R.string.touch_style_classic }
         AppSettings.TOUCH_PAD -> { v -> mapOf("auto" to R.string.touch_auto, "always" to R.string.touch_always, "never" to R.string.touch_never)[v] }
         ConsoleSettings.MD_REGION -> { v -> mapOf("auto" to R.string.region_auto, "ntsc-u" to R.string.region_ntsc_u, "ntsc-j" to R.string.region_ntsc_j, "pal" to R.string.region_pal)[v] }
         else -> { _ -> null }
@@ -938,7 +1017,7 @@ fun optionLabels(def: SettingDef.Choice): Map<String, String> {
         res(v)?.let { stringResource(it) } ?: when (def) {
             AppSettings.FF_SPEED -> "${v}x"
             AppSettings.REWIND_MB -> "$v MB"
-            AppSettings.DEADZONE, AppSettings.TOUCH_PAD_OPACITY -> "$v%"
+            AppSettings.DEADZONE, AppSettings.TOUCH_PAD_OPACITY, AppSettings.TOUCH_SIZE -> "$v%"
             AppSettings.LANGUAGE -> LANGUAGE_NAMES[v] ?: v
             else -> v
         }
