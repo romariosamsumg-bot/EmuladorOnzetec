@@ -501,6 +501,10 @@ pelo workflow `.github/workflows/pages.yml` a cada push na `main` que mude o sit
 - `tools/site/sync_assets.sh` copia logo, capas dos consoles e sons do app para o site.
 - Para ativar (uma vez): **Settings → Pages → Source: GitHub Actions**. O Pages gratuito exige o
   repositório público.
+- **Cloudflare Pages** (alternativa, funciona com repositório privado):
+  `tools/site/package_cloudflare.sh` gera `build/OnzetecGames-site-cloudflare.zip`, com o site na
+  raiz do domínio, `_redirects` (`/tv` e `/celular` baixam os APKs) e `_headers` (cache e
+  segurança). No painel: Workers & Pages → Create → Pages → **Upload assets** → envie o zip.
 
 ## Estrutura
 
