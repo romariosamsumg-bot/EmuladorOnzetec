@@ -1,0 +1,17 @@
+{
+  "_leia": "Catálogo de jogos LIVRES (homebrew/freeware com licença que permite redistribuir). Cada jogo precisa de 'licenca' e 'fonte' (página oficial do autor). Não coloque jogos comerciais aqui. Veja o manual do site (Jogos livres) para o formato.",
+  "pacoteGeral": null,
+  "consoles": {
+    "snes": { "nome": "Super Nintendo", "pacote": null },
+    "megadrive": { "nome": "Mega Drive", "pacote": null },
+    "mastersystem": { "nome": "Master System", "pacote": null },
+    "nes": { "nome": "Nintendinho", "pacote": null },
+    "gb": { "nome": "Game Boy", "pacote": null },
+    "gbc": { "nome": "Game Boy Color", "pacote": null },
+    "gba": { "nome": "Game Boy Advance", "pacote": null },
+    "atari2600": { "nome": "Atari 2600", "pacote": null },
+    "psx": { "nome": "PlayStation", "pacote": null },
+    "arcade": { "nome": "Arcade", "pacote": null }
+  },
+  "jogos": []
+}

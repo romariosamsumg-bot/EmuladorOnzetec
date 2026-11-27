@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jogos livres · Onzetec Games</title>
+  <meta name="description" content="Jogos livres (homebrew) para baixar e jogar no Onzetec Games, por console ou todos de uma vez.">
+  <meta name="theme-color" content="#070b16">
+  <link rel="icon" href="favicon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <script type="module" src="assets/js/site.js"></script>
+  <script type="module" src="assets/js/jogos.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="assets/img/mark.webp" alt="" width="70" height="34"><span>ONZETEC GAMES</span></a>
+      <nav aria-label="Principal">
+        <a href="./">Início</a>
+        <a href="jogos.html">Jogos</a>
+        <a href="manual.html">Manual</a>
+        <a href="jogar/">Jogar</a>
+      </nav>
+      <button class="sound-toggle" type="button" aria-pressed="false" title="Ligar som e música">🔇</button>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="wrap">
+        <h2 class="section-title reveal">Jogos livres</h2>
+        <p class="section-sub reveal">Jogos <strong>homebrew</strong> e <strong>freeware</strong>, feitos por fãs e estúdios independentes para os consoles clássicos, com licença que permite baixar e compartilhar. Baixe um por um, o pacote de cada console ou tudo de uma vez, e coloque na pasta <code>Jogos</code> do app.</p>
+        <div id="pacotes" class="console-packs" hidden></div>
+        <input id="busca" class="search" type="search" placeholder="Buscar um jogo…" aria-label="Buscar um jogo">
+        <div id="filtros" class="filters" role="group" aria-label="Console"></div>
+        <div id="lista"></div>
+
+        <div class="cards" style="margin-top:48px">
+          <div class="card reveal"><div class="emoji">⚖️</div><h3>Por que só jogos livres?</h3><p>Jogos comerciais (Nintendo, Sega, Sony, SNK…) têm direitos autorais: só quem tem a licença pode distribuí-los. Aqui ficam apenas jogos cujos autores permitem a distribuição, com o link para o site de cada um.</p></div>
+          <div class="card reveal"><div class="emoji">💾</div><h3>E os meus jogos?</h3><p>Use cópias dos cartuchos e discos que você possui. O <a href="manual.html#colocar-jogos">manual</a> mostra como levar os arquivos para a TV ou para o celular.</p></div>
+          <div class="card reveal"><div class="emoji">🛠️</div><h3>Fez um homebrew?</h3><p>Abra uma <a href="https://github.com/romariosamsumg-bot/EmuladorOnzetec/issues">sugestão no GitHub</a> com o nome, a licença e o link oficial do seu jogo para ele entrar aqui.</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span class="made">Feito por Romário Marcelino</span>
+      <nav><a href="jogos.html">Jogos livres</a><a href="manual.html">Manual</a><a href="https://github.com/romariosamsumg-bot/EmuladorOnzetec">Código-fonte</a><a href="manual.html#legal">Aviso legal</a></nav>
+      <p>Onzetec Games é software livre (GPL-3.0). Não inclui jogos nem BIOS; use apenas cópias que você possui legalmente. As marcas citadas pertencem aos seus donos; este projeto não tem ligação com eles.</p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -480,6 +480,28 @@ python3 tools/testrom/build_test_rom.py teste.sfc
 python3 tools/testrom/run_in_core.py snes9x2010_libretro.so teste.sfc saida/   # confere vídeo, entrada e áudio
 ```
 
+## Site oficial
+
+A pasta `site/` é o site (HTML, CSS e JavaScript, sem etapa de build), publicado no GitHub Pages
+pelo workflow `.github/workflows/pages.yml` a cada push na `main` que mude o site:
+`https://romariosamsumg-bot.github.io/EmuladorOnzetec/`.
+
+- **Início** (`index.html`): download do app de TV/Box/Stick e do de celular (sempre a versão mais
+  nova das Releases), endereços curtos para o app Downloader (`…/tv/` e `…/celular/`), consoles e
+  recursos. Marca o download certo para o aparelho de quem visita.
+- **Jogos** (`jogos.html` + `data/jogos.json`): catálogo de **jogos livres** (homebrew/freeware
+  com licença que permite redistribuir), com download por jogo, por console e geral. Cada jogo
+  precisa de `titulo`, `console`, `licenca`, `fonte` (página oficial do autor) e `url`
+  (download, https). Não coloque jogos comerciais.
+- **Manual** (`manual.html`): instalação, como colocar jogos, cada tela e opção, dicas e
+  solução de problemas.
+- **Jogar** (`jogar/`): página da versão web (em construção).
+- Sons e música do app (botão ♪, desligado por padrão), animações ao rolar, transições entre
+  páginas e um segredo (↑ ↑ ↓ ↓ ← → ← → B A).
+- `tools/site/sync_assets.sh` copia logo, capas dos consoles e sons do app para o site.
+- Para ativar (uma vez): **Settings → Pages → Source: GitHub Actions**. O Pages gratuito exige o
+  repositório público.
+
 ## Estrutura
 
 ```

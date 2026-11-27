@@ -1,0 +1,38 @@
+# Publica o site oficial (pasta site/) no GitHub Pages.
+# Endereço: https://romariosamsumg-bot.github.io/EmuladorOnzetec/
+# Uma vez só: Settings → Pages → Source: "GitHub Actions" (repositório público ou plano pago).
+name: Site
+
+on:
+  push:
+    branches: [main]
+    paths: ['site/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+      - name: Configurar o Pages
+        uses: actions/configure-pages@v5
+      - name: Empacotar o site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: Publicar
+        id: deployment
+        uses: actions/deploy-pages@v4

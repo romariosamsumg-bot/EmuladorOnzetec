@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manual · Onzetec Games</title>
+  <meta name="description" content="Manual completo do Onzetec Games: instalação na TV, Box, Stick e celular, como colocar jogos, cada tela, cada opção e dicas.">
+  <meta name="theme-color" content="#070b16">
+  <link rel="icon" href="favicon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <script type="module" src="assets/js/site.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="assets/img/mark.webp" alt="" width="70" height="34"><span>ONZETEC GAMES</span></a>
+      <nav aria-label="Principal">
+        <a href="./">Início</a>
+        <a href="jogos.html">Jogos</a>
+        <a href="manual.html">Manual</a>
+        <a href="jogar/">Jogar</a>
+      </nav>
+      <button class="sound-toggle" type="button" aria-pressed="false" title="Ligar som e música">🔇</button>
+    </div>
+  </header>
+
+  <main class="wrap manual">
+    <aside><nav aria-label="Sumário do manual"><a href="#comecar">Começando</a><a href="#instalar-tv">Instalar na TV, Box e Stick</a><a href="#instalar-celular">Instalar no celular</a><a href="#colocar-jogos">Colocar os jogos</a><a class="sub" href="#pasta-jogos">Pasta Jogos</a><a class="sub" href="#qr">Pelo celular (QR code)</a><a class="sub" href="#usb">Pendrive e HD USB</a><a class="sub" href="#smb">Pasta da rede</a><a class="sub" href="#celular-arquivos">No app de celular</a><a href="#consoles">Consoles, formatos e BIOS</a><a href="#perfis">Abertura e perfis</a><a href="#navegar">Navegando no app</a><a class="sub" href="#tv-menu">Menu lateral (TV)</a><a class="sub" href="#celular-abas">Abas (celular)</a><a class="sub" href="#detalhes">Detalhes do jogo</a><a href="#jogando">Jogando</a><a class="sub" href="#menu-jogo">Menu do jogo</a><a class="sub" href="#atalhos">Atalhos do controle</a><a class="sub" href="#controle-tela">Controle na tela</a><a class="sub" href="#highlights">Highlights e prints</a><a href="#midia">Mídia</a><a href="#config">Configurações</a><a href="#feel">Sons, música e vibração</a><a href="#dicas">Dicas</a><a href="#problemas">Solução de problemas</a><a href="#legal">Aviso legal</a></nav></aside>
+    <article>
+<h2 id="comecar">Começando</h2>
+<p>O <strong>Onzetec Games</strong> é um emulador de consoles clássicos com cara de app de streaming. Ele organiza seus jogos com capas e fileiras, guarda o progresso de cada pessoa da casa e baixa sozinho o motor de emulação (núcleo) de cada console na primeira vez que você joga.</p>
+<ul>
+  <li><strong>App de TV</strong> (<code>OnzetecGames.apk</code>): Android TV, Google TV, TV Box, Fire TV Stick e projetores Android. Usa o controle remoto e gamepads.</li>
+  <li><strong>App de celular</strong> (<code>OnzetecGames-Celular.apk</code>): celulares e tablets Android 8 ou mais novos. Usa toque, com controle na tela.</li>
+  <li><strong>Versão web</strong>: em construção.</li>
+</ul>
+<div class="callout info"><p>Os dois apps podem ficar instalados no mesmo aparelho. Os jogos ficam na pasta <code>Jogos</code>, então os dois enxergam os mesmos arquivos.</p></div>
+
+<h2 id="instalar-tv">Instalar na TV, Box e Stick</h2>
+<ol class="steps">
+  <li><strong>Ative o modo desenvolvedor:</strong> Configurações → Sistema → Sobre → clique 7 vezes em <em>Build do Android TV OS</em> (no Fire TV: Minha Fire TV → Sobre → clique 7 vezes no nome do aparelho).</li>
+  <li><strong>Instale o app Downloader</strong> pela loja da TV (ícone laranja, gratuito).</li>
+  <li><strong>Permita instalar apps de fora da loja:</strong> Configurações → Apps → Segurança e restrições → <em>Fontes desconhecidas</em> → ligue para o Downloader.</li>
+  <li>No Downloader, digite o endereço curto <code data-short="tv/">tv/</code> e confirme. O download começa sozinho; toque em <em>Instalar</em>.</li>
+  <li>Abra o <strong>Onzetec Games</strong> na tela inicial (em <em>Apps</em>). Pronto!</li>
+</ol>
+<p>Outros jeitos: copie o <code>.apk</code> para um <strong>pendrive</strong> e abra com um gerenciador de arquivos (ex.: <em>File Commander</em>, <em>X-plore</em>), ou instale pelo computador com <code>adb install -r OnzetecGames.apk</code>.</p>
+<p><strong>Atualizar:</strong> instale o APK novo por cima. Jogos, saves e configurações continuam.</p>
+
+<h2 id="instalar-celular">Instalar no celular</h2>
+<ol class="steps">
+  <li>No celular, abra o site e toque em <strong>Baixar para celular</strong> (ou o endereço <code data-short="celular/">celular/</code>).</li>
+  <li>O Android pergunta se pode instalar apps desta fonte (navegador ou gerenciador de arquivos): permita e instale.</li>
+  <li>Abra o app, crie seu perfil e toque em <strong>Adicionar jogos</strong>.</li>
+</ol>
+
+<h2 id="colocar-jogos">Colocar os jogos</h2>
+<h3 id="pasta-jogos">Pasta Jogos (recomendado)</h3>
+<p>Na TV, abra <strong>Transferir jogos → Permitir acesso aos arquivos</strong>. Em <em>Permissões → Arquivos e mídia</em>, escolha <strong>Permitir tudo</strong> (só "mídia" não basta) e volte. O app cria esta estrutura:</p>
+<pre><code>Jogos/
+├─ Super Nintendo/   ├─ Nintendinho/      ├─ Game Boy Advance/
+├─ Mega Drive/       ├─ Game Boy/         ├─ Atari 2600/
+├─ Master System/    ├─ Game Boy Color/   ├─ PlayStation/
+├─ Arcade/           └─ BIOS/             └─ LEIA-ME.txt</code></pre>
+<p>Copie cada jogo para a subpasta do console. Ao abrir o app, os jogos novos aparecem sozinhos (ou use <em>Verificar agora</em>).</p>
+<div class="callout"><p><strong>TV sem a tela de permissão?</strong> Pelo computador: <code>adb shell appops set --uid com.retroplay.tv MANAGE_EXTERNAL_STORAGE allow</code></p></div>
+
+<h3 id="qr">Pelo celular, com QR code</h3>
+<ol class="steps">
+  <li>TV e celular na <strong>mesma rede Wi-Fi</strong>. Na TV, abra <strong>Transferir jogos</strong>: aparecem um QR code, um endereço e um PIN.</li>
+  <li>Aponte a câmera do celular para o QR code (ou digite o endereço no navegador e o PIN).</li>
+  <li>Toque em <strong>Escolher arquivos</strong> e mande um ou vários jogos. Cada arquivo vai para a pasta certa sozinho.</li>
+</ol>
+<p>Segurança: o envio só funciona com essa tela aberta, exige o PIN e bloqueia por 1 minuto depois de 5 PINs errados.</p>
+
+<h3 id="usb">Pendrive e HD USB</h3>
+<p>Em <strong>Transferir jogos → Adicionar pasta ou pendrive</strong>, escolha a pasta. Dá para jogar direto do USB ou usar <strong>Copiar para a TV</strong>, que confere o espaço livre antes.</p>
+
+<h3 id="smb">Pasta da rede (computador ou NAS)</h3>
+<p><strong>Configurações → Rede → Adicionar pasta da rede (SMB)</strong>: servidor (nome ou IP), compartilhamento, subpasta (opcional), usuário e senha (vazio = convidado). <em>Testar e adicionar</em> confere a conexão. Funciona com SMB 2 e 3 (Windows 10/11, Samba e a maioria dos NAS).</p>
+
+<h3 id="celular-arquivos">No app de celular</h3>
+<p>Toque no ícone ⇧ da Início (ou <strong>Ajustes → Adicionar jogos</strong>) e em <strong>Escolher arquivos</strong>: marque vários jogos de Downloads, Drive ou do cartão de memória. O console é reconhecido sozinho, inclusive dentro de <code>.zip</code>. Na página de um console, o botão <strong>Adicionar</strong> escolhe jogos só daquele console.</p>
+
+<h2 id="consoles">Consoles, formatos e BIOS</h2>
+<div class="table-scroll"><table>
+  <thead><tr><th>Console</th><th>Arquivos</th><th>Núcleos (o 1º é o padrão)</th><th>BIOS</th></tr></thead>
+  <tbody>
+    <tr><td>Super Nintendo</td><td><code>.sfc .smc .fig .swc</code></td><td>Snes9x 2010 · Snes9x</td><td>não precisa</td></tr>
+    <tr><td>Mega Drive</td><td><code>.md .gen .smd .bin</code></td><td>Genesis Plus GX · PicoDrive</td><td>não precisa</td></tr>
+    <tr><td>Master System</td><td><code>.sms</code></td><td>Genesis Plus GX · PicoDrive</td><td>não precisa</td></tr>
+    <tr><td>Nintendinho</td><td><code>.nes .unf .unif</code></td><td>FCEUmm · Nestopia UE</td><td>não precisa</td></tr>
+    <tr><td>Game Boy / Color</td><td><code>.gb .gbc</code></td><td>Gambatte</td><td>não precisa</td></tr>
+    <tr><td>Game Boy Advance</td><td><code>.gba</code></td><td>mGBA · VBA Next</td><td>não precisa</td></tr>
+    <tr><td>Atari 2600</td><td><code>.a26 .bin</code></td><td>Stella 2014 · Stella</td><td>não precisa</td></tr>
+    <tr><td>PlayStation</td><td><code>.chd .pbp .iso .cue</code>+<code>.bin</code>, <code>.m3u</code></td><td>PCSX ReARMed</td><td><code>scph5501.bin</code> recomendada</td></tr>
+    <tr><td>Arcade</td><td>romsets <code>.zip</code> (sem descompactar)</td><td>MAME 2000 (0.37) · FinalBurn Neo · MAME 2003-Plus</td><td><code>neogeo.zip</code> para Neo Geo</td></tr>
+  </tbody>
+</table></div>
+<ul>
+  <li>Consoles de cartucho aceitam o jogo dentro de <code>.zip</code> ou <code>.7z</code>.</li>
+  <li><strong>PlayStation:</strong> prefira <code>.chd</code> (um arquivo só, menor). Jogos de vários discos: crie um <code>.m3u</code> com os discos, um por linha, e troque de disco no menu do jogo. Um <code>.zip</code> com o jogo é extraído sozinho.</li>
+  <li><strong>Arcade:</strong> o romset precisa ser da versão do núcleo (MAME 0.37, FBNeo ou MAME 0.78). Clones precisam do romset principal na mesma pasta. A BIOS <code>neogeo.zip</code> vai em <code>Jogos/BIOS</code>.</li>
+  <li>As BIOS vão em <code>Jogos/BIOS</code>. Em <strong>Configurações → BIOS</strong> você vê o que foi encontrado.</li>
+</ul>
+
+<h2 id="perfis">Abertura e perfis</h2>
+<p>Na primeira vez, o app pede para <strong>criar seu perfil</strong>: avatar, nome e cor do tema (a cor muda o app inteiro). Nas próximas, pergunta <strong>"Quem vai jogar?"</strong>. Cada perfil tem seus favoritos, "Continuar jogando", tempo de jogo e saves; os jogos e as configurações são comuns. São até 8 perfis; em <em>Gerenciar perfis</em> você edita ou exclui.</p>
+<p>Para trocar: na TV, o perfil fica no topo do menu lateral; no celular, toque no avatar da Início ou em Ajustes.</p>
+
+<h2 id="navegar">Navegando no app</h2>
+<h3 id="tv-menu">Menu lateral (TV)</h3>
+<dl>
+  <dt>Início</dt><dd>Destaque com ▶ Jogar e fileiras: Continuar jogando, Favoritos, Populares, Recentes, um por console, Mais jogados e por gênero. Escolher Início sempre volta ao topo.</dd>
+  <dt>Buscar</dt><dd>Teclado na tela (ou voz, se a TV tiver). Resultados enquanto digita, sem diferenciar acentos.</dd>
+  <dt>Consoles</dt><dd>Capa de cada console com a quantidade de jogos. Na página do console: filtros A–Z, Populares, Recentes, Mais jogados e Favoritos, e o núcleo.</dd>
+  <dt>Favoritos</dt><dd>Os jogos marcados com ＋ Favoritos.</dd>
+  <dt>Mídia</dt><dd>Prints e highlights gravados nos jogos.</dd>
+  <dt>Transferir jogos</dt><dd>Permissão da pasta Jogos, QR code do celular, pendrive e pastas.</dd>
+  <dt>Configurações</dt><dd>Todas as opções (veja abaixo).</dd>
+  <dt>Sair</dt><dd>Pergunta antes de fechar. <kbd>Voltar</kbd> com o foco no menu, na Início, faz o mesmo.</dd>
+</dl>
+<h3 id="celular-abas">Abas (celular)</h3>
+<p>Início, Buscar, Consoles, Favoritos e Ajustes ficam na barra de baixo (na lateral com o celular deitado). No topo da Início: ▶ Mídia, ⇧ Adicionar jogos e o seu avatar.</p>
+<h3 id="detalhes">Detalhes do jogo</h3>
+<p>Escolha um jogo para ver: console, ano, gênero, jogadores, empresa, resumo (Wikipédia), cenas do jogo e <strong>Ver trailer</strong> (abre no YouTube). Botões: <strong>Continuar do save</strong> (se houver), <strong>Jogar</strong>, Favoritos, <strong>Opções</strong> (configurações deste jogo, renomear, escolher a capa) e Apagar.</p>
+
+<h2 id="jogando">Jogando</h2>
+<h3 id="menu-jogo">Menu do jogo</h3>
+<p>Abra com <kbd>Voltar</kbd> do controle remoto, <kbd>Guide</kbd> do gamepad, <kbd>Start</kbd> + <kbd>Select</kbd> juntos, ou ☰ na tela do celular. O jogo pausa e fica mudo.</p>
+<dl>
+  <dt>Sair</dt><dd>Salva o automático e volta para a Início.</dd>
+  <dt>Continuar</dt><dd>Fecha o menu.</dd>
+  <dt>Salvar / Carregar</dt><dd>9 espaços com miniatura e data; o automático é gravado ao sair.</dd>
+  <dt>Voltar no tempo</dt><dd>Liga o rewind; com ele ligado, <em>Voltar 5 segundos</em>.</dd>
+  <dt>Trocar disco</dt><dd>Jogos de PlayStation com vários discos (<code>.m3u</code>).</dd>
+  <dt>Reiniciar · Inserir ficha</dt><dd>Reset do console; ficha só no Arcade.</dd>
+  <dt>Acelerar</dt><dd>2x a 8x.</dd>
+  <dt>Filtro · Proporção</dt><dd>CRT, LCD, Nítido, Suave; proporção original ou pixel perfeito.</dd>
+  <dt>Controles · Opções do núcleo</dt><dd>Mapa dos botões e opções do motor deste jogo.</dd>
+  <dt>Mostrar FPS</dt><dd>Quadros por segundo no canto.</dd>
+  <dt>Tirar print</dt><dd>Salva a tela em Mídia.</dd>
+  <dt>Highlight</dt><dd>Salva os últimos 5, 10 ou 15 segundos em vídeo.</dd>
+</dl>
+<h3 id="atalhos">Atalhos do controle</h3>
+<div class="table-scroll"><table>
+  <thead><tr><th>Atalho</th><th>Faz</th></tr></thead>
+  <tbody>
+    <tr><td><kbd>Start</kbd> + <kbd>Select</kbd></td><td>Abre o menu (configurável: L3+R3, L1+R1+Start ou desligado)</td></tr>
+    <tr><td><kbd>Select</kbd> + <kbd>R1</kbd></td><td>Acelera / volta ao normal</td></tr>
+    <tr><td><kbd>Select</kbd> + <kbd>L1</kbd> (segurar)</td><td>Volta no tempo (com rewind ligado)</td></tr>
+    <tr><td><kbd>Select</kbd> + <kbd>R2</kbd> / <kbd>L2</kbd></td><td>Salvar / carregar rápido</td></tr>
+  </tbody>
+</table></div>
+<p>O controle remoto também joga: setas = direcional, OK = botão B.</p>
+<h3 id="controle-tela">Controle na tela (celular)</h3>
+<p>Aparece sozinho e some quando você usa um controle físico. Vale usar vários dedos ao mesmo tempo. Em <strong>Ajustes → Controles</strong>: modelo clássico (cores do controle original) ou simples, tamanho, transparência, vibração e <strong>Posições dos botões</strong> (arraste cada botão, por console).</p>
+<h3 id="highlights">Highlights e prints</h3>
+<p>Enquanto você joga, o app guarda os últimos 15 segundos de vídeo. No menu, <strong>Highlight → 5, 10 ou 15 segundos</strong> salva o trecho (sem som) em Mídia; o tempo com o menu aberto não entra. <strong>Tirar print</strong> salva a imagem da tela. Se o jogo ficar lento num aparelho fraco, desligue em Configurações → Vídeo → Highlights.</p>
+
+<h2 id="midia">Mídia</h2>
+<p>Prints e highlights, do mais novo para o mais antigo, com filtros Tudo, Prints e Highlights. Abra para ver em tela cheia (o vídeo repete); dá para apagar e, no celular, compartilhar. No Android 10 ou mais novo, os arquivos também ficam na galeria: <em>Imagens/Onzetec Games</em> e <em>Filmes/Onzetec Games</em>.</p>
+
+<h2 id="config">Configurações</h2>
+<p>Em Vídeo, Áudio, Controles e Emulação há um seletor no topo: <strong>Global</strong> ou um console. O valor de um console vale só para ele; o de um jogo (Detalhes → Opções → Configurações deste jogo), só para aquele jogo. "Personalizado aqui" mostra o que você mudou naquele nível.</p>
+<dl>
+  <dt>Vídeo</dt><dd>Filtro (Nenhum, CRT, LCD, Nítido, Suave), proporção, mostrar FPS, modo econômico e Highlights.</dd>
+  <dt>Áudio</dt><dd>Som do jogo, latência (baixa/normal) e silenciar no menu.</dd>
+  <dt>Controles</dt><dd>Controles conectados (perfil e jogador 1–4), <strong>Remapear botões</strong> (assistente "pressione o botão…"), turbo, controle remoto como gamepad, analógico como direcional, zona morta, layout Nintendo, atalhos, botão que abre o menu e o controle na tela.</dd>
+  <dt>Emulação</dt><dd>Velocidade e modo de acelerar, voltar no tempo (e memória usada), salvar ao sair, continuar automaticamente, espaços de save, núcleo de cada console e opções de cada núcleo.</dd>
+  <dt>BIOS</dt><dd>Situação das BIOS e importação de um pendrive ou pasta.</dd>
+  <dt>Biblioteca</dt><dd>Pastas, procurar agora ou ao abrir, ocultar não identificados, duplicados e reconstruir a biblioteca.</dd>
+  <dt>Núcleos</dt><dd>Versão e tamanho, baixar, atualizar, remover, voltar à versão anterior e canal (Estável ou Nightly).</dd>
+  <dt>Interface</dt><dd>Perfis, idioma (Português, English, Español), tema escuro ou preto OLED, animações, destaque animado, tamanho das capas, fileiras da Início e <strong>Sons e vibração</strong>.</dd>
+  <dt>Rede</dt><dd>Porta e PIN fixo da transferência, pasta da rede (SMB), baixar capas e capas só no Wi-Fi.</dd>
+  <dt>Armazenamento</dt><dd>Espaço usado, limpar cache, <strong>backup e restauração</strong> (saves, configurações, perfis e favoritos num <code>.zip</code>), exportar e importar só as configurações.</dd>
+  <dt>Controle parental</dt><dd>PIN de 4 dígitos para abrir as Configurações e/ou apagar jogos.</dd>
+  <dt>Sobre</dt><dd>Versão, aparelho, memória, registro de erros, licenças e aviso legal.</dd>
+</dl>
+
+<h2 id="feel">Sons, música e vibração</h2>
+<p>O app responde a cada ação, como um console: um <em>tic</em> ao mover o foco, um <em>toc</em> grave ao bater na borda, sons de escolher, voltar e salvar, e uma vinheta ao abrir o jogo. A <strong>música de fundo</strong> é original, entra e sai suave e para quando o jogo abre. No celular, o aparelho vibra; na TV, o controle treme (se tiver motor). Ajuste em <strong>Configurações → Interface → Sons e vibração</strong>.</p>
+
+<h2 id="dicas">Dicas</h2>
+<div class="cards">
+  <div class="card"><div class="emoji">🐢</div><h3>Jogo lento?</h3><p>Filtro "Nenhum", modo econômico ligado, voltar no tempo e highlights desligados. No SNES, use o Snes9x 2010.</p></div>
+  <div class="card"><div class="emoji">🎮</div><h3>Controle genérico</h3><p>Se algum botão não responde, use Remapear botões: o atalho Start + Select passa a seguir o novo mapa.</p></div>
+  <div class="card"><div class="emoji">💿</div><h3>PlayStation leve</h3><p>Converta para <code>.chd</code>: ocupa menos espaço e carrega mais rápido.</p></div>
+  <div class="card"><div class="emoji">🔗</div><h3>Endereço curto</h3><p>No Downloader, o endereço <code data-short="tv/">tv/</code> sempre baixa a versão mais nova.</p></div>
+  <div class="card"><div class="emoji">👪</div><h3>Crianças em casa</h3><p>Ligue o Controle parental para proteger as Configurações e o Apagar.</p></div>
+  <div class="card"><div class="emoji">💾</div><h3>Trocou de aparelho?</h3><p>Faça backup no pendrive e restaure no novo: saves, perfis e favoritos vão junto.</p></div>
+  <div class="card"><div class="emoji">🕹️</div><h3>Segredo</h3><p>No site, tente o código mais famoso dos videogames: ↑ ↑ ↓ ↓ ← → ← → B A.</p></div>
+</div>
+
+<h2 id="problemas">Solução de problemas</h2>
+<dl>
+  <dt>Os jogos não aparecem</dt><dd>Confira a permissão "Permitir tudo" (Transferir jogos), se estão na subpasta certa e toque em Verificar agora.</dd>
+  <dt>"Ainda não baixado" ao jogar</dt><dd>O núcleo é baixado na primeira vez: precisa de internet só nessa hora.</dd>
+  <dt>Jogo de Arcade não abre</dt><dd>A mensagem diz o que falta: BIOS <code>neogeo.zip</code>, romset principal (clones) ou versão errada do romset.</dd>
+  <dt>PlayStation não abre</dt><dd>Com <code>.cue</code>, as trilhas <code>.bin</code> precisam estar na mesma pasta. Coloque a <code>scph5501.bin</code> em Jogos/BIOS.</dd>
+  <dt>Controle não funciona</dt><dd>Veja se ele aparece em Configurações → Controles e remapeie. O controle remoto também joga.</dd>
+  <dt>Sem som de interface</dt><dd>Configurações → Interface → Sons e vibração.</dd>
+  <dt>Algo travou</dt><dd>Configurações → Sobre → Exportar registro de erros, e envie pelo <a href="https://github.com/romariosamsumg-bot/EmuladorOnzetec/issues">GitHub</a>.</dd>
+</dl>
+
+<h2 id="legal">Aviso legal</h2>
+<p>O Onzetec Games é software livre (licença <strong>GPL-3.0</strong>) e usa núcleos do projeto libretro. Ele <strong>não inclui jogos nem BIOS</strong>. Use apenas cópias de jogos e BIOS que você possui legalmente. Nomes e marcas de consoles e jogos pertencem aos seus donos e são citados só para identificar a compatibilidade; o projeto não tem ligação com eles. As capas exibidas no app vêm do projeto libretro-thumbnails.</p>
+    </article>
+  </main>
+  <footer>
+    <div class="wrap">
+      <span class="made">Feito por Romário Marcelino</span>
+      <nav><a href="jogos.html">Jogos livres</a><a href="manual.html">Manual</a><a href="https://github.com/romariosamsumg-bot/EmuladorOnzetec">Código-fonte</a><a href="manual.html#legal">Aviso legal</a></nav>
+      <p>Onzetec Games é software livre (GPL-3.0). Não inclui jogos nem BIOS; use apenas cópias que você possui legalmente. As marcas citadas pertencem aos seus donos; este projeto não tem ligação com eles.</p>
+    </div>
+  </footer>
+</body>
+</html>

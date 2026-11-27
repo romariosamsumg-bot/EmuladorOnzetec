@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Onzetec Games: seus clássicos na TV, no celular e no navegador</title>
+  <meta name="description" content="Emulador de consoles clássicos com cara de streaming: Super Nintendo, Mega Drive, PlayStation, Arcade, Game Boy e mais. Grátis, para Android TV, TV Box, Stick, celular e navegador.">
+  <meta name="theme-color" content="#070b16">
+  <meta property="og:title" content="Onzetec Games">
+  <meta property="og:description" content="Seus clássicos na TV, no celular e no navegador.">
+  <meta property="og:image" content="assets/img/logo.webp">
+  <link rel="icon" href="favicon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <script type="module" src="assets/js/site.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="assets/img/mark.webp" alt="" width="70" height="34"><span>ONZETEC GAMES</span></a>
+      <nav aria-label="Principal">
+        <a href="./">Início</a>
+        <a href="jogos.html">Jogos</a>
+        <a href="manual.html">Manual</a>
+        <a href="jogar/">Jogar</a>
+      </nav>
+      <button class="sound-toggle" type="button" aria-pressed="false" title="Ligar som e música">🔇</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap grid">
+        <div>
+          <img class="logo" src="assets/img/logo.webp" alt="Onzetec Games" width="420" height="232">
+          <h1>Aperte START.<br>Sua infância te espera.</h1>
+          <p class="lead">
+            Um emulador de consoles clássicos com cara de streaming: capas, fileiras, perfis da família,
+            saves e highlights. Funciona na <strong>TV</strong>, no <strong>TV Box</strong>, no
+            <strong>Stick</strong>, no <strong>celular</strong> e no <strong>navegador</strong>.
+          </p>
+          <div class="ctas">
+            <a class="btn" href="#baixar"><span class="ico">⬇</span><span>Baixar grátis<small>Android TV, Box, Stick e celular</small></span></a>
+            <a class="btn ghost" href="manual.html"><span class="ico">📖</span><span>Ver o manual<small>tudo explicado, com dicas</small></span></a>
+          </div>
+          <p class="note">Grátis e de código aberto (GPL-3.0). O app não traz jogos nem BIOS: use cópias que você possui.</p>
+        </div>
+        <div class="tv" aria-label="Consoles suportados">
+          <div class="screen">
+            <img src="assets/img/consoles/snes.webp" alt="Super Nintendo" width="660" height="440">
+            <img src="assets/img/consoles/megadrive.webp" alt="Mega Drive" width="660" height="440" loading="lazy">
+            <img src="assets/img/consoles/psx.webp" alt="PlayStation" width="660" height="440" loading="lazy">
+            <img src="assets/img/consoles/arcade.webp" alt="Arcade (Neo Geo, CPS)" width="660" height="440" loading="lazy">
+            <img src="assets/img/consoles/nes.webp" alt="Nintendinho" width="660" height="440" loading="lazy">
+            <img src="assets/img/consoles/gba.webp" alt="Game Boy Advance" width="660" height="440" loading="lazy">
+            <img src="assets/img/consoles/mastersystem.webp" alt="Master System" width="660" height="440" loading="lazy">
+            <img src="assets/img/consoles/gb.webp" alt="Game Boy" width="660" height="440" loading="lazy">
+            <img src="assets/img/consoles/gbc.webp" alt="Game Boy Color" width="660" height="440" loading="lazy">
+            <img src="assets/img/consoles/atari2600.webp" alt="Atari 2600" width="660" height="440" loading="lazy">
+          </div>
+          <span class="label">Super Nintendo</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="baixar" class="band">
+      <div class="wrap">
+        <h2 class="section-title reveal">Escolha seu cartucho</h2>
+        <p class="section-sub reveal">Três jeitos de jogar. Os apps são separados e cada um tem a interface pensada para o aparelho.</p>
+        <div class="downloads">
+          <article class="cart tv reveal">
+            <div class="big">📺</div>
+            <h3>Android TV, TV Box e Stick</h3>
+            <p>Google TV, Android TV, Mi Box, Fire TV Stick, TV Box Android e projetores Android.</p>
+            <ul>
+              <li>Menu lateral, controle remoto e gamepad</li>
+              <li>Transferência de jogos pelo celular (QR code)</li>
+              <li>Pendrive, HD USB e pasta da rede</li>
+            </ul>
+            <a class="btn download" href="https://github.com/romariosamsumg-bot/EmuladorOnzetec/releases/latest/download/OnzetecGames.apk" download>
+              <span class="ico">⬇</span><span>Baixar para TV<small>OnzetecGames.apk</small></span>
+            </a>
+            <p style="margin:14px 0 0">No app <strong>Downloader</strong> da TV, digite:</p>
+            <div class="copy-line"><code id="tv-short" data-short="tv/">tv/</code><button type="button" data-copy="#tv-short">Copiar</button></div>
+          </article>
+
+          <article class="cart phone reveal">
+            <div class="big">📱</div>
+            <h3>Celular e tablet Android</h3>
+            <p>Android 8 ou mais novo. Em pé ou deitado, com controle na tela personalizável.</p>
+            <ul>
+              <li>Barra de navegação, toque e teclado do celular</li>
+              <li>Escolha vários jogos de uma vez (Downloads, Drive)</li>
+              <li>Vibração, prints e highlights para compartilhar</li>
+            </ul>
+            <a class="btn cyan download" href="https://github.com/romariosamsumg-bot/EmuladorOnzetec/releases/latest/download/OnzetecGames-Celular.apk" download>
+              <span class="ico">⬇</span><span>Baixar para celular<small>OnzetecGames-Celular.apk</small></span>
+            </a>
+            <div class="copy-line"><code id="phone-short" data-short="celular/">celular/</code><button type="button" data-copy="#phone-short">Copiar</button></div>
+          </article>
+
+          <article class="cart web reveal">
+            <div class="big">🌐</div>
+            <span class="tag" style="font-family:var(--pixel);font-size:.55rem;background:#8b6cff33;color:#c9b8ff;padding:6px 8px;border-radius:6px">EM BREVE</span>
+            <h3>Jogar no navegador</h3>
+            <p>No computador, no celular ou na TV com navegador (incluindo Samsung e LG). Sem instalar nada.</p>
+            <ul>
+              <li>Abra o jogo do seu aparelho e jogue</li>
+              <li>Teclado, gamepad USB/Bluetooth ou toque</li>
+              <li>Saves guardados no próprio navegador</li>
+            </ul>
+            <a class="btn violet" href="jogar/"><span class="ico">🕹</span><span>Ver a versão web<small>em construção</small></span></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2 class="section-title reveal">10 consoles, um controle</h2>
+        <p class="section-sub reveal">Os núcleos de emulação são baixados sozinhos na primeira vez que você joga cada console, sempre a versão mais leve que roda bem em TVs simples.</p>
+        <div class="consoles">
+          <figure class="reveal"><img src="assets/img/consoles/snes.webp" alt="" loading="lazy" width="660" height="440"><figcaption>Super Nintendo <small>1990</small></figcaption></figure>
+          <figure class="reveal"><img src="assets/img/consoles/megadrive.webp" alt="" loading="lazy" width="660" height="440"><figcaption>Mega Drive <small>1988</small></figcaption></figure>
+          <figure class="reveal"><img src="assets/img/consoles/psx.webp" alt="" loading="lazy" width="660" height="440"><figcaption>PlayStation <small>1994</small></figcaption></figure>
+          <figure class="reveal"><img src="assets/img/consoles/arcade.webp" alt="" loading="lazy" width="660" height="440"><figcaption>Arcade <small>Neo Geo, CPS</small></figcaption></figure>
+          <figure class="reveal"><img src="assets/img/consoles/nes.webp" alt="" loading="lazy" width="660" height="440"><figcaption>Nintendinho <small>1983</small></figcaption></figure>
+          <figure class="reveal"><img src="assets/img/consoles/mastersystem.webp" alt="" loading="lazy" width="660" height="440"><figcaption>Master System <small>1985</small></figcaption></figure>
+          <figure class="reveal"><img src="assets/img/consoles/gb.webp" alt="" loading="lazy" width="660" height="440"><figcaption>Game Boy <small>1989</small></figcaption></figure>
+          <figure class="reveal"><img src="assets/img/consoles/gbc.webp" alt="" loading="lazy" width="660" height="440"><figcaption>Game Boy Color <small>1998</small></figcaption></figure>
+          <figure class="reveal"><img src="assets/img/consoles/gba.webp" alt="" loading="lazy" width="660" height="440"><figcaption>Game Boy Advance <small>2001</small></figcaption></figure>
+          <figure class="reveal"><img src="assets/img/consoles/atari2600.webp" alt="" loading="lazy" width="660" height="440"><figcaption>Atari 2600 <small>1977</small></figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <h2 class="section-title reveal">Feito para o sofá</h2>
+        <p class="section-sub reveal">Tudo o que você esperaria de um app de streaming, mas para os seus jogos.</p>
+        <div class="cards">
+          <div class="card reveal"><div class="emoji">🎬</div><span class="tag">ESTILO NETFLIX</span><h3>Capas e fileiras</h3><p>Destaque, Continuar jogando, Populares, por console e por gênero. Nome, ano, empresa, resumo e trailer de cada jogo.</p></div>
+          <div class="card reveal"><div class="emoji">👨‍👩‍👧</div><span class="tag">PERFIS</span><h3>Cada um com o seu</h3><p>Até 8 perfis com avatar e cor do tema. Favoritos, saves e tempo de jogo separados.</p></div>
+          <div class="card reveal"><div class="emoji">💾</div><span class="tag">SAVES</span><h3>Pare e continue</h3><p>Save automático ao sair, 9 espaços com miniatura, voltar no tempo e acelerar.</p></div>
+          <div class="card reveal"><div class="emoji">🎥</div><span class="tag">HIGHLIGHTS</span><h3>Grave a jogada</h3><p>Salve os últimos 5, 10 ou 15 segundos em vídeo, ou um print, e veja tudo em Mídia.</p></div>
+          <div class="card reveal"><div class="emoji">🎮</div><span class="tag">CONTROLES</span><h3>Qualquer controle</h3><p>Controle remoto, Xbox, PlayStation, 8BitDo e genéricos. Remapeie, use turbo e até 4 jogadores.</p></div>
+          <div class="card reveal"><div class="emoji">📲</div><span class="tag">QR CODE</span><h3>Jogos pelo celular</h3><p>A TV mostra um QR code: leia com o celular e envie os jogos pelo Wi-Fi, com PIN.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2 class="section-title reveal">Pronto em 3 passos</h2>
+        <ol class="steps reveal">
+          <li><strong>Instale</strong> o app certo para o seu aparelho (acima). Na TV, use o app <em>Downloader</em> e digite o endereço curto.</li>
+          <li><strong>Coloque seus jogos</strong> na pasta <code>Jogos</code>, por pendrive, pelo QR code do celular ou escolhendo os arquivos no celular.</li>
+          <li><strong>Aperte Jogar.</strong> O app reconhece cada jogo, busca a capa e baixa o núcleo do console na primeira vez.</li>
+        </ol>
+        <p class="reveal">Dúvidas? O <a href="manual.html">manual completo</a> explica cada tela e cada opção, com dicas.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span class="made">Feito por Romário Marcelino</span>
+      <nav><a href="jogos.html">Jogos livres</a><a href="manual.html">Manual</a><a href="https://github.com/romariosamsumg-bot/EmuladorOnzetec">Código-fonte</a><a href="manual.html#legal">Aviso legal</a></nav>
+      <p>Onzetec Games é software livre (GPL-3.0). Não inclui jogos nem BIOS; use apenas cópias que você possui legalmente. Super Nintendo, Mega Drive, PlayStation e as demais marcas pertencem aos seus donos; este projeto não tem ligação com eles.</p>
+    </div>
+  </footer>
+</body>
+</html>
