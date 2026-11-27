@@ -505,6 +505,8 @@ pelo workflow `.github/workflows/pages.yml` a cada push na `main` que mude o sit
   `tools/site/package_cloudflare.sh` gera `build/OnzetecGames-site-cloudflare.zip`, com o site na
   raiz do domínio, `_redirects` (`/tv` e `/celular` baixam os APKs) e `_headers` (cache e
   segurança). No painel: Workers & Pages → Create → Pages → **Upload assets** → envie o zip.
+  Com `APK_DIR=pasta` (com `OnzetecGames.apk` e `OnzetecGames-Celular.apk`), os APKs vão dentro
+  do site em `/downloads/` e nada depende do GitHub.
 
 ## Estrutura
 

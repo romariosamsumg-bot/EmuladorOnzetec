@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Empacota o site para o Cloudflare Pages (upload direto ou Git).
 # Saída: build/site-cloudflare/ e build/OnzetecGames-site-cloudflare.zip
+# Com APK_DIR=pasta (contendo OnzetecGames.apk e OnzetecGames-Celular.apk), os APKs vão
+# dentro do site (/downloads/) e os botões deixam de depender das Releases do GitHub.
 # Diferenças para o GitHub Pages: o site fica na raiz do domínio (a página 404 usa "/"),
 # /tv e /celular viram redirecionamentos de verdade (_redirects) e há cabeçalhos de cache
 # e segurança (_headers).
@@ -15,7 +17,15 @@ rm -f "$OUT/.nojekyll"
 sed -i 's|/EmuladorOnzetec/|/|g' "$OUT/404.html"
 # Os redirecionamentos substituem as páginas tv/ e celular/.
 rm -rf "$OUT/tv" "$OUT/celular"
-REL=https://github.com/romariosamsumg-bot/EmuladorOnzetec/releases/latest/download
+GH=https://github.com/romariosamsumg-bot/EmuladorOnzetec/releases/latest/download
+REL=$GH
+if [[ -n "${APK_DIR:-}" ]]; then
+  mkdir -p "$OUT/downloads"
+  cp "$APK_DIR/OnzetecGames.apk" "$APK_DIR/OnzetecGames-Celular.apk" "$OUT/downloads/"
+  REL=/downloads
+  # Botões e textos do site apontam para os APKs hospedados junto.
+  grep -rl "$GH" "$OUT" --include=*.html | xargs -r sed -i "s|$GH|/downloads|g"
+fi
 cat > "$OUT/_redirects" <<R
 /tv        $REL/OnzetecGames.apk          302
 /tv/       $REL/OnzetecGames.apk          302
@@ -38,6 +48,11 @@ cat > "$OUT/_headers" <<'H'
 
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
+
+/downloads/*
+  Content-Type: application/vnd.android.package-archive
+  Content-Disposition: attachment
+  Cache-Control: public, max-age=3600
 H
 (cd "$OUT" && zip -qr ../OnzetecGames-site-cloudflare.zip .)
 echo "Pasta: $OUT"
