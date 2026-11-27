@@ -47,6 +47,11 @@ fun consoleCover(system: GameSystem): Int? = when (system.id) {
     SystemRegistry.Ids.MASTER_SYSTEM -> R.drawable.cover_mastersystem
     SystemRegistry.Ids.ARCADE -> R.drawable.cover_arcade
     SystemRegistry.Ids.PLAYSTATION -> R.drawable.cover_psx
+    SystemRegistry.Ids.NES -> R.drawable.cover_nes
+    SystemRegistry.Ids.GAME_BOY -> R.drawable.cover_gb
+    SystemRegistry.Ids.GAME_BOY_COLOR -> R.drawable.cover_gbc
+    SystemRegistry.Ids.GBA -> R.drawable.cover_gba
+    SystemRegistry.Ids.ATARI_2600 -> R.drawable.cover_atari2600
     else -> null
 }
 

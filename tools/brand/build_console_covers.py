@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Corta a grade 2x2 (tools/brand/consoles_grid.png) nas capas dos consoles.
+"""Corta as grades 2x2 e as imagens avulsas nas capas dos consoles.
 
-Ordem: superior esquerdo SNES, superior direito Mega Drive, inferior esquerdo Master System,
-inferior direito Arcade. As faixas pretas entre os quadros são achadas sozinhas.
+- consoles_grid.png: SNES, Mega Drive / Master System, Arcade.
+- consoles_grid2.png: Nintendinho, Game Boy / Game Boy Color, Game Boy Advance.
+- console_psx.png, console_atari2600.png: uma imagem por console, cortada no centro.
+As faixas pretas entre os quadros são achadas sozinhas.
 Saída: app/src/main/res/drawable-nodpi/cover_<console>.webp (3:2, 660x440).
 """
 import sys
@@ -10,9 +12,13 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "tools/brand/consoles_grid.png"
+BRAND = ROOT / "tools/brand"
 OUT = ROOT / "app/src/main/res/drawable-nodpi"
-NAMES = [["snes", "megadrive"], ["mastersystem", "arcade"]]
+GRIDS = {
+    "consoles_grid.png": [["snes", "megadrive"], ["mastersystem", "arcade"]],
+    "consoles_grid2.png": [["nes", "gb"], ["gbc", "gba"]],
+}
+SINGLES = {"console_psx.png": "psx", "console_atari2600.png": "atari2600"}
 SIZE = (660, 440)
 
 
@@ -33,8 +39,22 @@ def gutter(profile, lo, hi):
     return best
 
 
-def main():
-    im = Image.open(SRC).convert("RGB")
+def save(cell, name, box):
+    """Corta no centro para 3:2 e grava cover_<name>.webp."""
+    ratio = SIZE[0] / SIZE[1]
+    cw, ch = cell.size
+    if cw / ch > ratio:
+        nw = round(ch * ratio); cell = cell.crop(((cw - nw) // 2, 0, (cw - nw) // 2 + nw, ch))
+    else:
+        nh = round(cw / ratio); cell = cell.crop((0, (ch - nh) // 2, cw, (ch - nh) // 2 + nh))
+    cell = cell.resize(SIZE, Image.LANCZOS)
+    dst = OUT / f"cover_{name}.webp"
+    cell.save(dst, "WEBP", quality=88, method=6)
+    print(dst.relative_to(ROOT), box, dst.stat().st_size // 1024, "KB")
+
+
+def cut_grid(src, names):
+    im = Image.open(src).convert("RGB")
     w, h = im.size
     g = im.convert("L")
     px = g.load()
@@ -50,20 +70,21 @@ def main():
     inset = 3
     xs = [(left + inset, gx[0] - inset), (gx[1] + inset, right - inset)]
     ys = [(top + inset, gy[0] - inset), (gy[1] + inset, bottom - inset)]
-    OUT.mkdir(parents=True, exist_ok=True)
-    ratio = SIZE[0] / SIZE[1]
     for r, (y0, y1) in enumerate(ys):
         for c, (x0, x1) in enumerate(xs):
-            cell = im.crop((x0, y0, x1, y1))
-            cw, ch = cell.size
-            if cw / ch > ratio:
-                nw = round(ch * ratio); cell = cell.crop(((cw - nw) // 2, 0, (cw - nw) // 2 + nw, ch))
-            else:
-                nh = round(cw / ratio); cell = cell.crop((0, (ch - nh) // 2, cw, (ch - nh) // 2 + nh))
-            cell = cell.resize(SIZE, Image.LANCZOS)
-            dst = OUT / f"cover_{NAMES[r][c]}.webp"
-            cell.save(dst, "WEBP", quality=88, method=6)
-            print(dst.relative_to(ROOT), (x0, y0, x1, y1), dst.stat().st_size // 1024, "KB")
+            save(im.crop((x0, y0, x1, y1)), names[r][c], (x0, y0, x1, y1))
+
+
+def main():
+    OUT.mkdir(parents=True, exist_ok=True)
+    only = set(sys.argv[1:])  # opcional: só estes arquivos de origem
+    for src, names in GRIDS.items():
+        if not only or src in only:
+            cut_grid(BRAND / src, names)
+    for src, name in SINGLES.items():
+        if not only or src in only:
+            im = Image.open(BRAND / src).convert("RGB")
+            save(im, name, (0, 0) + im.size)
 
 
 if __name__ == "__main__":

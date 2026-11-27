@@ -446,14 +446,16 @@ trocar, substitua os arquivos e rode `python3 tools/brand/build_brand.py` (reque
 gera o ícone adaptativo (com versão monocromática para os ícones temáticos), a splash, o banner
 640×360 da TV e o logo usado no app.
 
-**Capas dos consoles** (menu Consoles e Início): uma imagem só com os quatro quadros em grade 2×2
-(superior esquerdo Super Nintendo, superior direito Mega Drive, inferior esquerdo Master System,
-inferior direito Arcade, com uma faixa preta entre eles) fica em `tools/brand/consoles_grid.png`.
-Para trocar, substitua o arquivo e rode `python3 tools/brand/build_console_covers.py`: ele acha as
-divisórias sozinho e gera `cover_<console>.webp` (3:2, 660×440). Consoles sem capa usam o ícone.
+**Capas dos consoles** (menu Consoles e Início): imagens com quatro quadros em grade 2×2, com uma
+faixa preta entre eles, ficam em `tools/brand/`:
 
-A capa do PlayStation veio de uma imagem à parte (`tools/brand/console_psx.png`), cortada no
-centro para 3:2 (660×440) em `cover_psx.webp`.
+- `consoles_grid.png`: Super Nintendo, Mega Drive (em cima); Master System, Arcade (embaixo).
+- `consoles_grid2.png`: Nintendinho, Game Boy (em cima); Game Boy Color, Game Boy Advance (embaixo).
+
+O PlayStation e o Atari 2600 vêm de imagens à parte (`console_psx.png`, `console_atari2600.png`),
+cortadas no centro. Para trocar, substitua o arquivo e rode
+`python3 tools/brand/build_console_covers.py` (ou passe só os arquivos que mudaram). O script acha
+as divisórias sozinho e gera `cover_<console>.webp` (3:2, 660×440). Consoles sem capa usam o ícone.
 
 ## Informações dos jogos
 
