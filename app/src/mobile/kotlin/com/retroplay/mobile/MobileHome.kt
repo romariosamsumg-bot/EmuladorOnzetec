@@ -73,7 +73,9 @@ import com.retroplay.core.ui.R as UiR
 fun MobileHome(nav: MobileNav, profile: Profile?, onSwitchProfile: (() -> Unit)?, viewModel: HomeViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchGamesEffect(viewModel.launcher)
+    val update = com.retroplay.feature.update.rememberUpdateBanner(hiltViewModel())
     MobileHomeContent(
+        update = update,
         onMedia = nav::media,
         state = state,
         profile = profile,
@@ -90,6 +92,7 @@ fun MobileHome(nav: MobileNav, profile: Profile?, onSwitchProfile: (() -> Unit)?
 @Composable
 fun MobileHomeContent(
     state: HomeState,
+    update: com.retroplay.feature.update.UpdateBannerModel? = null,
     onMedia: () -> Unit = {},
     profile: Profile?,
     onSwitchProfile: (() -> Unit)?,
@@ -136,6 +139,7 @@ fun MobileHomeContent(
                     contentPadding = PaddingValues(bottom = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(18.dp),
                 ) {
+                    update?.let { u -> item(key = "update") { MobileUpdateBanner(u) } }
                     state.hero?.let { hero ->
                         val system = hero.systemId?.let { SystemRegistry.byId(it) }
                         if (system != null) item(key = "hero") { HeroCard(hero, system, onPlay, onOpenGame) }
@@ -273,6 +277,29 @@ fun ConsoleArt(system: GameSystem, modifier: Modifier = Modifier) {
             Image(painterResource(cover), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         } else {
             Text(system.shortName, style = MaterialTheme.typography.titleLarge)
+        }
+    }
+}
+
+/** Aviso de versão nova no topo da Início do celular. */
+@Composable
+private fun MobileUpdateBanner(model: com.retroplay.feature.update.UpdateBannerModel) {
+    Row(
+        Modifier.padding(horizontal = 16.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .padding(14.dp).testTag("update_banner"),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text("⬆ " + model.title, style = MaterialTheme.typography.titleSmall)
+            Caption(model.body)
+            model.progress?.let { p ->
+                androidx.compose.material3.LinearProgressIndicator(progress = { p }, modifier = Modifier.fillMaxWidth().padding(top = 6.dp))
+            }
+        }
+        if (model.action != null) {
+            Spacer(Modifier.width(10.dp))
+            Button(onClick = { com.retroplay.ui.feel.UiFeel.select(); model.onAction() }, modifier = Modifier.testTag("update_action")) { Text(model.action) }
         }
     }
 }

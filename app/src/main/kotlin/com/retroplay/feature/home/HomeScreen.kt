@@ -104,6 +104,7 @@ fun HomeEntry(
             onOpenGame = onOpenGame,
             loadSummary = viewModel::summary,
             onOpenConsole = onOpenConsole,
+            update = com.retroplay.feature.update.rememberUpdateBanner(androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()),
         )
     }
 }
@@ -117,6 +118,8 @@ fun HomeScreen(
     onOpenGame: (Game) -> Unit,
     onOpenConsole: (GameSystem) -> Unit,
     loadSummary: suspend (Game) -> com.retroplay.domain.library.GameSummary? = { null },
+    /** Aviso de versão nova (no topo da lista). */
+    update: com.retroplay.feature.update.UpdateBannerModel? = null,
 ) {
     val memory = rememberFocusMemory()
     val heroPlay = remember { FocusRequester() }
@@ -133,6 +136,11 @@ fun HomeScreen(
         contentPadding = PaddingValues(bottom = 48.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        update?.let { u ->
+            item(key = "update") {
+                com.retroplay.feature.update.TvUpdateBanner(u, Modifier.padding(start = 48.dp, end = 48.dp, top = 16.dp))
+            }
+        }
         state.hero?.let { hero ->
             item(key = "hero") {
                 val system = hero.systemId?.let { catalog.byId(it) }

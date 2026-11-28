@@ -446,6 +446,33 @@ class SettingsPane(
                 SettingRow(stringResource(R.string.about_ram), null, ram, "about_ram") {}
             }
         }
+        item(key = "update") {
+            val st by vm.appUpdates.state.collectAsStateWithLifecycle()
+            val value = when (val u = st) {
+                com.retroplay.feature.update.UpdateState.Checking -> stringResource(R.string.update_checking)
+                com.retroplay.feature.update.UpdateState.UpToDate -> stringResource(R.string.update_latest)
+                is com.retroplay.feature.update.UpdateState.Available -> stringResource(R.string.update_available, u.info.versionName)
+                is com.retroplay.feature.update.UpdateState.Downloading -> stringResource(R.string.update_downloading, ((u.fraction ?: 0f) * 100).toInt())
+                is com.retroplay.feature.update.UpdateState.NeedsPermission -> stringResource(R.string.update_permission)
+                is com.retroplay.feature.update.UpdateState.Installing -> stringResource(R.string.update_installing)
+                is com.retroplay.feature.update.UpdateState.Failed -> stringResource(R.string.update_failed)
+                else -> null
+            }
+            val context = LocalContext.current
+            SettingRow(stringResource(R.string.set_updates), stringResource(R.string.set_updates_desc), value, "about_update") {
+                if (st is com.retroplay.feature.update.UpdateState.NeedsPermission && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    runCatching {
+                        context.startActivity(
+                            android.content.Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, android.net.Uri.parse("package:${context.packageName}"))
+                                .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                    }
+                } else {
+                    vm.checkAndUpdate()
+                }
+            }
+        }
+        bool(AppSettings.UPDATE_NOTIFY, R.string.set_update_notify, R.string.set_update_notify_desc)
         item(key = "log") {
             val context = LocalContext.current
             val logFile = remember { ErrorLog.file(context.filesDir) }

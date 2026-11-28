@@ -56,6 +56,7 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var profiles: ProfileRepository
 
     @Inject lateinit var startupOptions: StartupOptions
+    @Inject lateinit var appUpdates: com.retroplay.feature.update.UpdateManager
 
     /** Ações de perfil da trilha de inicialização. */
     private val startupActions = object : StartupActions {
@@ -134,6 +135,9 @@ class MainActivity : ComponentActivity() {
             // Varredura incremental ao abrir: só arquivos novos/alterados são lidos.
             if (snap.value(AppSettings.SCAN_ON_START)) library.scanNow()
             runCatching { coreUpdater.runIfDue() }.onFailure { ErrorLog.record(filesDir, "Atualização automática de núcleos falhou", it) }
+            // Versão nova do app (version.json do site): aviso na Início e checagem diária.
+            runCatching { com.retroplay.feature.update.UpdateWorker.schedule(this@MainActivity) }
+            runCatching { appUpdates.check() }
         }
         // Sons, vibração e música seguem as Configurações na hora.
         lifecycleScope.launch {

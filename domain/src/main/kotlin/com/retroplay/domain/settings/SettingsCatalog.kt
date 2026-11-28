@@ -82,6 +82,13 @@ object AppSettings {
     val MUSIC_VOLUME = Choice("ui.music_volume", "20", listOf("10", "20", "35", "50", "75"))
     /** Vibração do celular e tremor do controle nas interações. */
     val HAPTICS = Bool("ui.haptics", true)
+
+    // ---- Atualizações (fora da Play Store: version.json do site)
+    val UPDATE_NOTIFY = Bool("update.notify", true)
+    /** Última versão já avisada por notificação (avisa uma vez só). */
+    val UPDATE_NOTIFIED = Text("update.notified", "")
+    /** O app de celular já pediu a permissão de notificação. */
+    val NOTIF_ASKED = Bool("update.notif_asked", false)
     val CARD_SIZE = Choice("ui.card_size", "medium", listOf("small", "medium", "large"))
     /** Fileiras da Home ocultas (chaves separadas por vírgula). */
     val HIDDEN_ROWS = Text("ui.hidden_rows", "")

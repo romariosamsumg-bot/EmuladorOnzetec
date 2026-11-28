@@ -40,6 +40,9 @@ val signing = releaseSigning()
 // Versão: o CI informa (tag v1.2.3 → "1.2.3"; número da execução → versionCode).
 val appVersionName = providers.environmentVariable("RETROPLAY_VERSION_NAME").orNull?.takeIf { it.isNotBlank() } ?: "1.0.0"
 val appVersionCode = providers.environmentVariable("RETROPLAY_VERSION_CODE").orNull?.toIntOrNull() ?: 1
+// Onde o app procura versão nova (version.json do site). Troque pelo seu domínio do Cloudflare.
+val updateUrl = providers.environmentVariable("RETROPLAY_UPDATE_URL").orNull?.takeIf { it.startsWith("https://") }
+    ?: "https://onzetecgames.pages.dev/version.json"
 
 android {
     namespace = "com.retroplay"
@@ -58,6 +61,7 @@ android {
         versionCode = appVersionCode
         versionName = appVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "UPDATE_URL", "\"$updateUrl\"")
     }
 
     // Só pt-BR (padrão), inglês e espanhol: evita carregar traduções inúteis das bibliotecas.

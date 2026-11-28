@@ -331,4 +331,22 @@
     <string name="media_delete_failed">Não deu para apagar</string>
     <string name="media_close">Fechar</string>
     <string name="media_delete_confirm">Apagar este arquivo?</string>
+    <string name="update_available">Nova versão %1$s disponível</string>
+    <string name="update_now">Atualizar agora</string>
+    <string name="update_downloading">Baixando a atualização… %1$d%%</string>
+    <string name="update_installing">Abrindo a instalação…</string>
+    <string name="update_permission">Permita que o Onzetec Games instale a atualização</string>
+    <string name="update_permission_button">Permitir</string>
+    <string name="update_failed">Não deu para baixar a atualização</string>
+    <string name="update_retry">Tentar de novo</string>
+    <string name="update_latest">Você tem a versão mais nova</string>
+    <string name="update_checking">Procurando…</string>
+    <string name="update_keep">Seus jogos, saves e perfis continuam.</string>
+    <string name="set_updates">Procurar atualização</string>
+    <string name="set_updates_desc">Confere agora se saiu uma versão nova.</string>
+    <string name="set_update_notify">Avisar sobre novas versões</string>
+    <string name="set_update_notify_desc">Procura uma vez por dia e avisa (no celular, com notificação).</string>
+    <string name="notif_channel_updates">Atualizações</string>
+    <string name="notif_update_title">Saiu a versão %1$s do Onzetec Games!</string>
+    <string name="notif_update_text">Toque para atualizar. Seus jogos e saves continuam.</string>
 </resources>

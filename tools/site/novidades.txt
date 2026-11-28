@@ -1,0 +1,5 @@
+# Novidades da versão (uma por linha). Aparecem no aviso de atualização do app.
+# Linhas começando com # são ignoradas.
+Highlights gravados com o som do jogo
+Menu lateral da TV mais compacto
+Capas padronizadas na página de cada console

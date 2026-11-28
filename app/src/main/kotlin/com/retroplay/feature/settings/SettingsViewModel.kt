@@ -78,7 +78,18 @@ class SettingsViewModel @Inject constructor(
     private val backup: dagger.Lazy<com.retroplay.data.backup.BackupManager>,
     private val smb: dagger.Lazy<com.retroplay.data.smb.SmbAccess>,
     private val smbCredentials: dagger.Lazy<com.retroplay.data.smb.SmbCredentialStore>,
+    /** Atualizações do app (Configurações → Sobre). */
+    val appUpdates: com.retroplay.feature.update.UpdateManager,
 ) : ViewModel() {
+
+    /** "Procurar atualização": confere agora e, se houver versão nova, já baixa e instala. */
+    fun checkAndUpdate() {
+        viewModelScope.launch {
+            val current = appUpdates.state.value
+            val info = (current as? com.retroplay.feature.update.UpdateState.Available)?.info ?: appUpdates.check(force = true)
+            if (info != null) appUpdates.downloadAndInstall(info)
+        }
+    }
 
     /** Testa a conexão e, se der certo, adiciona a pasta da rede e procura jogos. true = adicionada. */
     fun addSmbFolder(form: SmbForm, onDone: (Boolean) -> Unit = {}) {

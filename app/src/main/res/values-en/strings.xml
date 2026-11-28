@@ -311,4 +311,22 @@
     <string name="media_delete_failed">Could not delete</string>
     <string name="media_close">Close</string>
     <string name="media_delete_confirm">Delete this file?</string>
+    <string name="update_available">New version %1$s available</string>
+    <string name="update_now">Update now</string>
+    <string name="update_downloading">Downloading the update… %1$d%%</string>
+    <string name="update_installing">Opening the installer…</string>
+    <string name="update_permission">Allow Onzetec Games to install the update</string>
+    <string name="update_permission_button">Allow</string>
+    <string name="update_failed">Could not download the update</string>
+    <string name="update_retry">Try again</string>
+    <string name="update_latest">You have the latest version</string>
+    <string name="update_checking">Checking…</string>
+    <string name="update_keep">Your games, saves and profiles stay.</string>
+    <string name="set_updates">Check for updates</string>
+    <string name="set_updates_desc">Checks now for a new version.</string>
+    <string name="set_update_notify">Notify about new versions</string>
+    <string name="set_update_notify_desc">Checks once a day and lets you know (on phones, with a notification).</string>
+    <string name="notif_channel_updates">Updates</string>
+    <string name="notif_update_title">Onzetec Games %1$s is out!</string>
+    <string name="notif_update_text">Tap to update. Your games and saves stay.</string>
 </resources>

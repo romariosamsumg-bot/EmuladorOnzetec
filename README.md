@@ -482,6 +482,26 @@ python3 tools/testrom/build_test_rom.py teste.sfc
 python3 tools/testrom/run_in_core.py snes9x2010_libretro.so teste.sfc saida/   # confere vídeo, entrada e áudio
 ```
 
+## Atualizações (fora da Play Store)
+
+O app procura versão nova no `version.json` do site (endereço em `RETROPLAY_UPDATE_URL`; padrão
+`https://onzetecgames.pages.dev/version.json`) ao abrir e uma vez por dia (WorkManager, só com
+internet). Com versão nova:
+
+- **Início** (TV e celular): aviso "Nova versão X disponível" com as novidades e **Atualizar agora**;
+- **celular**: notificação (uma vez por versão; o app pede a permissão no Android 13+);
+- **Configurações → Sobre → Procurar atualização** confere na hora; "Avisar sobre novas versões"
+  liga/desliga a checagem diária.
+
+**Atualizar agora** baixa o APK do site (com barra de progresso), confere que é o mesmo app, com a
+**mesma assinatura** e versão maior, e abre a instalação do Android (PackageInstaller). Na primeira
+vez o Android pede para permitir "Instalar apps desconhecidos" para o Onzetec Games. Jogos, saves
+e perfis continuam.
+
+Para publicar uma versão: edite `tools/site/novidades.txt` e rode
+`APK_DIR=pasta-com-os-apks tools/site/package_cloudflare.sh`; o `version.json` sai com a versão lida do
+próprio APK. Envie o zip no Cloudflare: quem já tem o app recebe o aviso.
+
 ## Site oficial
 
 A pasta `site/` é o site (HTML, CSS e JavaScript, sem etapa de build), publicado no GitHub Pages

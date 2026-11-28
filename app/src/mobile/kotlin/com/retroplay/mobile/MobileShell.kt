@@ -75,6 +75,22 @@ fun MobileShell(
     LaunchedEffect(navController, goHomeRequests) {
         goHomeRequests.collect { MobileNav(navController).home() }
     }
+    // Android 13+: pede (uma vez) a permissão de notificação, usada para avisar de versão nova.
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        val updatesVm: com.retroplay.feature.update.UpdateViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
+        val askNotifications = androidx.activity.compose.rememberLauncherForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+        ) { updatesVm.markNotificationAsked() }
+        val ctx = androidx.compose.ui.platform.LocalContext.current
+        LaunchedEffect(Unit) {
+            val granted = androidx.core.content.ContextCompat.checkSelfPermission(ctx, android.Manifest.permission.POST_NOTIFICATIONS) ==
+                android.content.pm.PackageManager.PERMISSION_GRANTED
+            if (!granted && !updatesVm.notificationAsked()) {
+                kotlinx.coroutines.delay(1500)
+                runCatching { askNotifications.launch(android.Manifest.permission.POST_NOTIFICATIONS) }
+            }
+        }
+    }
     val entry by navController.currentBackStackEntryAsState()
     var confirmExit by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
     // Voltar na Início (sem telas abertas por cima) pergunta antes de fechar o app.

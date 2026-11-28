@@ -26,6 +26,28 @@ if [[ -n "${APK_DIR:-}" ]]; then
   # Botões e textos do site apontam para os APKs hospedados junto.
   grep -rl "$GH" "$OUT" --include=*.html | xargs -r sed -i "s|$GH|/downloads|g"
 fi
+
+# version.json: o app lê este arquivo para avisar de versão nova (Início, Sobre e notificação).
+# A versão vem do próprio APK; as novidades, de tools/site/novidades.txt.
+if [[ -n "${APK_DIR:-}" ]]; then
+  SDK=$(grep -s sdk.dir local.properties | cut -d= -f2); SDK=${SDK:-${ANDROID_HOME:-}}
+  AAPT=$(ls -d "$SDK"/build-tools/*/aapt2 2>/dev/null | tail -1)
+  BADGE=$("$AAPT" dump badging "$APK_DIR/OnzetecGames.apk" 2>/dev/null | sed -n 1p)
+  VCODE=$(sed -E "s/.*versionCode='([0-9]+)'.*/\1/" <<<"$BADGE")
+  VNAME=$(sed -E "s/.*versionName='([^']+)'.*/\1/" <<<"$BADGE")
+  python3 - "$OUT/version.json" "$VCODE" "$VNAME" tools/site/novidades.txt <<'PY'
+import json, sys
+out, code, name, notes_file = sys.argv[1:5]
+notes = [l.strip() for l in open(notes_file, encoding="utf-8") if l.strip() and not l.startswith("#")]
+json.dump({
+    "versionCode": int(code),
+    "versionName": name,
+    "notes": notes,
+    "apk": {"tv": "/downloads/OnzetecGames.apk", "mobile": "/downloads/OnzetecGames-Celular.apk"},
+}, open(out, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+PY
+  echo "version.json: $VNAME ($VCODE)"
+fi
 cat > "$OUT/_redirects" <<R
 /tv        $REL/OnzetecGames.apk          302
 /tv/       $REL/OnzetecGames.apk          302
@@ -45,6 +67,10 @@ cat > "$OUT/_headers" <<'H'
 
 /data/*
   Cache-Control: public, max-age=300
+
+/version.json
+  Cache-Control: no-cache
+  Access-Control-Allow-Origin: *
 
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
