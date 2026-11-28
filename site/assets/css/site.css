@@ -589,3 +589,84 @@ pre code { background: none; border: 0; padding: 0; word-break: normal; }
   .hero .tv { padding: 16px; border-radius: 24px; }
 }
 .consoles figcaption small { white-space: nowrap; }
+
+/* ------------------------------------------------------------ celular */
+.menu-toggle { display: none; }
+
+@media (max-width: 720px) {
+  body { font-size: 16px; }
+  .topbar .wrap { gap: 10px; min-height: 58px; }
+  .topbar .brand span { display: inline; font-size: 0.6rem; }
+  .topbar .brand img { height: 26px; }
+
+  /* Menu ☰: os links viram uma lista que abre embaixo do topo. */
+  .menu-toggle {
+    display: grid;
+    place-items: center;
+    margin-left: auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--text);
+    font-size: 1.25rem;
+    cursor: pointer;
+  }
+  .topbar nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: grid;
+    gap: 2px;
+    padding: 8px 16px 14px;
+    margin: 0;
+    background: rgb(7 11 22 / 0.97);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 20px 40px -10px rgb(0 0 0 / 0.8);
+    transform-origin: top;
+    transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.2s;
+    opacity: 0;
+    visibility: hidden;
+    transform: scaleY(0.92) translateY(-6px);
+  }
+  .topbar.open nav { opacity: 1; visibility: visible; transform: none; }
+  .topbar nav a { padding: 12px 14px; font-size: 1.05rem; border-radius: 12px; }
+  .sound-toggle { margin-left: 0; height: 40px; min-width: 40px; }
+
+  section { padding: 44px 0; }
+  .hero { padding: 28px 0 40px; }
+  .hero .grid { gap: 22px; }
+  .hero .logo { width: min(120px, 34%); }
+  .hero h1 { font-size: 1.1rem; margin: 16px 0 12px; }
+  .hero .lead { font-size: 1rem; }
+  .hero .ctas { display: grid; }
+  .hero .ctas .btn { justify-content: flex-start; }
+  .tv { rotate: 0deg; padding: 14px; border-radius: 22px; }
+  .tv .label { font-size: 0.55rem; }
+
+  /* Capas em duas colunas. */
+  .consoles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .consoles figcaption { flex-direction: column; gap: 0; padding: 8px 10px; font-size: 0.92rem; }
+  .consoles figure > div { padding: 0 10px 10px !important; }
+  .consoles .btn.small { padding: 7px 10px; font-size: 0.82rem; }
+  .games { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .game .body { padding: 10px; }
+  .game h3 { font-size: 0.95rem; }
+
+  .cart { padding: 26px 18px 22px; }
+  .cart h3 { font-size: 0.82rem; }
+  .copy-line code { font-size: 0.8rem; overflow-wrap: anywhere; }
+  .card { padding: 18px; }
+  .steps li { padding: 14px 14px 14px 58px; }
+  .manual { padding: 20px 0 60px; gap: 16px; }
+  .manual aside { position: sticky; top: 58px; z-index: 10; background: rgb(7 11 22 / 0.95); margin: 0 -16px; padding: 8px 16px; }
+  .manual article h2 { margin-top: 40px; }
+  .manual table { font-size: 0.85rem; }
+  footer .made { font-size: 0.62rem; }
+}
+
+@media (max-width: 360px) {
+  .topbar .brand span { display: none; }
+}

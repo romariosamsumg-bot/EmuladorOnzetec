@@ -62,6 +62,30 @@ document.addEventListener("click", (e) => {
   navigator.vibrate?.(12);
 });
 
+// ------------------------------------------------------------ menu ☰ (celular)
+const topbar = $(".topbar");
+const nav = $(".topbar nav");
+if (topbar && nav) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "menu-toggle";
+  btn.setAttribute("aria-label", "Abrir o menu");
+  btn.setAttribute("aria-expanded", "false");
+  btn.textContent = "☰";
+  nav.id ||= "menu-principal";
+  btn.setAttribute("aria-controls", nav.id);
+  nav.before(btn);
+  const set = (open) => {
+    topbar.classList.toggle("open", open);
+    btn.setAttribute("aria-expanded", String(open));
+    btn.textContent = open ? "✕" : "☰";
+  };
+  btn.addEventListener("click", () => set(!topbar.classList.contains("open")));
+  nav.addEventListener("click", (e) => { if (e.target.closest("a")) set(false); });
+  addEventListener("keydown", (e) => { if (e.key === "Escape") set(false); });
+  document.addEventListener("click", (e) => { if (!topbar.contains(e.target)) set(false); });
+}
+
 // ------------------------------------------------------------ menu atual
 const here = location.pathname.replace(/index\.html$/, "");
 $$(".topbar nav a").forEach((a) => {
