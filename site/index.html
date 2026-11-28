@@ -152,15 +152,65 @@
       </div>
     </section>
 
-    <section>
+    <section class="journey" id="jornada">
       <div class="wrap">
-        <h2 class="section-title reveal">Pronto em 3 passos</h2>
-        <ol class="steps reveal">
-          <li><strong>Instale</strong> o app certo para o seu aparelho (acima). Na TV, use o app <em>Downloader</em> e digite o endereço curto.</li>
-          <li><strong>Coloque seus jogos</strong> na pasta <code>Jogos</code>, por pendrive, pelo QR code do celular ou escolhendo os arquivos no celular.</li>
-          <li><strong>Aperte Jogar.</strong> O app reconhece cada jogo, busca a capa e baixa o núcleo do console na primeira vez.</li>
-        </ol>
-        <p class="reveal">Dúvidas? O <a href="manual.html">manual completo</a> explica cada tela e cada opção, com dicas.</p>
+        <h2 class="section-title reveal">Sua jornada até o START</h2>
+        <p class="section-sub reveal">Quatro fases e você está jogando. Escolha onde vai jogar:</p>
+        <div class="device-switch reveal" role="group" aria-label="Onde você vai jogar">
+          <button type="button" class="chip" data-device="tv" aria-pressed="true">📺 TV, Box ou Stick</button>
+          <button type="button" class="chip" data-device="phone" aria-pressed="false">📱 Celular</button>
+        </div>
+        <div class="map" data-device="tv">
+          <svg class="trail h" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true">
+            <path class="base" d="M125,100 C220,20 290,175 375,150 S540,55 625,100 S790,195 875,150"/>
+            <path class="draw" pathLength="1" d="M125,100 C220,20 290,175 375,150 S540,55 625,100 S790,195 875,150"/>
+          </svg>
+          <svg class="trail v" viewBox="0 0 60 1000" preserveAspectRatio="none" aria-hidden="true">
+            <path class="base" d="M30,40 C60,150 0,250 30,330 S60,520 30,600 S0,780 30,880"/>
+            <path class="draw" pathLength="1" d="M30,40 C60,150 0,250 30,330 S60,520 30,600 S0,780 30,880"/>
+          </svg>
+          <img class="mascot" src="assets/img/mark.webp" alt="" width="64" height="31" aria-hidden="true">
+          <ol class="stages">
+            <li class="stage">
+              <div class="node"><span>1</span></div>
+              <div class="stage-card">
+                <div class="emoji">📲</div>
+                <h3>Instale o app</h3>
+                <p data-tv>No app <strong>Downloader</strong> da TV, digite o endereço curto e instale o Onzetec Games.</p>
+                <p data-phone>Baixe o app de celular e, quando o Android perguntar, <strong>permita instalar</strong> desta fonte.</p>
+                <a class="btn small" href="#baixar">Baixar o app</a>
+              </div>
+            </li>
+            <li class="stage">
+              <div class="node"><span>2</span></div>
+              <div class="stage-card">
+                <div class="emoji">💾</div>
+                <h3>Pegue seus jogos</h3>
+                <p>Use cópias dos seus cartuchos e discos ou os jogos livres do site. Pode deixar em <code>.zip</code>.</p>
+                <a class="btn small ghost" href="jogos.html">Baixar jogos</a>
+              </div>
+            </li>
+            <li class="stage">
+              <div class="node"><span>3</span></div>
+              <div class="stage-card">
+                <div class="emoji">📁</div>
+                <h3>Coloque na pasta Jogos</h3>
+                <p data-tv>Copie para <code>Jogos/</code> pelo <strong>pendrive</strong>, ou abra <em>Transferir jogos</em> e mande pelo celular com o <strong>QR code</strong>.</p>
+                <p data-phone>Toque em <strong>Adicionar jogos → Escolher arquivos</strong> e marque os jogos: o app separa por console sozinho.</p>
+                <a class="btn small ghost" data-tv href="manual.html#pasta-jogos">Como mover</a>
+                <a class="btn small ghost" data-phone href="manual.html#celular-arquivos">Como adicionar</a>
+              </div>
+            </li>
+            <li class="stage final">
+              <div class="node"><span>🏁</span></div>
+              <div class="stage-card">
+                <div class="emoji">🕹️</div>
+                <h3>Aperte START!</h3>
+                <p>O app encontra os jogos, coloca capa e informações e baixa o núcleo do console na primeira vez. É só escolher e jogar.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
       </div>
     </section>
   </main>

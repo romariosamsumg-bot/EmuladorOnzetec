@@ -116,6 +116,58 @@ const isAndroidTablet = !isTv && /Android/i.test(ua) && !/Mobile/i.test(ua);
 const rec = isTv ? ".cart.tv" : isPhone || isAndroidTablet ? ".cart.phone" : null;
 if (rec) $(rec)?.classList.add("recommended");
 
+// ------------------------------------------------------------ jornada (mapa de fases)
+const map = $(".map");
+if (map) {
+  const switches = $$("[data-device]", $(".device-switch") ?? document.createElement("div"));
+  const setDevice = (d) => {
+    map.dataset.device = d;
+    switches.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.device === d)));
+    placeMascot(false);
+  };
+  switches.forEach((b) => b.addEventListener("click", () => setDevice(b.dataset.device)));
+  if (isPhone || isAndroidTablet) setDevice("phone");
+
+  const stages = $$(".stage", map);
+  const mascot = $(".mascot", map);
+  let reached = -1;
+  let current = -1;
+
+  // Coloca o mascote em cima do número da fase atual (pulando, se [hop]).
+  function placeMascot(hop = true) {
+    if (!mascot || current < 0) return;
+    const node = $(".node", stages[current]);
+    const m = map.getBoundingClientRect();
+    const n = node.getBoundingClientRect();
+    const x = n.left - m.left + n.width / 2 - mascot.offsetWidth / 2;
+    const y = n.top - m.top - mascot.offsetHeight - 6;
+    mascot.style.translate = `${x}px ${y}px`;
+    mascot.classList.add("on");
+    if (hop) {
+      mascot.classList.remove("hop");
+      void mascot.offsetWidth; // reinicia a animação
+      mascot.classList.add("hop");
+    }
+  }
+
+  // Cada fase acende quando chega ao meio da tela: moeda "+1", som e o mascote pula até ela.
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (!en.isIntersecting) return;
+      const i = stages.indexOf(en.target);
+      if (i <= reached) { current = i; placeMascot(); return; }
+      for (let k = reached + 1; k <= i; k++) stages[k].classList.add("done");
+      reached = i;
+      current = i;
+      placeMascot();
+      sfx(i === stages.length - 1 ? "success" : "move", i === stages.length - 1 ? 0.5 : 0.35);
+      if (i === stages.length - 1) navigator.vibrate?.([20, 40, 20]);
+    });
+  }, { rootMargin: "-40% 0px -40% 0px" });
+  stages.forEach((st) => obs.observe(st));
+  addEventListener("resize", () => placeMascot(false));
+}
+
 // ------------------------------------------------------------ copiar endereço
 $$("[data-copy]").forEach((b) => {
   b.addEventListener("click", async () => {

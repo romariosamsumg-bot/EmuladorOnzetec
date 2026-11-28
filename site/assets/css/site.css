@@ -677,3 +677,141 @@ img { height: auto; }
 .topbar .brand img { width: auto; }
 .tv .screen img { height: 100%; }
 .consoles img, .game .cover { height: auto; object-fit: cover; }
+
+/* ------------------------------------------------------------ jornada (mapa de fases) */
+.device-switch { display: flex; gap: 8px; flex-wrap: wrap; margin: -12px 0 28px; }
+.map {
+  position: relative;
+  /* Mostra só o texto do aparelho escolhido. */
+  &[data-device="tv"] [data-phone], &[data-device="phone"] [data-tv] { display: none; }
+}
+.trail { position: absolute; pointer-events: none; overflow: visible; }
+.trail path { fill: none; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+.trail .base { stroke: var(--line); stroke-width: 6; stroke-dasharray: 2 14; }
+.trail .draw {
+  stroke: var(--orange);
+  stroke-width: 6;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  filter: drop-shadow(0 0 8px rgb(255 122 26 / 0.6));
+}
+.trail.h { left: 0; right: 0; top: 0; height: 120px; width: 100%; }
+.trail.v { display: none; }
+
+.stages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  position: relative;
+}
+.stage { display: grid; justify-items: center; gap: 18px; }
+.stage:nth-child(even) .node { translate: 0 30px; }
+.stage:nth-child(even) .stage-card { margin-top: 30px; }
+.node {
+  width: 64px;
+  height: 64px;
+  margin-top: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: var(--card-2);
+  border: 3px solid var(--line);
+  font-family: var(--pixel);
+  font-size: 1rem;
+  color: var(--muted);
+  box-shadow: 0 6px 0 #050812;
+  transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  z-index: 1;
+}
+.stage.done .node {
+  background: var(--orange);
+  border-color: #ffd29e;
+  color: #1f0a00;
+  box-shadow: 0 6px 0 oklch(0.5 0.17 45), 0 0 30px rgb(255 122 26 / 0.5);
+  transform: scale(1.08);
+}
+/* "Moeda" que sobe quando a fase é alcançada. */
+.stage.done .node::after {
+  content: "+1";
+  position: absolute;
+  top: -8px;
+  font-family: var(--pixel);
+  font-size: 0.6rem;
+  color: var(--orange-2);
+  animation: coin 0.9s ease-out forwards;
+}
+@keyframes coin {
+  from { opacity: 1; translate: 0 0; }
+  to { opacity: 0; translate: 0 -36px; }
+}
+.stage-card {
+  width: 100%;
+  text-align: center;
+  background: linear-gradient(180deg, var(--card-2), var(--card));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  opacity: 0.55;
+  transform: translateY(12px) scale(0.97);
+  transition: opacity 0.5s, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.4s;
+  & .emoji { font-size: 2rem; }
+  & h3 { margin: 6px 0 8px; font-size: 1.08rem; }
+  & p { color: var(--muted); margin: 0 0 14px; font-size: 0.95rem; }
+  & .btn { margin-top: 2px; }
+}
+.stage.done .stage-card { opacity: 1; transform: none; border-color: oklch(0.72 0.19 50 / 0.55); }
+.stage.final.done .stage-card { box-shadow: var(--glow); }
+
+/* Mascote: pula de fase em fase. */
+.mascot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 56px;
+  height: auto;
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 6px rgb(0 0 0 / 0.6));
+  transition: translate 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  opacity: 0;
+  &.on { opacity: 1; }
+  &.hop { animation: hop 0.7s ease-out; }
+}
+@keyframes hop {
+  0% { transform: translateY(0) scaleY(1); }
+  15% { transform: translateY(0) scale(1.15, 0.8); }
+  45% { transform: translateY(-34px) scale(0.92, 1.1); }
+  80% { transform: translateY(0) scale(1.1, 0.88); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* A trilha se desenha conforme a página rola (onde o navegador suporta). */
+@supports (animation-timeline: view()) {
+  .map .trail .draw {
+    animation: draw linear both;
+    animation-timeline: --map;
+    animation-range: entry 30% cover 70%;
+  }
+  .map { view-timeline-name: --map; }
+  @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+}
+
+@media (max-width: 820px) {
+  .trail.h { display: none; }
+  .trail.v { display: block; left: 2px; top: 0; bottom: 0; width: 60px; height: 100%; }
+  .stages { grid-template-columns: 1fr; gap: 22px; padding-left: 74px; }
+  .stage { display: block; position: relative; }
+  .stage:nth-child(even) .node, .stage:nth-child(even) .stage-card { translate: none; margin-top: 0; }
+  .node { position: absolute; left: -72px; top: 0; margin: 0; width: 52px; height: 52px; font-size: 0.85rem; border-radius: 14px; }
+  .stage-card { text-align: left; padding: 16px; }
+  .mascot { width: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-card { opacity: 1; transform: none; }
+  .mascot { display: none; }
+}
