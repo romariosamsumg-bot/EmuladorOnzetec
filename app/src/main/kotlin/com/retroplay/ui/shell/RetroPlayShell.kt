@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -72,6 +73,9 @@ import com.retroplay.navigation.SearchRoute
 import com.retroplay.navigation.SettingsRoute
 import com.retroplay.navigation.TopLevelDestination
 import com.retroplay.navigation.TransferRoute
+
+/** Altura de cada item do menu lateral (mais compacto que o padrão do Compose for TV). */
+private val ItemHeight = 44.dp
 
 /** Largura do menu recolhido; o conteúdo começa depois dela. */
 private val CollapsedDrawerWidth = 88.dp
@@ -134,31 +138,35 @@ fun RetroPlayShell(
                     .testTag("drawer"),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                // Marca: só o símbolo com o menu recolhido; logo completo com ele aberto.
-                // Larguras fixas (sem fillMaxWidth): o menu recolhido não pode crescer sobre o conteúdo.
-                Box(Modifier.width(if (open) 240.dp else 64.dp).height(60.dp), contentAlignment = if (open) Alignment.CenterStart else Alignment.Center) {
+                // Marca: o mesmo símbolo nos dois estados (não "pula" ao abrir); com o menu aberto, o
+                // nome e "Feito por Romário Marcelino" aparecem ao lado, sem apertar o logo.
+                Row(
+                    Modifier.height(56.dp).padding(bottom = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(Modifier.width(64.dp), contentAlignment = Alignment.Center) {
+                        Image(
+                            painterResource(R.drawable.logo_mark),
+                            contentDescription = stringResource(R.string.app_name),
+                            modifier = Modifier.width(48.dp).testTag("drawer_mark"),
+                        )
+                    }
                     if (open) {
-                        // Logo + "Feito por Romário Marcelino" (no topo: sempre visível com o menu aberto).
-                        Column(Modifier.padding(start = 8.dp)) {
-                            Image(
-                                painterResource(R.drawable.logo_onzetec),
-                                contentDescription = stringResource(R.string.app_name),
-                                modifier = Modifier.height(40.dp).testTag("drawer_logo"),
+                        Column(Modifier.width(196.dp).padding(start = 6.dp).testTag("drawer_logo")) {
+                            Text(
+                                stringResource(R.string.app_name),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
                             )
                             Text(
                                 stringResource(R.string.made_by),
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                                 modifier = Modifier.testTag("drawer_credit"),
                             )
                         }
-                    } else {
-                        Image(
-                            painterResource(R.drawable.logo_mark),
-                            contentDescription = stringResource(R.string.app_name),
-                            modifier = Modifier.width(44.dp).testTag("drawer_mark"),
-                        )
                     }
                 }
                 // Perfil ativo: avatar (menu recolhido) ou avatar + nome; abre "Quem vai jogar?".
@@ -167,12 +175,12 @@ fun RetroPlayShell(
                         selected = false,
                         onClick = onSwitchProfile,
                         leadingContent = { com.retroplay.feature.profiles.ProfileAvatar(profile, 24.dp) },
-                        modifier = Modifier.testTag("nav_profile"),
+                        modifier = Modifier.height(ItemHeight).testTag("nav_profile"),
                     ) {
                         Text(profile.name, maxLines = 1)
                     }
                 }
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(6.dp))
                 TopLevelDestination.entries.forEach { dest ->
                     NavigationDrawerItem(
                         selected = dest == current,
@@ -186,19 +194,20 @@ fun RetroPlayShell(
                         },
                         leadingContent = { Icon(painterResource(dest.iconRes), contentDescription = null) },
                         modifier = Modifier
+                            .height(ItemHeight)
                             .focusRequester(itemRequesters.getValue(dest))
                             .testTag(dest.testTag),
                     ) {
                         Text(stringResource(dest.labelRes))
                     }
                 }
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(6.dp))
                 // Sair: pede confirmação antes de fechar o app.
                 NavigationDrawerItem(
                     selected = false,
                     onClick = { confirmExit = true },
                     leadingContent = { Icon(painterResource(com.retroplay.core.ui.R.drawable.ic_nav_exit), contentDescription = null) },
-                    modifier = Modifier.testTag("nav_exit"),
+                    modifier = Modifier.height(ItemHeight).testTag("nav_exit"),
                 ) {
                     Text(stringResource(R.string.nav_exit))
                 }

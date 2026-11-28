@@ -153,6 +153,9 @@ fun ConsoleScreen(
                 system = system, game = game, title = game.title, onClick = { onOpenGame(game) },
                 cardModifier = (if (first) Modifier.focusRequester(firstItem) else Modifier).rememberFocus(memory, "g${game.id}"),
                 fillWidth = true,
+                // Todas as capas do mesmo tamanho (proporção da caixa do console) e o nome sempre visível.
+                uniform = true,
+                uniformRatio = system.coverAspect,
                 testTag = "game_${game.id}",
             )
         }

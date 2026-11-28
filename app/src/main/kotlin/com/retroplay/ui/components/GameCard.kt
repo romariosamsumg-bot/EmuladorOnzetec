@@ -82,10 +82,12 @@ fun GameCard(
      * sempre visível embaixo.
      */
     uniform: Boolean = false,
+    /** Proporção comum no modo [uniform] (ex.: a do console na página dele); padrão 3:4. */
+    uniformRatio: Float = UNIFORM_RATIO,
     testTag: String? = null,
 ) {
     if (uniform) {
-        GameCardBody(system, game, title, onClick, modifier, cardModifier, width, true, UNIFORM_RATIO, {}, testTag, alwaysTitle = true)
+        GameCardBody(system, game, title, onClick, modifier, cardModifier, width, true, uniformRatio, {}, testTag, alwaysTitle = true)
         return
     }
     // Proporção da capa: a típica do console até a imagem chegar; depois, a da imagem encontrada
