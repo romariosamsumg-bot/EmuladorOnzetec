@@ -43,6 +43,8 @@ val appVersionCode = providers.environmentVariable("RETROPLAY_VERSION_CODE").orN
 
 android {
     namespace = "com.retroplay"
+    // Mesmo NDK do LibretroDroid (third_party): é ele que tira os símbolos de depuração das .so.
+    ndkVersion = "27.2.12479018"
     compileSdk {
         version = release(libs.versions.compileSdk.get().toInt()) {
             minorApiLevel = libs.versions.compileSdkMinor.get().toInt()
@@ -137,7 +139,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":data"))
 
-    implementation(libs.libretrodroid)
+    implementation(project(":libretrodroid"))
     implementation(libs.okhttp)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)

@@ -297,7 +297,7 @@
     <string name="highlight_failed">Could not save the highlight</string>
     <string name="highlight_unavailable">Play a few seconds before saving a highlight</string>
     <string name="highlight_off">Highlights are off: turn them on in Settings → Video → Highlights</string>
-    <string name="highlight_note">Video without sound, saved to Media (and to the gallery, in Movies/Onzetec Games).</string>
+    <string name="highlight_note">Video with the game sound, saved to Media (and to the gallery, in Movies/Onzetec Games).</string>
     <string name="set_highlights">Highlights</string>
     <string name="set_highlights_desc">Keeps the last 15 s of play so you can save them from the menu. Turn off if the game gets slow.</string>
     <string name="nav_media">Media</string>

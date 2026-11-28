@@ -43,7 +43,8 @@ jobs:
           java-version: '17'
 
       - name: Instalar a plataforma Android 37.2
-        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-37.2" "build-tools;37.0.0" > /dev/null
+        # NDK e CMake: o LibretroDroid (third_party/) é compilado junto (grampo de áudio dos highlights).
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-37.2" "build-tools;37.0.0" "ndk;27.2.12479018" "cmake;3.22.1" > /dev/null
 
       - name: Preparar o Gradle (com cache)
         uses: gradle/actions/setup-gradle@v4

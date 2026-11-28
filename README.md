@@ -391,7 +391,9 @@ O app responde a cada ação com som, movimento e vibração, como um console:
   LCD, Nítido) · Proporção (original ou pixel perfeito, no SNES e Mega Drive/Master System) ·
   Controles · Opções do núcleo · Mostrar FPS · **Tirar print** · **Highlight**.
 - **Highlight**: enquanto você joga, o app guarda continuamente os últimos 15 s de vídeo (360p,
-  24 quadros/s, sem som; ~5 MB de memória). No menu, **Highlight → 5, 10 ou 15 segundos** salva
+  24 quadros/s) **e do som do jogo** (~7 MB de memória). O som vem de um "grampo" no motor de
+  emulação: o app usa uma cópia modificada do LibretroDroid (`third_party/libretrodroid`, GPL-3.0),
+  sem pedir nenhuma permissão. No menu, **Highlight → 5, 10 ou 15 segundos** salva
   esse trecho em MP4 na **Mídia**. O tempo com o menu aberto não entra no vídeo. Se o aparelho
   for fraco e o jogo ficar lento, desligue em Configurações → Vídeo → Highlights.
 - **Save automático** ao sair pelo menu e ao apertar Home na TV; ao voltar, o menu aparece.

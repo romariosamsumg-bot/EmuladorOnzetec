@@ -306,7 +306,7 @@
     <string name="highlight_failed">No se pudo guardar el highlight</string>
     <string name="highlight_unavailable">Juega unos segundos antes de guardar un highlight</string>
     <string name="highlight_off">Highlights desactivados: actívalos en Ajustes → Video → Highlights</string>
-    <string name="highlight_note">Video sin sonido, guardado en Multimedia (y en la galería, en Películas/Onzetec Games).</string>
+    <string name="highlight_note">Video con el sonido del juego, guardado en Multimedia (y en la galería, en Películas/Onzetec Games).</string>
     <string name="set_highlights">Highlights</string>
     <string name="set_highlights_desc">Graba los últimos 15 s de juego para guardarlos desde el menú. Desactívalo si el juego va lento.</string>
     <string name="nav_media">Multimedia</string>

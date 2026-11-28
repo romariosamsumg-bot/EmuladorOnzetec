@@ -15,8 +15,10 @@ import android.view.SurfaceView
 import java.io.FileDescriptor
 
 /**
- * Highlights: grava continuamente os últimos segundos do jogo (só vídeo) num buffer em memória,
- * já comprimido em H.264. "Salvar" junta os últimos 5/10/15 s num MP4, sem parar o jogo.
+ * Highlights: grava continuamente os últimos segundos do jogo num buffer em memória: o vídeo já
+ * comprimido em H.264 e o som do jogo em PCM (lido do grampo de áudio do LibretroDroid modificado,
+ * third_party/libretrodroid). "Salvar" junta os últimos 5/10/15 s num MP4 com vídeo e som (AAC),
+ * sem parar o jogo.
  *
  * - A tela do jogo é copiada ~[FPS] vezes por segundo (PixelCopy, já reduzida para 360p) e
  *   desenhada na superfície de entrada do codificador de vídeo do aparelho.
@@ -27,6 +29,15 @@ import java.io.FileDescriptor
 class HighlightRecorder(private val view: SurfaceView) {
 
     private class Sample(val data: ByteArray, val ptsUs: Long, val key: Boolean)
+
+    /** Trecho de som: PCM estéreo intercalado, na taxa do núcleo, começando em [startNs]. */
+    private class AudioChunk(val pcm: ShortArray, val startNs: Long)
+
+    private val audioLock = Any()
+    private val audio = ArrayDeque<AudioChunk>()
+    private var audioRate = 0
+    private val audioBuf = ShortArray(16384)
+    private var audioOn = false
 
     private val main = Handler(Looper.getMainLooper())
     private val worker = HandlerThread("highlights").apply { start() }
@@ -49,6 +60,56 @@ class HighlightRecorder(private val view: SurfaceView) {
         if (codec == null && !setUp()) return
         running = true
         main.post(tick)
+        startAudio()
+    }
+
+    /** Liga o grampo de áudio do núcleo e drena a cada 100 ms (sem o grampo: highlight sem som). */
+    private fun startAudio() {
+        if (!audioOn) {
+            audioOn = runCatching { com.swordfish.libretrodroid.LibretroDroid.setAudioTapEnabled(true) }.isSuccess
+        }
+        if (audioOn) {
+            workerHandler.removeCallbacks(drainAudio)
+            workerHandler.post(drainAudio)
+        }
+    }
+
+    private val drainAudio = object : Runnable {
+        override fun run() {
+            if (!audioOn) return
+            runCatching { pullAudio() }
+            if (running) workerHandler.postDelayed(this, 100)
+        }
+    }
+
+    @Synchronized
+    private fun pullAudio() {
+        val rate = com.swordfish.libretrodroid.LibretroDroid.audioTapSampleRate()
+        if (rate <= 0) return
+        val endNs = com.swordfish.libretrodroid.LibretroDroid.audioTapLastWriteNs()
+        val parts = ArrayList<ShortArray>()
+        var total = 0
+        while (true) {
+            val n = com.swordfish.libretrodroid.LibretroDroid.readAudioTap(audioBuf)
+            if (n <= 0) break
+            parts += audioBuf.copyOf(n)
+            total += n
+            if (n < audioBuf.size) break
+        }
+        if (total == 0) return
+        val pcm = ShortArray(total)
+        var o = 0
+        parts.forEach { System.arraycopy(it, 0, pcm, o, it.size); o += it.size }
+        // O último quadro do lote foi escrito em [endNs]: o lote começa (amostras / taxa) antes.
+        val startNs = endNs - (total / 2) * 1_000_000_000L / rate
+        synchronized(audioLock) {
+            if (rate != audioRate) { audio.clear(); audioRate = rate }
+            audio.addLast(AudioChunk(pcm, startNs))
+            var frames = audio.sumOf { it.pcm.size / 2 }.toLong()
+            while (audio.size > 1 && frames > (KEEP_SECONDS + 2L) * rate) {
+                frames -= audio.removeFirst().pcm.size / 2
+            }
+        }
     }
 
     /** Pausa a captura (menu aberto, app em segundo plano); o que já foi gravado fica. */
@@ -59,6 +120,8 @@ class HighlightRecorder(private val view: SurfaceView) {
 
     fun release() {
         pause()
+        if (audioOn) runCatching { com.swordfish.libretrodroid.LibretroDroid.setAudioTapEnabled(false) }
+        audioOn = false
         runCatching { codec?.stop() }
         runCatching { codec?.release() }
         runCatching { input?.release() }
@@ -170,23 +233,149 @@ class HighlightRecorder(private val view: SurfaceView) {
         val clip = synchronized(lock) { pick(samples.toList(), seconds * 1_000_000L) }
         if (clip.isEmpty()) return null
         val times = retime(clip)
+        val durationUs = times.last() + 1_000_000L / FPS
+        // Som do mesmo trecho: do 1º quadro do vídeo em diante, com a mesma duração.
+        val encodedAudio = runCatching { encodeAudio(clip.first().ptsUs * 1000, durationUs) }.getOrNull()
         val muxer = MediaMuxer(fd, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
         try {
             val track = muxer.addTrack(fmt)
+            val audioTrack = encodedAudio?.let { muxer.addTrack(it.format) }
             muxer.start()
             val info = MediaCodec.BufferInfo()
             clip.forEachIndexed { i, s ->
                 info.set(0, s.data.size, times[i], if (s.key) MediaCodec.BUFFER_FLAG_KEY_FRAME else 0)
                 muxer.writeSampleData(track, java.nio.ByteBuffer.wrap(s.data), info)
             }
+            if (encodedAudio != null && audioTrack != null) {
+                encodedAudio.samples.forEach { a ->
+                    info.set(0, a.data.size, a.ptsUs, 0)
+                    muxer.writeSampleData(audioTrack, java.nio.ByteBuffer.wrap(a.data), info)
+                }
+            }
             muxer.stop()
         } finally {
             runCatching { muxer.release() }
         }
-        return times.last() / 1000 + 1000L / FPS
+        return durationUs / 1000
+    }
+
+    private class EncodedAudio(val format: MediaFormat, val samples: List<Sample>)
+
+    /** Junta o som a partir de [fromNs] (mesmo relógio do vídeo), reamostra e codifica em AAC. */
+    private fun encodeAudio(fromNs: Long, durationUs: Long): EncodedAudio? {
+        // Pega o que ainda estava no grampo (o menu acabou de abrir).
+        if (audioOn) runCatching { pullAudio() }
+        val (chunks, rate) = synchronized(audioLock) { audio.map { it.startNs to it.pcm } to audioRate }
+        if (rate <= 0 || chunks.isEmpty()) return null
+        val pcm = sliceAudio(chunks, rate, fromNs, durationUs)
+        if (pcm.size < 2 * rate / 10) return null // menos de 0,1 s de som
+        val out = resampleStereo(pcm, rate, AAC_RATE)
+        return encodeAac(out)
+    }
+
+    private fun encodeAac(pcm: ShortArray): EncodedAudio? {
+        val format = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC, AAC_RATE, 2).apply {
+            setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC)
+            setInteger(MediaFormat.KEY_BIT_RATE, 128_000)
+            setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 16384)
+        }
+        val enc = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC)
+        try {
+            enc.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+            enc.start()
+            val info = MediaCodec.BufferInfo()
+            val samples = ArrayList<Sample>()
+            var outFormat: MediaFormat? = null
+            var pos = 0 // em amostras (L+R)
+            var inputDone = false
+            var outputDone = false
+            var guard = 0
+            while (!outputDone && guard++ < 100_000) {
+                if (!inputDone) {
+                    val i = enc.dequeueInputBuffer(5_000)
+                    if (i >= 0) {
+                        val buf = enc.getInputBuffer(i)!!
+                        buf.clear()
+                        val n = minOf((buf.capacity() / 2) and 1.inv(), 2048, pcm.size - pos)
+                        val ptsUs = (pos / 2).toLong() * 1_000_000L / AAC_RATE
+                        if (n <= 0) {
+                            enc.queueInputBuffer(i, 0, 0, ptsUs, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+                            inputDone = true
+                        } else {
+                            buf.order(java.nio.ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(pcm, pos, n)
+                            enc.queueInputBuffer(i, 0, n * 2, ptsUs, 0)
+                            pos += n
+                        }
+                    }
+                }
+                val o = enc.dequeueOutputBuffer(info, 5_000)
+                when {
+                    o == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> outFormat = enc.outputFormat
+                    o >= 0 -> {
+                        if (info.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG == 0 && info.size > 0) {
+                            val b = enc.getOutputBuffer(o)!!
+                            b.position(info.offset); b.limit(info.offset + info.size)
+                            samples += Sample(ByteArray(info.size).also { b.get(it) }, info.presentationTimeUs, false)
+                        }
+                        enc.releaseOutputBuffer(o, false)
+                        if (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) outputDone = true
+                    }
+                }
+            }
+            val f = outFormat ?: return null
+            return if (samples.isEmpty()) null else EncodedAudio(f, samples)
+        } finally {
+            runCatching { enc.stop() }
+            runCatching { enc.release() }
+        }
     }
 
     companion object {
+        /** Taxa do AAC (os núcleos usam taxas como 32040 Hz, que o codificador não aceita). */
+        const val AAC_RATE = 44_100
+
+        /**
+         * Som do trecho: a partir de [fromNs], [durationUs] de duração (estéreo intercalado).
+         * Trechos em que o jogo estava pausado não geram som, então juntar em ordem já acompanha
+         * o vídeo (que também encolhe as pausas).
+         */
+        internal fun sliceAudio(chunks: List<Pair<Long, ShortArray>>, rate: Int, fromNs: Long, durationUs: Long): ShortArray {
+            val wantFrames = (durationUs * rate / 1_000_000L).toInt()
+            val out = ShortArray(wantFrames * 2)
+            var w = 0
+            for ((startNs, pcm) in chunks) {
+                val frames = pcm.size / 2
+                val endNs = startNs + frames * 1_000_000_000L / rate
+                if (endNs <= fromNs) continue
+                val skip = if (startNs < fromNs) ((fromNs - startNs) * rate / 1_000_000_000L).toInt().coerceIn(0, frames) else 0
+                val n = minOf((frames - skip) * 2, out.size - w)
+                if (n <= 0) break
+                System.arraycopy(pcm, skip * 2, out, w, n)
+                w += n
+                if (w >= out.size) break
+            }
+            return if (w == out.size) out else out.copyOf(w)
+        }
+
+        /** Reamostragem linear (estéreo) de [from] Hz para [to] Hz. */
+        internal fun resampleStereo(pcm: ShortArray, from: Int, to: Int): ShortArray {
+            if (from == to) return pcm
+            val inFrames = pcm.size / 2
+            val outFrames = (inFrames.toLong() * to / from).toInt()
+            val out = ShortArray(outFrames * 2)
+            val step = from.toDouble() / to
+            for (i in 0 until outFrames) {
+                val x = i * step
+                val a = x.toInt().coerceAtMost(inFrames - 1)
+                val b = (a + 1).coerceAtMost(inFrames - 1)
+                val t = x - a
+                for (c in 0..1) {
+                    out[i * 2 + c] = (pcm[a * 2 + c] * (1 - t) + pcm[b * 2 + c] * t).toInt().toShort()
+                }
+            }
+            return out
+        }
+
         const val FPS = 24
         const val HEIGHT = 360
         const val BITRATE = 2_000_000

@@ -317,7 +317,7 @@
     <string name="highlight_failed">Não deu para salvar o highlight</string>
     <string name="highlight_unavailable">Jogue alguns segundos antes de salvar um highlight</string>
     <string name="highlight_off">Highlights desligados: ligue em Configurações → Vídeo → Highlights</string>
-    <string name="highlight_note">Vídeo sem som, salvo em Mídia (e na galeria, em Filmes/Onzetec Games).</string>
+    <string name="highlight_note">Vídeo com o som do jogo, salvo em Mídia (e na galeria, em Filmes/Onzetec Games).</string>
     <string name="set_highlights">Highlights</string>
     <string name="set_highlights_desc">Grava os últimos 15 s de jogo para salvar pelo menu. Desligue se o jogo ficar lento.</string>
     <string name="nav_media">Mídia</string>

@@ -26,3 +26,6 @@ include(":core:ui")
 include(":domain")
 include(":data")
 include(":baselineprofile")
+// LibretroDroid com o grampo de áudio dos highlights (fonte em third_party/libretrodroid).
+include(":libretrodroid")
+project(":libretrodroid").projectDir = file("third_party/libretrodroid")
