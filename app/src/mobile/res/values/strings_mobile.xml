@@ -29,4 +29,6 @@
     <string name="mobile_switch_profile">Trocar de perfil</string>
     <string name="mobile_tab_settings">Ajustes</string>
     <string name="media_share">Compartilhar</string>
+    <string name="mobile_profiles_hint">Toque no seu perfil para entrar</string>
+    <string name="mobile_profiles_manage_hint">Toque num perfil para mudar o nome, o avatar ou a cor</string>
 </resources>

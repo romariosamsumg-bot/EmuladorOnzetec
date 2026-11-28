@@ -43,6 +43,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import com.retroplay.ui.feel.pressBounce
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
@@ -82,63 +86,125 @@ object MobileStartupUi : StartupUi {
     ) = MobileProfileEditor(initial, suggestedIndex, firstRun, canDelete, onSave, onCancel, onDelete)
 }
 
+/** Fundo das telas de perfil: azul-marinho da marca com um brilho na cor do tema. */
+@Composable
+private fun Modifier.profileBackground(): Modifier {
+    val glow = MaterialTheme.colorScheme.primary
+    val bg = MaterialTheme.colorScheme.background
+    return background(Brush.verticalGradient(listOf(Color(0xFF011C38), bg, bg)))
+        .background(Brush.radialGradient(listOf(glow.copy(alpha = 0.18f), Color.Transparent), radius = 900f))
+}
+
 @Composable
 fun MobileProfilePicker(profiles: List<Profile>, onPick: (Profile) -> Unit, onAdd: () -> Unit, onEdit: (Profile) -> Unit) {
     var managing by rememberSaveable { mutableStateOf(false) }
     Column(
-        Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(horizontal = 24.dp).testTag("screen_profiles"),
+        Modifier.fillMaxSize().profileBackground()
+            .statusBarsPadding().navigationBarsPadding().padding(horizontal = 24.dp)
+            .testTag("screen_profiles"),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(28.dp))
+        androidx.compose.foundation.Image(
+            androidx.compose.ui.res.painterResource(R.drawable.logo_onzetec),
+            contentDescription = stringResource(R.string.app_name),
+            modifier = Modifier.height(84.dp).testTag("profiles_logo"),
+        )
+        Spacer(Modifier.height(28.dp))
         Text(
             stringResource(if (managing) R.string.profile_manage_title else R.string.who_plays),
             style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.testTag("profiles_title"),
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            stringResource(if (managing) R.string.mobile_profiles_manage_hint else R.string.mobile_profiles_hint),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(28.dp))
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(120.dp),
+            columns = GridCells.Adaptive(132.dp),
             modifier = Modifier.weight(1f).fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(22.dp),
             contentPadding = PaddingValues(bottom = 16.dp),
         ) {
             items(profiles, key = { it.id }) { p ->
-                Column(
-                    Modifier.clip(RoundedCornerShape(16.dp)).clickable { if (managing) onEdit(p) else onPick(p) }.padding(8.dp).testTag("profile_${p.id}"),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                ProfileTile(
+                    label = p.name,
+                    tag = "profile_${p.id}",
+                    wiggle = managing,
+                    onClick = { if (managing) onEdit(p) else onPick(p) },
                 ) {
                     Box {
-                        ProfileAvatar(p, 96.dp)
+                        Box(
+                            Modifier.border(3.dp, accentOf(p.accent).color.copy(alpha = 0.9f), CircleShape).padding(5.dp),
+                        ) { ProfileAvatar(p, 100.dp) }
                         if (managing) {
                             Box(
-                                Modifier.align(Alignment.BottomEnd).size(32.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                Modifier.align(Alignment.BottomEnd).size(34.dp).clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.onBackground),
                                 contentAlignment = Alignment.Center,
-                            ) { Text("✎", fontSize = 16.sp) }
+                            ) { Text("✎", fontSize = 16.sp, color = MaterialTheme.colorScheme.background) }
                         }
                     }
-                    Spacer(Modifier.height(8.dp))
-                    Text(p.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
             if (!managing && profiles.size < Profile.MAX_PROFILES) {
                 item(key = "add") {
-                    Column(
-                        Modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = onAdd).padding(8.dp).testTag("profile_add"),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Box(Modifier.size(96.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHigh), contentAlignment = Alignment.Center) {
-                            Text("+", fontSize = 44.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        Spacer(Modifier.height(8.dp))
-                        Text(stringResource(R.string.profile_add), style = MaterialTheme.typography.titleMedium, maxLines = 1)
+                    ProfileTile(stringResource(R.string.profile_add), "profile_add", wiggle = false, onClick = onAdd) {
+                        Box(
+                            Modifier.size(110.dp).clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                .border(2.dp, MaterialTheme.colorScheme.outline, CircleShape),
+                            contentAlignment = Alignment.Center,
+                        ) { Text("+", fontSize = 48.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                     }
                 }
             }
         }
-        OutlinedButton(onClick = { managing = !managing }, modifier = Modifier.padding(vertical = 16.dp).testTag("profile_manage")) {
-            Text(stringResource(if (managing) R.string.profile_manage_done else R.string.profile_manage))
+        OutlinedButton(
+            onClick = { com.retroplay.ui.feel.UiFeel.select(); managing = !managing },
+            modifier = Modifier.padding(vertical = 18.dp).testTag("profile_manage"),
+        ) {
+            Text(stringResource(if (managing) R.string.profile_manage_done else R.string.profile_manage), color = MaterialTheme.colorScheme.onBackground)
         }
+    }
+}
+
+/** Perfil (ou "Adicionar"): afunda e volta com mola ao toque; balança no modo Gerenciar. */
+@Composable
+private fun ProfileTile(label: String, tag: String, wiggle: Boolean, onClick: () -> Unit, avatar: @Composable () -> Unit) {
+    val interaction = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val angle = if (wiggle) {
+        val t = androidx.compose.animation.core.rememberInfiniteTransition(label = "wiggle")
+        t.animateFloat(-2.5f, 2.5f, androidx.compose.animation.core.infiniteRepeatable(androidx.compose.animation.core.tween(140), androidx.compose.animation.core.RepeatMode.Reverse), label = "a")
+    } else null
+    Column(
+        Modifier
+            .graphicsLayer { rotationZ = angle?.value ?: 0f }
+            .pressBounce(interaction)
+            .clip(RoundedCornerShape(20.dp))
+            .clickable(interactionSource = interaction, indication = androidx.compose.foundation.LocalIndication.current) {
+                com.retroplay.ui.feel.UiFeel.select(); onClick()
+            }
+            .padding(10.dp)
+            .testTag(tag),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        avatar()
+        Spacer(Modifier.height(10.dp))
+        Text(
+            label,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 

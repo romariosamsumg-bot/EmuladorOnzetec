@@ -178,7 +178,10 @@ class MainActivity : ComponentActivity() {
      * muda, em UiFeel.onFocusGained) e, se o foco não mudou logo depois, toca o "toc" da borda.
      * Voltar toca o som de voltar.
      */
-    @SuppressLint("RestrictedApi") // falso positivo: Activity.dispatchKeyEvent é API pública
+    // RestrictedApi: falso positivo (Activity.dispatchKeyEvent é API pública).
+    // GestureBackNavigation: o Voltar não é interceptado aqui, só toca o som; quem trata o Voltar
+    // continuam sendo os BackHandlers (gesto preditivo intacto).
+    @SuppressLint("RestrictedApi", "GestureBackNavigation")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (event.action == KeyEvent.ACTION_DOWN) {
             UiFeel.lastDeviceId = event.deviceId

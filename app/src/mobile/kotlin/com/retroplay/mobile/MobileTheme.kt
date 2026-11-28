@@ -38,5 +38,12 @@ fun MobileTheme(content: @Composable () -> Unit) {
         outlineVariant = tv.surfaceVariant,
         error = tv.error,
     )
-    MaterialTheme(colorScheme = scheme, content = content)
+    MaterialTheme(colorScheme = scheme) {
+        // Texto claro também nas telas sem Surface (ex.: "Quem vai jogar?"): sem isto o Material 3
+        // usa preto por padrão, que some no fundo escuro.
+        androidx.compose.runtime.CompositionLocalProvider(
+            androidx.compose.material3.LocalContentColor provides scheme.onBackground,
+            content = content,
+        )
+    }
 }
