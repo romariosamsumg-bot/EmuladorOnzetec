@@ -670,3 +670,10 @@ pre code { background: none; border: 0; padding: 0; word-break: normal; }
 @media (max-width: 360px) {
   .topbar .brand span { display: none; }
 }
+
+/* Sem distorção: toda imagem mantém a proporção original (os width/height do HTML servem só
+   para reservar o espaço). Quem precisa preencher uma caixa usa object-fit. */
+img { height: auto; }
+.topbar .brand img { width: auto; }
+.tv .screen img { height: 100%; }
+.consoles img, .game .cover { height: auto; object-fit: cover; }
